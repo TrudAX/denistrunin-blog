@@ -1,0 +1,279 @@
+@import "syntax-highlighting";
+@import "~docsearch.js/dist/npm/styles/main";
+
+a {
+  color: #007acc;
+}
+
+a:hover {
+  color: lighten(#007acc,7%);
+  svg {
+    fill: lighten(#007acc,7%);
+  }
+}
+
+.post-tags {
+  list-style: none;
+  display: inline;
+
+  ul {
+    margin-left: 0;
+    display: inline;
+
+    li {
+      display: inline;
+      margin-left: 0.5rem;
+    }
+  }
+
+  margin-bottom: 1rem;
+}
+
+.tag-links {
+  li {
+    display: inline;
+    margin-right: 0.65rem;
+  }
+
+  margin-bottom: 1.1rem;
+  margin-left: 0;
+  padding-left: 0;
+}
+
+.tag-count {
+  display: block;
+  margin-bottom: 1rem;
+  font-weight: 500;
+}
+
+.about-page {
+  ul {
+    list-style: none;
+    li {
+      margin-bottom: 0.25rem;
+    }
+  }
+}
+
+.about-icon {
+  height: 1rem;
+  display: inline;
+  margin-right: 0.25rem;
+  margin-bottom: 0;
+  fill: #007acc;
+}
+
+.front-post-title {
+  margin-top: 1rem;
+}
+
+.front-post-image {
+  width: 33%;
+  display: inline-block;
+}
+
+.front-post-excerpt {
+  display: inline-block;
+  width: 66%;
+  vertical-align: top;
+  padding-left: 1.25rem;
+}
+
+.front-post-info {
+  display: block;
+  margin-bottom: 1rem;
+
+  .front-post-info-date {
+    margin-right: 1rem;
+  }
+}
+
+.front-post-separator {
+  margin-bottom: 1rem;
+  margin-top: 1rem;
+  background: hsla(0, 0% ,0%, 0.1);
+}
+
+.SocialMediaShareButton, .SocialMediaShareButton div {
+  display: inline-block;
+}
+
+.SocialMediaShareButton {
+  margin: 0.25rem;
+  cursor: pointer;
+}
+.share-icons {
+  display: flex;
+  justify-content: center;
+}
+
+.menu-items {
+
+  margin-top: 2px;
+
+  a {
+    margin-right: 1rem;
+    text-decoration: none!important;
+    font-weight: 500;
+    color: hsla(204,12.449720506%,0%,0.77)!important;
+  }
+}
+
+.blog-name {
+  font-size: 1.5rem;
+  margin-bottom: 0;
+  font-weight: 500;
+
+  a {
+    text-decoration: none!important;
+    color: hsla(204,12.449720506%,0%,0.77)!important;
+  }
+}
+
+.main-navigation {
+  display: flex;
+  align-items: center;
+  margin-bottom: 2.1rem;
+  border-bottom: 1px solid hsla(0, 0% ,0%, 0.3);;
+  padding-bottom: 0.5rem;
+
+  hr {
+    margin-bottom: 0;
+  }
+
+  .logo {
+    img {
+      border-radius: 50px;
+    }
+    margin-right: 1rem;
+    margin-bottom: 0;
+    height: 4rem;
+    width: 4rem;
+  }
+
+  a:hover {
+    color: lighten(#007acc,7%)!important;
+  }
+}
+
+.featured-image {
+  margin-bottom: 1.25rem;
+}
+
+.follow-me {
+  margin-top: 3rem;
+  display: flex;
+  justify-content: center;
+
+  .follow-me-icon {
+    margin-right: 0.5rem;
+    margin-left: 0.5rem;
+    cursor: pointer;
+
+    &:hover.twitter svg {
+      fill: #00aced;
+    }
+
+    &:hover.feedly svg {
+      fill: #6CC655;
+
+      .inner {
+        fill: #fff;
+      }
+    }
+
+    &:hover.linkedin svg {
+      fill: #007fb1;
+    }
+
+    &:hover.rss svg {
+      fill: #f26522;
+    }
+
+    &:hover.gplus svg {
+      fill: #dd4b39;
+    }
+
+    &:hover.github svg {
+      fill: #333;
+    }
+
+
+    svg {
+      height: 2rem;
+      width: 2rem;
+      fill: lighten(hsla(204,12.449720506%,0%,0.77), 10%);
+    }
+  }
+}
+
+li {
+  margin-bottom: 0.3rem;
+}
+
+.pagination  {
+  display: flex;
+  justify-content: center;
+
+  a {
+    margin-right: 0.2rem;
+    margin-left: 0.2rem;
+  }
+
+  .current-page {
+    font-weight: 500
+  }
+
+}
+
+@media only screen and (max-width: 40em) {
+  .logo {
+    height: inherit;
+  }
+}
+
+body {
+  background-color: hsla(0, 0% ,0%, 0.04);
+}
+
+.content-root {
+  background-color: #fff;
+  border-right: 1px solid hsla(0, 0% ,0%, 0.1);
+  border-left: 1px solid hsla(0, 0% ,0%, 0.1);
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.linked-post {
+  padding: 1rem;
+  padding-top: 0;
+  margin-bottom: 1rem;
+  background-color: hsla(0, 0% ,0%, 0.01);
+  border:1px solid hsla(0, 0% ,0%, 0.1);
+}
+
+.search-box {
+  border: 1px solid hsla(0, 0% ,0%, 0.01);
+  color: hsla(0, 0% ,0%, 0.85);
+  padding: 0 0 0 3px;
+  // Mobile Safari shows inner shadow in the field
+  -webkit-appearance: none;
+}
+
+.search-box:focus {
+  color:hsla(0, 0% ,0%, 0.95);
+  background-color: hsla(0, 0% ,0%, 0.1);
+  outline: none;
+}
+
+.search-icon {
+  display: inline-block;
+  height: 1.3rem;
+  color: hsla(0, 0% ,0%, 0.2);
+  vertical-align: middle;
+  cursor: pointer;
+}
+
+.search-box-container {
+  white-space: nowrap;
+}
