@@ -5,7 +5,7 @@ tags: ['Java']
 path: '/raw-strings'
 featuredImage: './raw-strings.jpg'
 disqusArticleIdentifier: '99017 http://vojtechruzicka.com/?p=99017'
-excerpt: "1Java 12 finally brings support for raw strings. They can span multiple lines and you don't need to escape special characters. Especially useful for regular expressions."
+excerpt: "331Java 12 finally brings support for raw strings. They can span multiple lines and you don't need to escape special characters. Especially useful for regular expressions."
 ---
 
 Currently (pre-Java 12), string literals in Java are in many cases unnecessarily hard to deal with and have some limitations.
