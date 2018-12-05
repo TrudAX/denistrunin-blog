@@ -1,9 +1,9 @@
 module.exports = {
   siteMetadata: {
-    title: 'Vojtech Ruzicka\'s Programming Blog',
-    author: 'Vojtech Ruzicka',
-    description: 'Blog about Full-stack Software Development. Clean code, Design patterns, Java, Spring, Javascript, Angular, React and more.',
-    siteUrl: 'https://www.vojtechruzicka.com',
+    title: 'Denis Trunin\'s X++ Programming Blog',
+    author: 'Denis Trunin',
+    description: 'Blog about Microsoft Dynamics 365 for Finance and Operations X++ programming, tools, hints and more.',
+    siteUrl: 'https://denistrunin.netlify.com/',
   },
   pathPrefix: '/',
   plugins: [
@@ -135,9 +135,9 @@ module.exports = {
       {
           resolve: `gatsby-plugin-manifest`,
           options: {
-              name: "Vojtech Ruzicka's Programming Blog",
-              short_name: "VR Blog",
-              start_url: "https://www.vojtechruzicka.com",
+              name: "Denis Trunin's X++ Programming Blog",
+              short_name: "DT Blog",
+              start_url: "https://denistrunin.netlify.com",
               background_color: "#fff",
               theme_color: "#007acc",
               display: "minimal-ui",
@@ -158,7 +158,7 @@ module.exports = {
       {
           resolve: `gatsby-plugin-canonical-urls`,
           options: {
-              siteUrl: `https://www.vojtechruzicka.com`,
+              siteUrl: `https://denistrunin.netlify.com`,
           },
       },
       `gatsby-plugin-sitemap`,
