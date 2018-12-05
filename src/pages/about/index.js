@@ -111,7 +111,7 @@ class AboutPage extends React.Component {
             </li>
             <li>
               {rssIcon}
-              <OutboundLink href="https://www.vojtechruzicka.com/feed/">
+              <OutboundLink href="/rss.xml">
                 Subscribe to RSS Feed
               </OutboundLink>
             </li>
@@ -125,15 +125,15 @@ class AboutPage extends React.Component {
                 {emailIcon}trud81@gmail.com
               </OutboundLink>
             </li>
-          </ul>
-
-          <strong>Additional links</strong>
-          <ul>
             <li>
               <OutboundLink href="https://www.linkedin.com/in/denis-trunin-3b73a213/">
                 {linkedInIcon}LinkedIn profile
               </OutboundLink>
-            </li>
+            </li>            
+          </ul>
+
+          <strong>Additional links</strong>
+          <ul>
             <li>
               <OutboundLink href="https://github.com/TrudAX">
                 {githubIcon}GitHub profile
@@ -142,7 +142,7 @@ class AboutPage extends React.Component {
 
           </ul>
           <h2>Found some issues?</h2>
-            This whole blog and its content is available on <OutboundLink href="https://github.com/TrudAX/trudax-blog">GitHub</OutboundLink>. Feel free to create a Pull Request if you find some issues in the text or you can just check the code if you are curious about GatsbyJS powered blogs.
+            This whole blog and its content is available on <OutboundLink href="https://github.com/TrudAX/denistrunin-blog">GitHub</OutboundLink>. Feel free to create a Pull Request if you find some issues in the text or you can just check the code if you are curious about GatsbyJS powered blogs.
         </div>
       </Layout>
     );

@@ -13,7 +13,7 @@ class Navigation extends React.Component {
         </Link>
         <div className="navigation">
           <div className="blog-name">
-            <Link to="/">Denis Trunin D365FO Programming Blog</Link>
+            <Link to="/">Denis Trunin X++ Programming Blog</Link>
           </div>
           <div className="menu-items">
             <Link to="/">Home</Link>
