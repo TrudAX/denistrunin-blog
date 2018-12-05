@@ -74,8 +74,8 @@ class BlogIndex extends React.Component {
           <meta property="og:type" content="website" />
           <meta property="fb:app_id" content="2072264049710958" />
 
-          <meta name="twitter:creator" content="@vojtechruzicka" />
-          <meta name="twitter:site" content="@vojtechruzicka" />
+          <meta name="twitter:creator" content="@TruninDenis" />
+          <meta name="twitter:site" content="@TruninDenis" />
           <meta name="twitter:card" content="summary" />
           <meta name="twitter:title" content={siteTitle} />
           <meta name="twitter:description" content={siteDescription} />

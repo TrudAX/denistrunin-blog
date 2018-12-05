@@ -4,7 +4,7 @@ date: "2018-11-09T22:12:03.284Z"
 tags: ['Javascript']
 path: '/reactiveconf-2018'
 featuredImage: './reactive-conf-1.jpg'
-disqusArticleIdentifier: '99015 http://vojtechruzicka.com/?p=99015'
+disqusArticleIdentifier: '99015 https://denistrunin.netlify.com/?p=99015'
 excerpt: 'My experience as a volunteer at Reactive Conf Prague 2018.'
 ---
 

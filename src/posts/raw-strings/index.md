@@ -4,7 +4,7 @@ date: "2018-11-26T22:12:03.284Z"
 tags: ['Java']
 path: '/raw-strings'
 featuredImage: './raw-strings.jpg'
-disqusArticleIdentifier: '99017 http://vojtechruzicka.com/?p=99017'
+disqusArticleIdentifier: '99017 https://denistrunin.netlify.com/?p=99017'
 excerpt: "331Java 12 finally brings support for raw strings. They can span multiple lines and you don't need to escape special characters. Especially useful for regular expressions."
 ---
 
