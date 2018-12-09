@@ -47,7 +47,7 @@ String myPath = "Open \"C:\\Program Files\\Java\\jdk1.8.0_151\"";
 
 It gets especially bad with regular expressions, which can be using a lot of backslashes and are then hard to read because of escaping.
 
-# Raw Strings
+### Raw Strings
 Turns out, that other JVM  languages already solved the problem with multiline strings and readability of escaped sequences. They are called Raw Strings. They can span multiple lines without concatenation and they don't use escaped sequences. You can use backslashes or double quotes directly. For example, in Kotlin, in addition to regular string literals, you can use Raw Strings with three double quotes `"""` instead of just one.
 
 ```kotlin
@@ -62,7 +62,7 @@ Or even double-quotes "
 
 On JVM, also Groovy and Scala support raw strings using `"""`. Java is like usually late to the party (similar to introducing [JShell REPL](https://www.vojtechruzicka.com/jshell-repl)) and only now, in version 12, introduces what is already common both in other JVM and non-JVM languages.
 
-# Raw String Literals in Java
+## Raw String Literals in Java
 In Java 12, one of the new features will be [JEP 326: Raw String Literals](http://openjdk.java.net/jeps/326). Unlike Kotlin, Groovy or Python, which use `"""` Java decided to use backtick `` ` `` notation, which is currently used by Javascript or Go.
 
 ```java
@@ -108,6 +108,32 @@ This is my string
 ```
 
 The string contains the indentation, which was supposed only to format the code to be more readable, but it is not intended to be part of the string.
+```sql
+SELECT TOP 50 
+DB_NAME(CONVERT(int, qpa.value)) as [DataBase],
+qt.[TEXT],
+qs.execution_count,
+qs.total_logical_reads, qs.last_logical_reads,
+qs.total_logical_writes, qs.last_logical_writes,
+qs.last_physical_reads, qs.total_physical_reads,
+qs.total_worker_time/1000000 total_worker_time_in_S,
+qs.last_worker_time/1000 last_worker_time_in_mS,
+qs.total_elapsed_time/1000000 total_elapsed_time_in_S,
+qs.last_elapsed_time/1000 last_elapsed_time_in_mS,
+qs.last_execution_time,
+DATEDIFF(MI,creation_time,GETDATE()) AS [Age of the Plan(Minutes)]
+
+,qp.query_plan
+FROM sys.dm_exec_query_stats qs
+CROSS APPLY sys.dm_exec_sql_text(qs.sql_handle) qt
+CROSS APPLY sys.dm_exec_query_plan(qs.plan_handle) qp
+CROSS APPLY sys.dm_exec_plan_attributes(qs.plan_handle) qpa
+where attribute = 'dbid'
+ORDER BY qs.total_logical_reads DESC -- logical reads
+-- ORDER BY qs.total_logical_writes DESC -- logical writes
+--ORDER BY qs.total_worker_time DESC -- CPU time
+--ORDER BY qs.total_physical_reads desc
+```
 
 A quick fix would be to remove the indentation, but it would be hard to read:
 
@@ -171,14 +197,18 @@ myString.align(2);
 ```
 
 # String Interpolation
-Other languages, which currently support Raw String literals usually also support string interpolation. It is basically a fancy name for substituting variable placeholders in the string with values, such as:
+**Other languages**, which currently support Raw String literals usually also support string interpolation. It is basically a fancy name for substituting variable placeholders in the string with values, such as:
 
 ```kotlin
     val name = "John"
     println("Hi, my name is ${name}.")
 ```
 
-Unfortunately, this is still not possible in Java, not even Java 12. JEP 326 even explicitly states that this is not intended to be part of this proposal. However, it may be introduced by some other proposal in the future.
+* Unfortunately
+* this 
+* is still
+
+not possible in Java, not even Java 12. JEP 326 even explicitly states that this is not intended to be part of this proposal. However, it may be introduced by some other proposal in the future.
 
 # IntelliJ IDEA support
 The good news is that since version 2018.3, IDEA already supports Raw String Literals.
