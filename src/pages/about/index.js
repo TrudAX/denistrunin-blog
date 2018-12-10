@@ -97,6 +97,7 @@ class AboutPage extends React.Component {
             <h1>About</h1>
             I have been working with Dynamics 365 For Operation / Dynamics AX since Axapta 2.5 version. 
             In this blog I plan to share some useful tips and tricks. 
+            <br/>
             Have fun reading!
           <h2>Stay informed</h2>
           <strong>Get notified about the newest posts</strong>
