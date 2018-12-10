@@ -173,13 +173,10 @@ class BlogPostTemplate extends React.Component {
               <OutboundLink href="https://twitter.com/TruninDenis">
                 {twitterIcon}Twitter
               </OutboundLink>,{" "}
-              <OutboundLink href="https://www.vojtechruzicka.com/feed/">
+              <OutboundLink href="/rss.xml">
                 {rssIcon}RSS
-              </OutboundLink>{" "}
-              or{" "}
-              <OutboundLink href="https://eepurl.com/bZ0waf">
-                {emailIcon}Email
-              </OutboundLink>.
+              </OutboundLink>{" "}            
+              .
             </strong>
           </p>
           <div className="share-icons">

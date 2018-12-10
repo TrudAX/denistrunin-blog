@@ -95,18 +95,15 @@ class AboutPage extends React.Component {
             <meta name="twitter:description" content={siteDescription} />
           </Helmet>
             <h1>About</h1>
+            I have been working with Dynamics 365 For Operation / Dynamics AX since Axapta 2.5 version. 
+            In this blog I plan to share some useful tips and tricks. 
+            Have fun reading!
           <h2>Stay informed</h2>
           <strong>Get notified about the newest posts</strong>
           <ul>
             <li>
               <OutboundLink href="https://twitter.com/TruninDenis">
                 {twitterIcon}Follow @TruninDenis
-              </OutboundLink>
-            </li>
-            <li>
-              {emailIcon}
-              <OutboundLink href="https://eepurl.com/bZ0waf">
-                Receive new posts by email
               </OutboundLink>
             </li>
             <li>
@@ -135,8 +132,8 @@ class AboutPage extends React.Component {
           <strong>Additional links</strong>
           <ul>
             <li>
-              <OutboundLink href="https://github.com/TrudAX">
-                {githubIcon}GitHub profile
+              <OutboundLink href="https://github.com/TrudAX/TRUDUtilsD365">
+                {githubIcon}A set of D365FO Add-ins that can help you to accelerate the development speed
               </OutboundLink>
             </li>
 
