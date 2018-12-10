@@ -36,11 +36,8 @@ class BlogPostTemplate extends React.Component {
     const disqusShortname = "denis-trunin-programming-blog";
     const url = "https://denistrunin.netlify.com" + post.frontmatter.path;
     let disqusArticleIdentifier;
-    if (post.frontmatter.disqusArticleIdentifier) {
-      disqusArticleIdentifier = post.frontmatter.disqusArticleIdentifier;
-    } else {
-      disqusArticleIdentifier = post.frontmatter.path;
-    }
+    disqusArticleIdentifier = post.frontmatter.path;
+    
     const disqusConfig = {
       url: url,
       identifier: disqusArticleIdentifier,
@@ -242,8 +239,7 @@ export const pageQuery = graphql`
               originalImg
             }
           }
-        }
-        disqusArticleIdentifier
+        }        
         path
       }
     }
