@@ -45,7 +45,7 @@ Let’s check what is the overhead of **forceLiterals** usage(I have tested this
 
 For the test let’s use the following job. It calculates actual item quantity for the warehouse.
 
-```java
+```csharp
 class dev_testForceLiterals
 {
     public static void main(Args _args)
