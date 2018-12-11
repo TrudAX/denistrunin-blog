@@ -5,6 +5,7 @@ import "../styles/index.scss";
 import Navigation from "../components/Navigation";
 import FollowMe from "../components/FollowMe";
 import { Helmet } from "react-helmet";
+import icon from '../components/favicon.ico'
 
 class Template extends React.Component {
   render() {
@@ -24,7 +25,7 @@ class Template extends React.Component {
       >
         <Helmet>
           <html lang="en" />
-          <link rel="icon" type="image/png" href="/favicon.png" />
+          <link rel="icon" type="image/png" href={icon} />
 
         </Helmet>
         <Navigation />
