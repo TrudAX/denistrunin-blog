@@ -95,7 +95,8 @@ class AboutPage extends React.Component {
             <meta name="twitter:description" content={siteDescription} />
           </Helmet>
             <h1>About</h1>
-            I have been working with Dynamics 365 For Operation / Dynamics AX since Axapta 2.5 version. 
+            I have been working with Dynamics 365 For Operation / Dynamics AX since Axapta 2.5 version.   <br/>
+            Interested in performance optimization, development productivity and team management.
             In this blog I plan to share some useful tips and tricks. 
             <br/>
             Have fun reading!
