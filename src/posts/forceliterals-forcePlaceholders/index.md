@@ -7,14 +7,14 @@ featuredImage: "./Versus4.png"
 excerpt: "Index hints is a new feature announced in D365FO PU23. When do we need it and what is the performance overhead of others alternatives."
 ---
 
-The idea of this post came after discussing new PU23 feature “Enabling index hints in X++ again”
+I had the idea of this post after discussing new PU23 feature “Enabling index hints in X++ again”
 
 <https://docs.microsoft.com/en-us/dynamics365/unified-operations/fin-and-ops/get-started/whats-new-platform-update-23#enabling-index-hints-in-x-again>
 
 And the main question during the discussion was – Do we really need “index hints” for the modern SQL Server?
 
-First of all some theory about SQL statement execution.
-In D365FO we have 2 way of executing a SQL statement
+First of all, let's discuss some theory about SQL statement execution.
+In D365FO we have 2 ways of executing a SQL statement
 
 ### **ForcePlaceholders**
 
