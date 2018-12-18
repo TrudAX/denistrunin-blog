@@ -20,15 +20,15 @@ In D365FO we have 2 ways of executing a SQL statement
 
 This is the default query execution mode. In this case, every SQL Statement that you write in X++, is processed in 2 steps – first **sp_prepare** command executed with placeholders instead of actual values and as a result of this **sp_prepare** command, we get a cached plan. Then **sp_cursorexecute** is called, that executes the query using this plan and the actual values. For one SQL statement with the different values, the plan is calculated only once.
 
-How does SQL server determines what plan to generate in **sp_prepare** if the statement in new (for some values one plan may be more efficient than for others)? For the new unknown plans it uses a “parameters sniffing” feature. If it gets **sp_prepare** command for the new statement, it doesn’t try to calculate it immediately, instead, it waits for the first call of **sp_cursorexecute** and uses the first passed values to calculate the plan.
+How does SQL server determine what plan to generate in **sp_prepare** if the statement is new (for some values one plan may be more efficient than for others)? For new unknown plans it uses a “parameters sniffing” feature. If it gets **sp_prepare** command for a new statement, it doesn’t try to calculate it immediately, instead, it waits for the first call of **sp_cursorexecute** and uses the first passed values to calculate the plan.
 
 ### **ForceLiterals**
 
-In this case, your actual SQL statement (with the actual values) is sent to SQL Server and executed as is. The drawback is that for every set of values you will need to parse this statement and compile a new SQL plan.
+In this case, your current SQL statement (with the actual values) is sent to SQL Server and executed as it is. The drawback of this is that for every set of values you will need to parse this statement and compile a new SQL plan.
 
 ### **Parameters sniffing**
 
-Parameters sniffing quite often becomes a reason for the performance problems. For example, you have a warehouse where most of the items have one batch ID, but there are some Items and Batches with general names (like “No batch”, “Empty”). In this situation, when you query item by batch your actual plan depends on the first query values. If you query contains “general” batch values, SQL Server creates a plan that starts execution with the ItemId, as a “general batch value” is not selective in this case. But for most of your items, it will be wrong and gives huge overhead, as in most cases Batch is a unique value.
+Parameters sniffing quite often becomes a reason for performance problems. For example, you have a warehouse where most of the items have one batch ID, but there are some Items and Batches with general names (like “No batch”, “Empty”). In this situation, when you query item by batch your actual plan depends on the first query values. If your query contains “general” batch values, SQL Server creates a plan that starts execution with the ItemId, as a “general batch value” is not selective in this case. But for most of your items, it will be wrong and gives huge overhead, as in most cases Batch is a unique value.
 
 **How to resolve a Parameters sniffing issue**:
 
@@ -109,13 +109,13 @@ ORDER BY [Total MBs - USE Count 1] DESC
 
 ### **forcePlaceholders results**
 
-For the first and for the second execution, time was the same
+For the first and for the second executions, time was the same
 
 First run: 8,51 sec
 
 Second run: 8,51 sec
 
-Memory consumption
+Memory consumption:
 
 ![1544426361493](Memory1.png)
 
@@ -125,7 +125,7 @@ First run: 66,57 sec
 
 Second run: 9,60 sec
 
-Memory consumption
+Memory consumption:
 
 ![1544426462937](Memory2.png)
 
@@ -133,7 +133,7 @@ During the execution there was almost 100% utilization for 1 CPU core
 
 ![1544426512418](CPU2.png)
 
-If we present these values on a graph
+If we present these values on a graph:
 
 ![1544426563576](Compare1.png)
 
@@ -143,4 +143,4 @@ Memory consumption is about 100KB per saved plan. So in forceLiterals case, it r
 
 Plan compilation is still a complex task, that consumes a lot of CPU. This 1-minute difference between the first run of **forceLiterals** and **forcePlaceholders** is utilizing one CPU core for 100%. For the **forceLiterals** case, time to build a plan is 6 times longer than the time to fetch the actual data. Also, notice a difference between the second run of **forceLiterals** and **forcePlaceholders**. It is about a second – this time is a time server spends doing lexical parsing of SQL statement.
 
-For single SQL statements (or statement that executes once per document header) **forceLiterals** can provide some benefit, but if we have a large number of users who are working with different items and different dimensions **forceLiterals** usage for the frequent SQL requests can affect overall SQL server performance (both for memory consumption and CPU), so we need to avoid **forceLiterals** usage on "per line" level. And the new “index hint” feature can help us in this.
+For single SQL statements (or statement that executes once per document header) **forceLiterals** can provide some benefit, but if we have a large number of users who are working with different items and different dimensions **forceLiterals** usage for the frequent SQL requests can affect overall SQL server performance (both for memory consumption and CPU), so we need to avoid **forceLiterals** usage on a "per line" level. And the new “index hint” feature can help us in this.
