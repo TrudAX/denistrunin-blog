@@ -7,7 +7,7 @@ featuredImage: "./Versus4.png"
 excerpt: "Index hint is a new feature announced in D365FO PU23. When do we need it and what is the performance overhead of others alternatives."
 ---
 
-The idea to write this post came after a discussion of the new PU23 feature “Enabling index hints in X++ again”
+The idea to wri_te this post came after a discussion of the new PU23 feature “Enabling index hints in X++ again”
 
 <https://docs.microsoft.com/en-us/dynamics365/unified-operations/fin-and-ops/get-started/whats-new-platform-update-23#enabling-index-hints-in-x-again>
 
