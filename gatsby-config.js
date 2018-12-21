@@ -4,7 +4,7 @@ module.exports = {
     author: "Denis Trunin",
     description:
       "Blog about Microsoft Dynamics 365 for Finance and Operations X++ programming, tools, hints and more.",
-    siteUrl: "https://denistrunin.netlify.com/"
+    siteUrl: "https://denistrunin.com/"
   },
   pathPrefix: "/",
   plugins: [
@@ -128,7 +128,7 @@ module.exports = {
       options: {
         name: "Denis Trunin's X++ Programming Blog",
         short_name: "DT Blog",
-        start_url: "https://denistrunin.netlify.com",
+        start_url: "https://denistrunin.com",
         background_color: "#fff",
         theme_color: "#007acc",
         display: "minimal-ui",
@@ -149,7 +149,7 @@ module.exports = {
     {
       resolve: `gatsby-plugin-canonical-urls`,
       options: {
-        siteUrl: `https://denistrunin.netlify.com`
+        siteUrl: `https://denistrunin.com`
       }
     },
     `gatsby-plugin-sitemap`,

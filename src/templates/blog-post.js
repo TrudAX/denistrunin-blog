@@ -34,7 +34,7 @@ class BlogPostTemplate extends React.Component {
     const shareIconSize = 32;
 
     const disqusShortname = "denis-trunin-programming-blog";
-    const url = "https://denistrunin.netlify.com" + post.frontmatter.path;
+    const url = "https://denistrunin.com" + post.frontmatter.path;
     let disqusArticleIdentifier;
     disqusArticleIdentifier = post.frontmatter.path;
     
