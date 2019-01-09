@@ -7,7 +7,7 @@ featuredImage: "./logo.png"
 excerpt: "'RunBase class builder' Add-in parameters description and usage scenarious"
 ---
 
-This topic describes "RunBase class builder" Add-in, it's parameters and usage. The purpose of this Add-in is to generate template code for a class that extends RunBaseBatch based on typical usage scenarios.
+This topic describes "RunBase class builder" Add-in, its parameters and usage. The purpose of this Add-in is to generate code template for a class that extends RunBaseBatch based on typical usage scenarios. Use the following link to download it.
 
 ## Main screen
 
@@ -33,12 +33,12 @@ The value that will be returned from the static description() method.
 
 ### -Parameters..
 
-You can specify several parameters that will be displayed in the user dialog. One line per parameter. To describe the parameter the following information should be provided(values are separated by a | delimiter):
+You can specify several parameters that will be displayed in the user dialog, one line per parameter. To describe the parameter the following information should be provided(values are separated by a | delimiter):
 
 - **EDT** - Extended data type name for the dialog field. For mandatory fields add * at the end
 - **Variable name** - class variable for this EDT. Can be empty, in this case, it will be generated from the EDT name
-- **Label** - you can override EDT label for the field on the dialog form, can be empty, in this case, EDT label will be used
-- **Help text**- you can override EDT help text for the field on the dialog form, can be empty, in this case, EDT help text will be used
+- **Label** - you can override EDT label for the field on the dialog form. If the Label is empty, EDT label will be used
+- **Help text**- you can override EDT help text for the field on the dialog form. If it is empty, EDT help text will be used
 
 The following code is generated for each parameter:
 
@@ -59,7 +59,7 @@ public CustAccount parmCustAccount(CustAccount _custAccount = custAccount)...
 
 ### -Query table
 
-If you want to display a query in the dialog, you need to specify the main table for this query here. In this case, the following code will be added:
+If you want to display a query in the dialog, you need to specify the main table for this query. In this case, the following code will be added:
 
 ```csharp
 //ClassDeclaration
@@ -91,7 +91,7 @@ while (queryRun.next())
 
 ### -External table name
 
-Table name of the caller record should be specified. This covers a scenario when class is calling from a Menu item button on a form. Often, in this case, we need to save the caller record, check for the caller record or update existing query based on the caller record.
+Table name of the caller record should be specified. This covers a scenario when class is calling from a Menu item button on a form. Often, in this case, we need to save the caller record, to check for the caller record or to update the existing query based on the caller record.
 
 The following code will be generated (**External table name** = CustTable)
 
@@ -116,7 +116,7 @@ if (_args && _args.record().TableId == tablenum(CustTable))
 
 ### -Add file upload
 
-Need to specify 'y' symbol to generate code that allows a user to select a file from the local PC. It will add a fileUploadResult variable, all necessary code to handle this file and a sample code that displays uploaded text file content.
+You need to specify 'y' symbol to generate code that allows a user to select a file from the local PC. It will add a fileUploadResult variable, a necessary code to handle this file and a sample code that displays uploaded text file content.
 
  ![1546932149579](FileUpload.png)
 
@@ -135,7 +135,7 @@ while (asciiIo.status() == IO_Status::Ok)
 }
 ```
 
-Comparing to AX2012(where you can simply define a variable with the FileNameOpen type) adding file upload button requires more code in D365FO, as Dialog doesn't include new file control. I even created an idea to improve this https://experience.dynamics.com/ideas/idea/?ideaid=ac0834aa-216c-e711-80c0-00155d7cd0b4, but the status is still New.
+Comparing to AX2012(where you can simply define a variable with the FileNameOpen type) adding file upload button requires more efforts in D365FO, as Dialog doesn't include new file control. I even created an idea to improve this https://experience.dynamics.com/ideas/idea/?ideaid=ac0834aa-216c-e711-80c0-00155d7cd0b4, but its status is still New.
 
 ### -Create menu item
 
