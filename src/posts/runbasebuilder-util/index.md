@@ -7,7 +7,7 @@ featuredImage: "./logo.png"
 excerpt: "'RunBase class builder' Add-in parameters description and usage scenarious"
 ---
 
-This topic describes "RunBase class builder" Add-in, its parameters and usage. The purpose of this Add-in is to generate code template for a class that extends RunBaseBatch based on typical usage scenarios. Use the following link to download it.
+This topic describes "RunBase class builder" Add-in, its parameters and usage. The purpose of this Add-in is to generate code template for a class that extends RunBaseBatch based on typical usage scenarios. Use the following [link]( https://github.com/TrudAX/TRUDUtilsD365/releases) to download it.
 
 ## Main screen
 
