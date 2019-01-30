@@ -4,7 +4,7 @@ date: "2019-01-30T20:12:03.284Z"
 tags: ["SQL", "Performance"]
 path: "/understanding-sql-blocking"
 featuredImage: "./logo.png"
-excerpt: "Understanding blocking is a key component of resolving performance issues. You can have fast CPU, a lot of memory, but if you face SQL blocking problem all these will not be used  "
+excerpt: "Understanding blocking is a key component of resolving performance issues. You can have fast CPU, a lot of memory, but if you face SQL blocking problem all these will not be fully utilized"
 ---
 
 Understanding blocking is a key component of resolving performance issues. You can have fast CPU, a lot of memory, but if you face SQL blocking problem, all these will not be fully utilized. Moreover, some tips from the Performance webcasts can actually lead to blocking. In this post, I am going to describe the most common reasons for blocking and how to avoid them.
