@@ -107,7 +107,7 @@ Field3 may be added as a normal or "include" index field. This will resolve our 
 
 Following some performance tips(even if they are given by Microsoft experts) without knowing the drawbacks can sometimes slow down your system.
 
-- Try to avoid any **update_recordset** and **delete_from** usage by default(especially in document posting operations). Use it only when you are 100% sure that it will not cause blocking and you really need to reduce the operation time
+- Try to avoid any **update_recordset** and **delete_from** usage by default(especially in document posting operations - e.g. Sales-Purch orders, Journals..). Use it only when you are 100% sure that it will not cause blocking and you really need to reduce the operation time
 
 - If you still want to use **update_recordset**, check that all fields, used in WHERE condition, are covered by the existing indexes
 
