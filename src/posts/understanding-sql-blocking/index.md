@@ -103,11 +103,21 @@ CREATE NONCLUSTERED INDEX [I_TEST1] ON [dbo].[DEVBLOCKINGTESTTABLE]
 
 Field3 may be added as a normal or "include" index field. This will resolve our blocking issue in test 2. But when someone tries to update the same table using a different set of fields(for example Field2 and Field4) we'll get blocking again.
 
+Does adding an index always remove blocking? No. Sometimes you need to remove existing index in order solve it. One of the most common cases - blocking of InventSumDelta table in AX2012 - https://axology.wordpress.com/2013/12/19/locking-on-the-inventsumdelta-table-additional-tweaks/
+
+> Locking on the InventSumDelta table – additional tweaks  - We tried 
+> changing the column sequence on the two tables to have Partition and 
+> DataAreaId in the beginning, but nothing happened **until we disabled the** 
+> **ItemId index too**. That had an instant effect and practically removed the
+> deadlock issues immediately.
+
 ## Summary
 
 Following some performance tips(even if they are given by Microsoft experts) without knowing the drawbacks can sometimes slow down your system.
 
-- Try to avoid any **update_recordset** and **delete_from** usage by default(especially in document posting operations - e.g. Sales-Purch orders, Journals..). Use it only when you are 100% sure that it will not cause blocking and you really need to reduce the operation time
+- Try to avoid any **update_recordset** and **delete_from** usage by default(especially in document posting operations - e.g. Sales-Purch orders, Journals..) if you don't get any measurable performance boost(less than 1%). For example, if you want to update/delete less than 1000 rows in a transaction that can last more than a minute, better to use **select forupdate**.
+
+  Use set based operations only when you are 100% sure that it will not cause blocking and you really need to reduce the operation time
 
 - If you still want to use **update_recordset**, check that all fields, used in WHERE condition, are covered by the existing indexes
 
