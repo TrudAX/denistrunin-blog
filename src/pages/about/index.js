@@ -138,7 +138,11 @@ class AboutPage extends React.Component {
                 {githubIcon}A set of D365FO Add-ins that can help you to accelerate the development speed
               </OutboundLink>
             </li>
-
+            <li>
+              <OutboundLink href="https://community.dynamics.com/365/financeandoperations">
+              Dynamics 365 for Finance and Operations Community page
+              </OutboundLink>
+            </li>
           </ul>
           <h2>Found some issues?</h2>
             This whole blog and its content is available on <OutboundLink href="https://github.com/TrudAX/denistrunin-blog">GitHub</OutboundLink>. Feel free to create a Pull Request if you find some issues in the text or you can just check the code if you are curious about GatsbyJS powered blogs.
