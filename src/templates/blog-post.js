@@ -38,11 +38,18 @@ class BlogPostTemplate extends React.Component {
     let disqusArticleIdentifier;
     disqusArticleIdentifier = post.frontmatter.path;
     
+      /*
     const disqusConfig = {
       url: url,
       identifier: disqusArticleIdentifier,
       title: post.frontmatter.title
     };
+    */
+   const disqusConfig = {
+    url: "https://denistrunin.com/understanding-sql-blocking/",
+    identifier: "understanding-sql-blocking",
+    title: "understanding-sql-blocking"
+  };
     let disqus = null;
     if (typeof window !== "undefined") {
       disqus = (
