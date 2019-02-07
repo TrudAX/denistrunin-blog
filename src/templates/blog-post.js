@@ -8,18 +8,12 @@ import Tags from "../components/Tags";
 import { Link } from "gatsby";
 import {
   FacebookShareButton,
-  GooglePlusShareButton,
   LinkedinShareButton,
   TwitterShareButton,
-  RedditShareButton,
-  TumblrShareButton,
   EmailShareButton,
   FacebookIcon,
-  GooglePlusIcon,
   TwitterIcon,
-  RedditIcon,
   LinkedinIcon,
-  TumblrIcon,
   EmailIcon
 } from "react-share";
 import { OutboundLink } from "gatsby-plugin-google-analytics";
@@ -34,7 +28,7 @@ class BlogPostTemplate extends React.Component {
     const shareIconSize = 32;
 
     const disqusShortname = "denis-trunin-programming-blog";
-    const url = "https://denistrunin.com" + post.frontmatter.path;
+    const url = "https://denistrunin.com/" + post.frontmatter.path;
     let disqusArticleIdentifier;
     disqusArticleIdentifier = post.frontmatter.path;
     
