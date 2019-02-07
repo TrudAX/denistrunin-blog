@@ -46,19 +46,19 @@ class BlogPostTemplate extends React.Component {
     };
     */
    const disqusConfig = {
-    url: "https://denistrunin.com/understanding-sql-blocking/",
+    //url: "https://denistrunin.com/understanding-sql-blocking/",
     identifier: "understanding-sql-blocking",
-    title: "understanding-sql-blocking"
+    title: "understanding-sql-blocking title"
   };
     let disqus = null;
-    if (typeof window !== "undefined") {
+    //if (typeof window !== "undefined") {
       disqus = (
         <Disqus.DiscussionEmbed
           shortname={disqusShortname}
           config={disqusConfig}
         />
       );
-    }
+    //}
     const relatedPosts = this.props.pageContext.related;
     let similarPosts = null;
     if (relatedPosts && relatedPosts.length > 0) {
