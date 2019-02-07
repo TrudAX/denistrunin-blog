@@ -47,8 +47,8 @@ class BlogPostTemplate extends React.Component {
     */
    const disqusConfig = {
     //url: "https://denistrunin.com/understanding-sql-blocking/",
-    identifier: "understanding-sql-blocking",
-    title: "understanding-sql-blocking title"
+    identifier: disqusArticleIdentifier,
+    title: post.frontmatter.title
   };
     let disqus = null;
     //if (typeof window !== "undefined") {
