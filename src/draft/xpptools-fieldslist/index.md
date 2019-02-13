@@ -1,15 +1,15 @@
 ---
 title: "Fields list form(if you like Table browser, you love it)"
-date: "2018-12-22T22:12:03.284Z"
+date: "2019-02-13T22:12:03.284Z"
 tags: ["Xpp tools"]
-path: "/financial-reporting-local-onebox"
+path: "/xpptools-fieldslist"
 featuredImage: "./logo.png"
 excerpt: "Fields list form is an extended version of the standard Show all fields form with the additions features such as displaying all fields the the extended information, compare and editing features"
 ---
 
 
 
-Currently you have the following standard options to work with the D365FO data that are not visible in the user interface
+Currently you have the following standard options to work with the D365FO data, that are not visible in the user interface
 
 - SQL via **SQL Management Studio**
 - **Table browser** form
@@ -64,18 +64,6 @@ Select first line and press **Options - Record info - Fields list** button. Then
 Close this form, return to Sales order and select the second line. Run **Fields list** form again. Then you can compare previously saved Line1 and the Current record(sort by the Different columns to see the all differences )
 
 ![](assets/CompareLine2.png)
-
-
-
-## Show Fields list tool
-
-Download Source code from GitHub
-
-Copy DEVTools folder to your package folder (C:\AOSService\PackagesLocalDirectory )
-
-Start Visual Studio and Run compile for the DEVTools folder (Dynamics 365 –Build models.. – Select DEVTools)
-
-
 
 ## Summary
 
