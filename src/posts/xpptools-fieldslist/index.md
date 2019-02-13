@@ -4,10 +4,10 @@ date: "2019-02-13T22:12:03.284Z"
 tags: ["Xpp tools"]
 path: "/xpptools-fieldslist"
 featuredImage: "./logo.png"
-excerpt: "Fields list form is an extended version of the standard Show all fields form with the additional features such as displaying all fields with the extended information, comparing and editing features"
+excerpt: "Fields list form is an extended version of the standard Show all fields form with the additional features such as displaying all fields with the extended information, comparing and editing"
 ---
 
-This post describes the custom X++ Fields list form.
+[Fields list form](https://github.com/TrudAX/XppTools#-fields-list) is an extended version of the standard **Show all fields** form with the additional features such as displaying all fields with the extended information, comparing and editing.
 
 Currently, you have the following options to directly view or edit D365FO data:
 
@@ -33,13 +33,13 @@ Typical problems when using these tools are:
 
 Open All sales orders form and go to the **Options-Record info** and then press **Fields list** button
 
-![](FromRecordInfo.png)
+![Record information new button](FromRecordInfo.png)
 
 Fields list form will show the current data for the selected sales order
 
 ![](EnumView.png)
 
-Another way to run this form is to Right click on the form field, press **Form information** and then **Field list** button. This action doesn't save the current form cursor, so you can view the uncommitted data. 
+Another way to run this form is to Right click on the form field, press **Form information** and then **Field list** button. This action doesn't save the current form cursor, so you can view the uncommitted data.
 
 ![1549427927132](FormInformationCall.png)
 
@@ -61,7 +61,7 @@ Select the first line and press **Options - Record info - Fields list** button. 
 
 ![](assets/SaveSalesLine1.png)
 
-Close this form, return to Sales order and select the second line. Run **Fields list** form again. Then you can compare previously saved Line1 and the Current record(sort by the **Different** columns to see all differences)
+Close this form, return to Sales order and select the second line. Run **Fields list** form again. Then you can compare previously saved Line1 and the Current record(sort by the **Different** column to see all differences)
 
 ![](assets/CompareLine2.png)
 
