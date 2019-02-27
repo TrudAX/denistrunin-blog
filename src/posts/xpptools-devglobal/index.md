@@ -1,17 +1,17 @@
 ---
 title: "30 additional methods to the Global class"
 date: "2019-02-13T22:12:03.284Z"
-tags: ["Xpp common"]
+tags: ["Xpp DEVCommon"]
 path: "/xpptools-devglobal"
 featuredImage: "./logo.png"
-excerpt: "Fields list form is an extended version of the standard Show all fields form with the additional features such as displaying all fields with the extended information, comparing and editing"
+excerpt: "Global class is a standard class that contains a lot of small static functions. This post describes additional functions that extend it."
 ---
 
-Global class is a standard class that contains a lot of small static functions. This post describes additional functions. Class exists in [DEVCommon](https://github.com/TrudAX/XppTools#devcommon-model) model and has a name DEV. As a common practice you can copy it into your application as is, or rename it to your model name(e.g. ABC)
+Global class is a standard class that contains a lot of small static functions. This post describes additional functions that extend it. To avoid using prefixes all functions were added into separate static class DEV. Class exists in [DEVCommon](https://github.com/TrudAX/XppTools#devcommon-model) model. As a common practice, you can copy it into your application as is, or rename it to your model name(e.g. ABC)
 
 ## DEV class methods
 
-#### buf2Buf 
+#### buf2Buf
 
 Copies one cursor to another using copy by field names(standard *buf2Buf* uses IDs). So you copy values between different tables
 
@@ -50,7 +50,7 @@ static Object cObject(Object  _obj)
 
 #### countTotalQuick
 
-Calculates number of records in the query using Count(RecId). Standard *SysQuery::countTotal* switches to the loop mode when the query contains more than 1 datasource. 
+Calculates the number of records in the query using Count(RecId). Standard *SysQuery::countTotal* switches to the loop mode when the query contains more than 1 DataSource.
 
 ```csharp
 static Integer countTotalQuick(QueryRun _queryRun)
@@ -58,7 +58,7 @@ static Integer countTotalQuick(QueryRun _queryRun)
 
 #### copyRanges
 
-Copies datasource ranges
+Copies DataSource ranges
 
 ```csharp
 static void copyRanges(QueryBuildDataSource _qbdsTarget, QueryBuildDataSource _qbdsSource)
@@ -74,7 +74,7 @@ static Notes datasourceRangesAsText(QueryBuildDataSource _sourceDS)
 
 #### date2DateTime, dateTime2Date
 
-Converts date to datetime using UserPreferredTimeZone
+Converts date to DateTime using UserPreferredTimeZone
 
 ```csharp
 static utcDateTime date2DateTime(TransDate _date, boolean _isEndOfDay = false)
@@ -96,12 +96,12 @@ Returns start of the week, start of the year
 
 ```csharp
 static TransDate  dateStartWk(TransDate _transDate)
-static TransDate  dateStartYr(TransDate _transDate)    
+static TransDate  dateStartYr(TransDate _transDate)
 ```
 
 #### dsAllowEditExceptFields
 
-Enable or disable all form DS fields, except specified 
+Enable or disable all form DS fields, except specified
 
 ```csharp
 static void dsAllowEditExceptFields(FormDataSource _formDataSource, boolean _allowEdit, container _fieldListExclude=connull())
@@ -122,7 +122,7 @@ Performs datasource refresh/research/executeQuery
 ```csharp
 static void dsRefresh(Common  _record)
 static void dsResearch(Common _record, NoYes _savePosition = NoYes::Yes)
-static void dsExecuteQuery(Common _record, NoYes _savePosition = NoYes::Yes)    
+static void dsExecuteQuery(Common _record, NoYes _savePosition = NoYes::Yes)
 ```
 
 #### getFormRunFromFormArgs
@@ -135,7 +135,7 @@ static Object getFormRunFromFormArgs(FormRun  _element, IdentifierName _formName
 
 #### isQueryHasRecord
 
-Checks, that the query has a record. Common usage scenario is when you need to create a custom lookup for the field. In this case you create a query for the lookup, create a lookup based on this query and add a check into the validateWrite() method to check that the entered value(user can enter the value using the manual entry) is exists in this query  
+Checks, that the query has a record. The common usage scenario is when you need to create a custom lookup for the field. In this case, you create a query for the lookup, create a lookup based on this query and add a check into the validateWrite() method to check that the entered value(user can enter the value using the manual entry) is exists in this query  
 
 ```csharp
 static boolean isQueryHasRecord(Query  _q)
@@ -211,7 +211,7 @@ public static InventDim mergeInventDim(
 
 #### w
 
-Displays the current value - info(StrFmt('%1',_i));, using mostly for debug purposes. 
+Displays the current value - info(StrFmt('%1',_i));, using mostly for debug purposes.
 
 ```csharp
 static void w(anytype _i, str _addition = '')
@@ -221,4 +221,4 @@ static void w(anytype _i, str _addition = '')
 
 You can download this class using the following link https://github.com/TrudAX/XppTools/blob/master/DEVCommon/DEVCommon/AxClass/DEV.xml
 
-If you know some other helpful function fill free to create a GitHub pull request or write a comment.
+If you know some other helpful functions fill free to create a GitHub pull request or write a comment.
