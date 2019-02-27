@@ -7,13 +7,13 @@ featuredImage: "./logo.png"
 excerpt: "Global class is a standard class that contains a lot of small static functions. This post describes additional functions that extend it."
 ---
 
-Global class is a standard class that contains a lot of small static functions. This post describes additional functions that extend it. To avoid using prefixes all functions were added into separate static class DEV. Class exists in [DEVCommon](https://github.com/TrudAX/XppTools#devcommon-model) model. As a common practice, you can copy it into your application as is, or rename it to your model name(e.g. ABC)
+Global class is a standard class that contains a lot of small static functions. This post describes additional functions that extend it. To avoid using prefixes, all functions were added into the separate static class DEV. It exists in the [DEVCommon](https://github.com/TrudAX/XppTools#devcommon-model) model. As common practice, you can copy this class into your application as it is, or rename it according to your model name(e.g. ABC)
 
 ## DEV class methods
 
 #### buf2Buf
 
-Copies one cursor to another using copy by field names(standard *buf2Buf* uses IDs). So you copy values between different tables
+Copies one cursor to another using field names(standard *buf2Buf* uses IDs). So you can copy values between different tables
 
 ```csharp
 static void buf2Buf(Common _dest, Common _source, container _fieldsToExclude = conNull())
@@ -41,7 +41,7 @@ static Qty qty(Qty  _qty, UnitOfMeasureSymbol  _unit)
 
 #### cObject
 
-Object cast
+Casts parameter to Object
 
 ```csharp
 static Object cObject(Object  _obj)
@@ -83,7 +83,7 @@ static date dateTime2Date(utcDateTime _dateTime)
 
 #### systemdateget
 
-Returns current date. It is still unclear for me, why the original method was marked as obsolete
+Returns the current date. It is still unclear for me, why the original method was marked as obsolete
 
 ```csharp
 static TransDate systemdateget()
@@ -92,7 +92,7 @@ static TransDate systemdateget()
 
 #### dateStartWk, dateStartYr
 
-Returns start of the week, start of the year
+Returns the start of the week, the start of the year
 
 ```csharp
 static TransDate  dateStartWk(TransDate _transDate)
@@ -109,7 +109,7 @@ static void dsAllowEditExceptFields(FormDataSource _formDataSource, boolean _all
 
 #### dsGetDisabledFields
 
-Get a list of the disabled fields. Used with the previous function when Datasource contains some code, that before dsAllowEditExceptFields call disables some fields.  
+Get a list of the disabled fields. Used with the previous function when Datasource contains some code, that disables some fields, before dsAllowEditExceptFields call.  
 
 ```csharp
 static container dsGetDisabledFields(FormDataSource _formDataSource)
@@ -133,17 +133,17 @@ Gets the calling form from the current form args
 static Object getFormRunFromFormArgs(FormRun  _element, IdentifierName _formName)
 ```
 
-#### isQueryHasRecord
+#### queryHasRecord
 
-Checks, that the query has a record. The common usage scenario is when you need to create a custom lookup for the field. In this case, you create a query for the lookup, create a lookup based on this query and add a check into the validateWrite() method to check that the entered value(user can enter the value using the manual entry) is exists in this query  
+Checks, that the query has a record. The common usage scenario is when you need to create a custom lookup for the field. In this case, you create a query for this lookup, create the lookup based on this query and add a check into the validateWrite() method to check that the entered value(user can enter the value using the manual entry) exists in this query  
 
 ```csharp
-static boolean isQueryHasRecord(Query  _q)
+static boolean queryHasRecord(Query  _q)
 ```
 
 #### isUserInRole
 
-User included to the role
+Is the current user included into the role
 
 ```csharp
 static boolean isUserInRole(Description  _roleName)
@@ -151,7 +151,7 @@ static boolean isUserInRole(Description  _roleName)
 
 #### purchTableConfirm
 
-Confirms purchase order
+Confirms a purchase order
 
 ```csharp
 static void  purchTableConfirm(PurchTable  _purchTable)
@@ -159,7 +159,7 @@ static void  purchTableConfirm(PurchTable  _purchTable)
 
 #### runButtonWithRecord
 
-Executes form menu item button with the specified record
+Executes menu item button with the specified record
 
 ```csharp
 static void runButtonWithRecord(FormFunctionButtonControl _button, Common _record,
@@ -200,7 +200,7 @@ static void validateWriteRecordCheck(Common _record)
 
 #### mergeInventDim
 
-Merge 2 inventDim values
+Merges 2 inventDim values
 
 ```csharp
 public static InventDim mergeInventDim(
@@ -221,4 +221,4 @@ static void w(anytype _i, str _addition = '')
 
 You can download this class using the following link https://github.com/TrudAX/XppTools/blob/master/DEVCommon/DEVCommon/AxClass/DEV.xml
 
-If you know some other helpful functions fill free to create a GitHub pull request or write a comment.
+If you know some other helpful functions feel free to create a GitHub pull request or leave a comment.
