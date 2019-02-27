@@ -1,6 +1,6 @@
 ---
 title: "30 additional methods to the Global class"
-date: "2019-02-13T22:12:03.284Z"
+date: "2019-02-27T22:12:03.284Z"
 tags: ["Xpp DEVCommon"]
 path: "/xpptools-devglobal"
 featuredImage: "./logo.png"
