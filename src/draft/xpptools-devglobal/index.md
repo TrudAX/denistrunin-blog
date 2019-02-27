@@ -1,5 +1,5 @@
 ---
-title: "Go Global"
+title: "30 additional methods to the Global class"
 date: "2019-02-13T22:12:03.284Z"
 tags: ["Xpp common"]
 path: "/xpptools-devglobal"
@@ -7,15 +7,13 @@ featuredImage: "./logo.png"
 excerpt: "Fields list form is an extended version of the standard Show all fields form with the additional features such as displaying all fields with the extended information, comparing and editing"
 ---
 
-[Fields list form](https://github.com/TrudAX/XppTools#-fields-list) is an extended version of the standard **Show all fields** form with the additional features such as displaying all fields with the extended information, comparing and editing.
+Global class is a standard class that contains a lot of small static functions. This post describes additional functions. Class exists in [DEVCommon](https://github.com/TrudAX/XppTools#devcommon-model) model and has a name DEV. As a common practice you can copy it into your application as is, or rename it to your model name(e.g. ABC)
 
-Global class is a popular class that contains a lot of small functions to help you perform typical development actions. This post related to similar functions. Class name is DEV. As a common practice you can copy it into your application as is, or rename it to your model name(e.g. ABC)
-
-## Functions list
+## DEV class methods
 
 #### buf2Buf 
 
-Copies one cursor to another using copy by field names(standard buf2Buf using IDs)
+Copies one cursor to another using copy by field names(standard *buf2Buf* uses IDs). So you copy values between different tables
 
 ```csharp
 static void buf2Buf(Common _dest, Common _source, container _fieldsToExclude = conNull())
@@ -24,7 +22,7 @@ static void buf2BufMerge(Common _dest, Common _source)
 
 #### canBeConverted, convertQty
 
-The same functions as UnitofMeasureConverter::canBeConverted and ::convert but with the string parameters instead of RecIds
+The same functions as *UnitofMeasureConverter::canBeConverted* and *::convert* but with the string parameters instead of RecIds
 
 ```csharp
 public static client server boolean canBeConverted(
@@ -52,7 +50,7 @@ static Object cObject(Object  _obj)
 
 #### countTotalQuick
 
-Calculates number of records in the query using Count(RecId). Standard SysQuery::countTotal switches to the loop mode when the query contains more than 1 datasource. 
+Calculates number of records in the query using Count(RecId). Standard *SysQuery::countTotal* switches to the loop mode when the query contains more than 1 datasource. 
 
 ```csharp
 static Integer countTotalQuick(QueryRun _queryRun)
@@ -81,6 +79,24 @@ Converts date to datetime using UserPreferredTimeZone
 ```csharp
 static utcDateTime date2DateTime(TransDate _date, boolean _isEndOfDay = false)
 static date dateTime2Date(utcDateTime _dateTime)
+```
+
+#### systemdateget
+
+Returns current date. It is still unclear for me, why the original method was marked as obsolete
+
+```csharp
+static TransDate systemdateget()
+{ return DateTimeUtil::getSystemDate(DateTimeUtil::getUserPreferredTimeZone()); }
+```
+
+#### dateStartWk, dateStartYr
+
+Returns start of the week, start of the year
+
+```csharp
+static TransDate  dateStartWk(TransDate _transDate)
+static TransDate  dateStartYr(TransDate _transDate)    
 ```
 
 #### dsAllowEditExceptFields
@@ -174,86 +190,35 @@ Checks that the field is not empty and generates a message
 static boolean validateCursorField(Common _table, fieldId _fieldId, boolean _isThrow = true)
 ```
 
-#### copyRanges
+#### validateWriteRecordCheck
 
-Copies datasource ranges
-
-```csharp
-static void copyRanges(QueryBuildDataSource _qbdsTarget, QueryBuildDataSource _qbdsSource)
-```
-
-#### copyRanges
-
-Copies datasource ranges
+Calls a validateWrite() method and generates an error if it fails
 
 ```csharp
-static void copyRanges(QueryBuildDataSource _qbdsTarget, QueryBuildDataSource _qbdsSource)
+static void validateWriteRecordCheck(Common _record)
 ```
 
-#### copyRanges
+#### mergeInventDim
 
-Copies datasource ranges
+Merge 2 inventDim values
 
 ```csharp
-static void copyRanges(QueryBuildDataSource _qbdsTarget, QueryBuildDataSource _qbdsSource)
+public static InventDim mergeInventDim(
+        InventDimGroupSetup         _dimGroupSetup,
+        InventDim                   _fromInventDim,
+        InventDim                   _addedDim)
 ```
 
-#### copyRanges
+#### w
 
-Copies datasource ranges
+Displays the current value - info(StrFmt('%1',_i));, using mostly for debug purposes. 
 
 ```csharp
-static void copyRanges(QueryBuildDataSource _qbdsTarget, QueryBuildDataSource _qbdsSource)
+static void w(anytype _i, str _addition = '')
 ```
-
-#### copyRanges
-
-Copies datasource ranges
-
-```csharp
-static void copyRanges(QueryBuildDataSource _qbdsTarget, QueryBuildDataSource _qbdsSource)
-```
-
-#### copyRanges
-
-Copies datasource ranges
-
-```csharp
-static void copyRanges(QueryBuildDataSource _qbdsTarget, QueryBuildDataSource _qbdsSource)
-```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 ## Summary
 
-**Fields list** tool in some cases can simplify and increase the development speed. You can download it using the following link - https://github.com/TrudAX/XppTools#installation
+You can download this class using the following link https://github.com/TrudAX/XppTools/blob/master/DEVCommon/DEVCommon/AxClass/DEV.xml
 
-Feel free to post any comments(better as a GitHub issue) or ideas, what else can be improved.
+If you know some other helpful function fill free to create a GitHub pull request or write a comment.
