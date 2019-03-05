@@ -1,7 +1,7 @@
 ---
 title: "30 additional methods to the Global class"
 date: "2019-02-27T22:12:03.284Z"
-tags: ["Xpp DEVCommon"]
+tags: ["XppDEVCommon"]
 path: "/xpptools-devglobal"
 featuredImage: "./logo.png"
 excerpt: "Global class is a standard class that contains a lot of small static functions. This post describes additional functions that extend it."

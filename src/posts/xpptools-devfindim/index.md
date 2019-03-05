@@ -35,7 +35,7 @@ All this can create a real mess, some of these options require a setup, some don
 
 ### Methods for working with Dimensions
 
-There are a lot of classes to manipulate dimensions, so it is often difficult to find the right one. Moreover, classes related to dimension were renamed in D365FO(comparing to AX2012). As a result, developers sometimes create a duplicate of the existing methods. 
+There are a lot of classes to manipulate dimensions, so it is often difficult to find the right one. Moreover, classes related to dimension were renamed in D365FO(comparing to AX2012). As a result, developers sometimes create a duplicate of the existing methods.
 
 For example, if you google "assign a value to default dimension" the first link will point to the 2-pages method
 
@@ -47,7 +47,7 @@ For example, if you google "assign a value to default dimension" the first link 
 
 To resolve the described issues I have created [DEVDimensionHelper](https://github.com/TrudAX/XppTools/blob/master/DEVCommon/DEVCommon/AxClass/DEVDimensionHelper.xml) class(you can rename it with your project prefix or use the default DEV). The idea is to collect all the necessary stuff in one place.
 
-In order to reference a dimension, you create a static constant in this class 
+In order to reference a dimension, you create a static constant in this class
 
 ```csharp
 static const public Name BusinessUnit   = 'BusinessUnit';
