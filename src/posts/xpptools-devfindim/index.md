@@ -1,5 +1,5 @@
 ---
-title: "Working with the Financial Dimensions in D365FO"
+title: "Working with Financial dimensions in D365FO"
 date: "2019-03-06T22:12:03.284Z"
 tags: ["XppDEVCommon"]
 path: "/xpptools-devfindim"
@@ -19,7 +19,7 @@ There is no starting point if you want to learn Financial dimensions framework. 
 
 ### Reference to the dimension
 
-Sometimes you need to reference just one dimension value(for example get or set "Cost center" value). You don't see many examples of this in the standard application, as in most cases dimension merging is using. In AX2009 it was quite easy - you had an enum and could use it to get or set the value. In the current version, you need somehow reference a record in the *DimensionAttribute* table and there is no "recommended" way of doing this. So I have seen different implementations:
+Sometimes you need to reference just one dimension value(for example get or set "Cost center" value). You don't see many examples of this in the standard application, as in most cases dimension merging is using. In AX2009 it was quite easy - you had an enum and could use it to get or set the value. In the current version, you need somehow to reference a record in the *DimensionAttribute* table and there is no "recommended" way of doing this. So, I have seen different implementations:
 
 - Add *DimensionAttribute* to parameters(as String or as RecId)
 
@@ -31,13 +31,13 @@ Sometimes you need to reference just one dimension value(for example get or set 
 
 - ... sometimes combinations of these options to access the same dimensions
 
-All this can create a real mess, some of these options require a setup, some don't compatible with cross-references.
+All this can create a real mess, some of these options require a setup, some aren't compatible with cross-references.
 
 ### Methods for working with Dimensions
 
 There are a lot of classes to manipulate dimensions, so it is often difficult to find the right one. Moreover, classes related to dimension were renamed in D365FO(comparing to AX2012). As a result, developers sometimes create a duplicate of the existing methods.
 
-For example, if you google "assign a value to default dimension" the first link will point to the 2-pages method
+For example, if you google "assign a value to default dimension" the first link will point to the 2-page method
 
 ![](DimLongMethod.png)
 
@@ -71,7 +71,9 @@ Currently this class contains the following references:
 
 ![](DEVDimensionHelperClass.png)
 
-As you see, no new code exists, all these just references(or small wrappers) to the standard classes. These methods will cover typical project requirements, if you need more, you can add them to this class. The idea is to use this class as a starting point for any dimension related question on the project(even before google something). You get some dimension related question, you check this class, if there is no answer in it, research how to do this task and update the class with the solution(either in form of new methods or just references to existing objects).
+As you see, there is no new code, all these it's just references(or small wrappers) to the standard classes. These methods will cover typical project requirements, if you need more, you can add them to this class. 
+
+The idea is to use this class as a starting point for any dimension related question on the project(even before Googling something). You get some dimension related question, you check this class, if there is no answer in it, research how to do this task and update the class with the solution(either in form of new methods or just references to existing objects).
 
 ## Summary
 
