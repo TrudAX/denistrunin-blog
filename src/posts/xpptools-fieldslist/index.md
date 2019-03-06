@@ -1,7 +1,7 @@
 ---
 title: "Fields list form(if you like Table browser, you will love it)"
 date: "2019-02-13T22:12:03.284Z"
-tags: ["Xpp tools"]
+tags: ["XppTools"]
 path: "/xpptools-fieldslist"
 featuredImage: "./logo.png"
 excerpt: "Fields list form is an extended version of the standard Show all fields form with the additional features such as displaying all fields with the extended information, comparing and editing"
