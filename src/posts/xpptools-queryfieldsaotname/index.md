@@ -13,6 +13,10 @@ This tool adds a new column in the standard Field lookup dialog, so you can sear
 
 ![](DEVQueryFieldsAOTName.png)
 
+UPDATE - the same field was also added into the "Personalize-Add columns" dialog(thanks @wojzeh for the idea)
+
+![](DEVQueryFieldsAOTNamePers.png)
+
 ## Summary
 
 You can download this tool using the following link https://github.com/TrudAX/XppTools#-display-system-field-name-in-the-query-filter
