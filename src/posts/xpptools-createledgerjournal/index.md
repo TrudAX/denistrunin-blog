@@ -11,7 +11,7 @@ Programmatically create LedgerJournalTrans using X++ is quite a common task, but
 
 ## Test scenario
 
-To test different methods I created a Runnable class [DEVTutorialCreateLedgerJournal](https://github.com/TrudAX/XppTools/blob/master/DEVTutorial/DEVTutorial/AxClass/DEVTutorialCreateLedgerJournal.xml) that creates a new journal based on the data from the existing source journal using different create methods. The dialog looks like this
+To test different methods, I created a Runnable class [DEVTutorialCreateLedgerJournal](https://github.com/TrudAX/XppTools/blob/master/DEVTutorial/DEVTutorial/AxClass/DEVTutorialCreateLedgerJournal.xml) that creates a new journal based on the data from the existing source journal using different create methods. The dialog looks like this
 
 ![Dialog image](CopyJournalDialog.png)
 
@@ -19,7 +19,7 @@ Lets discuss possible copy options(*Copy type* parameter):
 
 ## LedgerJournalEngine class
 
-This method is using LedgerJournalEngine class(the same class that is used when the user creates the journal manually on the Journal lines form). This increases the chances that the resulting line will be the same as a manually created line.
+This method is using LedgerJournalEngine class - the same class that is used when the user creates the journal manually on the Journal lines form. This increases the chances that the resulting line will be the same as a manually created line.
 
 ```csharp
 while select ledgerJournalTransOrig
@@ -92,7 +92,7 @@ while select ledgerJournalTransOrig
 }
 ```
 
-When you modify Account/Offset account fields in this example you need to call two methods(on *ledgerJournalTrans* and *ledgerJournalEngine*). This ensures, that the line will be properly initialized from the Account field
+When you modify Account/Offset account fields in this example you need to call two methods(on *ledgerJournalTrans* and *ledgerJournalEngine*). This ensures that the line will be properly initialized from the Account field.
 
 ```csharp
 ledgerJournalTrans.modifiedField(fieldNum(LedgerJournalTrans, LedgerDimension));  
@@ -101,11 +101,11 @@ ledgerJournalEngine.accountModified(LedgerJournalTrans);
 
 Voucher assignment here processed in *ledgerJournalEngine.write().*
 
-Also, an interesting flag here is LedgerJournalTrans.SkipBlockedForManualEntryCheck. It is useful when you don't what to allow users post manually to the same accounts as your procedure.
+Also, an interesting flag here is LedgerJournalTrans.SkipBlockedForManualEntryCheck. It is useful when you don't want to allow users post manually to the same accounts as your procedure.
 
 ### LedgerJournalTrans defaultRow() method
 
-This is a new approach in D365FO and it is using a new *defaultRow()* table method. This method is also called by the data entity during the import process. Its idea is that we don't control the sequence of different *modifiedField* methods calls, we just populate the fields that we know, all other logic happens in the *defaultRow()* method.
+This is a new approach in D365FO and it is using a new *defaultRow()* table method. The data entity also calls this method during the import process. Its idea is that we don't control the sequence of different *modifiedField* methods calls, we just populate the fields that we know, all other logic happens in the *defaultRow()* method.
 
 Code for journal creation in this case
 
@@ -206,7 +206,7 @@ while select ledgerJournalTransOrig
 }
 ```
 
-As you see this method requires less code, we don't even need to write code for the journal header creation, it is all handled by the data entity insert() method. Dimensions can be also used as strings. Limitations here is that data entity doesn't contain all the table fields and entity does not support all account types.
+As you see this method requires less code: we don't even need to write code for the journal header creation, it is all handled by the data entity insert() method. Dimensions can be also used as strings. Limitations here is that data entity doesn't contain all the table fields and entity does not support all account types.
 
 ## Performance testing
 
@@ -218,11 +218,11 @@ Les't test the performance. First I created a test journal with the 1000 lines(*
 | Using DataEntity              | 33.09                          |      |
 | Using Table defaultRow method | 15.18                          |      |
 
-There are some differences between the copy speed in my example, but it is caused by the different logic for the dimension creation, so the result is that all methods are almost equal and quite fast. In a real life scenario, you can expect insert speed 10-30 lines per second.
+There are some differences between the copy speed in my example, but it is caused by the different logic for the dimension creation, so the result is that all methods are almost equal and quite fast. In a real-life scenario, you can expect insert speed 10-30 lines per second.
 
 ## Choosing the right method and things to avoid
 
-In general, you have 2 options - create journal similar to the manual user entry or create it similar to the import procedure(for the second scenario choice between entity and table is mostly depends on what data do you have as input and does the entity support all required fields). So the choice between these two should be done by answering the question - if the user wants to create the same journal manually - does he use manual entry or data import.  
+In general, you have 2 options - create journal similar to the manual user entry or create it similar to the import procedure(for the second scenario choice between entity and table is mostly depends on what data do you have as input and does the entity support all required fields). So the choice between these two should be made by answering the question - if the user wants to create the same journal manually - does he use manual entry or data import.  
 
 Probably in D365FO better to avoid creation using *JournalTransData* classes or when you simple populate *ledgerJournalTrans* fields and call *insert()*. This initially can work, but later users may complain about this - like _"Why when I create journal manually and specify a vendor account Due date field is calculated, but your procedure doesn't fill it"._
 
