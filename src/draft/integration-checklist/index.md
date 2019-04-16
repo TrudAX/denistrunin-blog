@@ -1,115 +1,60 @@
 ---
-title: "Designing D365FO Integration solution"
-date: "2019-03-06T22:12:03.284Z"
-tags: ["TRUDScripts"]
+title: "Keys to the successful integration"
+date: "2019-04-17T22:12:03.284Z"
+tags: ["TRUDScripts", "Integration"]
 path: "/integration-checklist"
 featuredImage: "./logo.png"
-excerpt: "Document contains main points to consider when designing integration solutions"
+excerpt: "Document contains main points to consider when designing integration solutions."
 ---
 
-There are a lot of ways to implement integration with D365FO for external system. To choose the correct approach very important to clearly understand integration requirements before doing actual programming/setup. In this document I propose the actual checklist of what you need to know before designing integration implementation. Checklist is based on Oracle guidelines  
+There are many ways to implement integration between D365FO and external system. To choose the correct approach you need clearly understand integration requirements before doing actual programming/setup. In this document, I propose the actual checklist of what you need to know to successfully design integration solution. The checklist is based on Oracle guidelines and contains questions that you need to ask while designing integration and before choosing between different integration methods(https://github.com/TrudAX/TRUDScripts/blob/master/Documents/Integration/Integration%20Data%20Flow%20Requirements.md):
 
-Every question in this document have a value and can dramatically change actual integration implementation
+- Defining the Integration Solution Topology
+- Defining Data Flow Requirements
+- Analysing the Data Flow properties
+- Defining the Quality of Service
+- Performance
+- Availability and Reliability
+- Security
+- Scalability
+- Logging and Nonrepudiation
 
-> # Integration solution specification
->
-> Adapted version for D365FO/AX2012
->
-> ## Defining the Integration Solution Topology
->
-> Integration topology specifies the physical location of the various entities in the integration environment. This topology should include information about the types of network connections among the participants, including LAN, WAN, Internet, dial-up, and so on.
->  The integration specialist must ask whether all the constituent entities in an integration solution will be located:
->
-> - At a single physical site (a LAN with a single domain)? 
-> - At different sites that are connected via a WAN behind a firewall? 
-> - At different sites for various trading partners, separated by firewalls?
->
-> ## Defining Business Data Flows
->
-> Defining Data Flow Requirements
->
-> - Sequence or order (in relation to other tasks and activities)
-> - Conditional data—data that is required to make processing decisions. (for example – file is created with the special extension in integration shared folder)
-> - Business or application rules—processing rules that are applied to the conditional data to determine the run-time execution path of the process. 
-> - Mappings—data transformations between the business events used as input and those used as output. For example, file moved to Processed folder after the import or some status file updated
-> - Business transactions—transactional boundaries in the process. A single process might contain many business transactions. In addition, for each business transaction, the integration specialist needs to define any compensating actions that must be performed if a transaction needs to be rolled back. 
-> - Error handling—what exceptions can occur and how they should be handled.
-> - Duplicate data handling—how system should react to already processed data(for example file with the same name)
->
-> ## Analysing the Data Flow properties
->
-> - What are the characteristics of each data element? 
-> - What are the characteristics of messages? 
->   -Message size, specified in terms of minimum, maximum, and average size 
->   -Message volume, specified in the number of messages at peak, lull, and average volumes, plus any cyclical patterns 
->   -Single or batched (aggregated) message. If messages are aggregated, do they need to be split up and routed appropriately? If so, what are the routing criteria or conditions? 
-> - What data transformations are needed between the source data and target data?
->
-> ## Defining the Quality of Service
->
-> ### Performance
->
-> - How quickly, in business terms, must the business process be carried out? 
-> - What are peak and off-peak performance requirements? 
->
-> ### Availability and Reliability
->
-> - When must systems be available? Are they needed 24 hours a day, 7 days a week (24x7)? 
-> - What are the planned and anticipated periods of scheduled and unscheduled system downtime, respectively? 
-> - What is the maximum allowable downtime? 
-> - What failover and recovery protections are required in case a hardware or network failure occurs? 
-> - Do business messages need to be persisted while in transit and recovered upon a system restart? 
->
-> ### Security
->
-> - How sensitive is the information in the business process? 
-> - What are the privacy needs associated with each role? 
-> - What security safeguards are currently in place? 
->
-> ### Scalability
->
-> Define the scalability requirements for the business process, based on the current volume of work and the projected volume in the future. (for example, the volume of orders it can handle, without interruption to service or additional application development by using more advanced hardware).
->
-> ### Logging and Nonrepudiation
->
-> - What kinds of problems can arise? 
-> - What information needs to be logged and monitored? 
-> - For integration solutions that use B2B integration, what information needs to be logged and maintained for audit or nonrepudiation purposes?
+Every question in this document is important and can dramatically change the actual integration approach. For example, if you have an external system that needs to query D365FO for some information(like item prices) and it requires 24x7 availability you can't use any direct calls(like OData, Webservices) to D365FO as it obviously will not be available 24x7(during new releases, hotfix installations..)
 
+## Keys to the successful integration
 
-
-## Practical examples
-
-Here I try to describe most problematic moments that was caused by the fact that integration requirements were not properly described during the design phase and this caused implementation problems
+Integration has never been easy. Here I try to describe the most problematic moments.
 
 ### Performance
 
-You need clearly define and test the amount of data that needs to be processed and time interval when processing should be done. Problems can be caused even by the simple solutions. For example client can ask you to develop a webservice that returns a list of vendors. This can be easily developed and tested but on production system you may see hundreds per minute calls of this webservice that can completely stops the whole system.
+You need to clearly define and test the amount of data that needs to be processed and the time interval when processing should be done. 
+
+Even simple solutions can cause problems. For example, the client can ask you to develop a webservice that returns a list of vendors. It can be easily developed and tested without asking additional questions, but on production system you may see hundreds per minute calls of this webservice that completely stops the whole system and make your client unhappy. By asking a simple question from this checklist - "Why do you need this webservice and how often do you plan to call it? and getting the answer - "One call per document line" you can fix the proposed design before it's actually be implemented.
 
 ### Transaction support
 
-When working with multiline documents transaction support is required. For example you import 10 lines sales order from external system and 1 sales line can't be created due to some validation. In most cases you don't want to create sales order with 9 lines, the whole document should be rejected and often this behaviour implemented via SQL transaction support. Such requirement can limit the number of solutions as for example standard D365FO Data managements module doesn't support transactions, you can't write several records in transactions
+When working with business documents transaction support is often required. For example, you import 10 lines sales order from the external system, and 1 sales line can't be created due to some validation. In most cases you don't want to create a sales order with only 9 lines, the whole document should be rejected and often this behavior implemented via SQL transaction support. Such requirement may limit possible solutions as standard D365FO Data management module doesn't support transactions, you can't write several records in transactions
 
 ![](EntityWrite.png)   
 
-In this case you either need to implement you own transaction system(via additional flags) or write more code that was initially planned
+In this case, you either need to implement your own transaction system(via additional flags) or write more custom code that was initially planned
 
 ### Logging and traceability
 
-Logging and traceability should be implemented as base requirement. For export scenarios it should be easy to identify what and when this particular record was exported, for import scenarios - what was the original request, it's processing status and what documents were created as the result of this processing.
+Logging and traceability should be a base requirement. For export scenarios, it should be easy to identify what and when this particular record was exported, for import scenarios - what was the original incoming request, it's processing status and created documents.
 
 ### Errors handling
 
-Errors often divided by 2 categories - that can and that can' be resolved by subsequent executions. For example when you are reading data from the file and the file structure is not what you expect to see - you can just mark this file with error flag and move it to the Errors folder. If the file contains vendor code that doesn't exists in the system probably you can just show an error and then try to process this file again(the vendor may be created later). You should also think if there will not be any reaction from the system administrator to the errors. Constant growing numbers of old error can stop new messages from processing, so some logic to mark such messages as skipped after some time(or number of process attempts) should be implemented.   
+Errors often divided by 2 categories - that can and that can' be resolved by subsequent executions. For example, when you are reading data from the file, and its structure is not what you expect to see - you can mark this file with error flag and move it to the Errors folder. If the file contains vendor code that doesn't exist in the system, probably you can just show an error and then try to process this file again(the vendor may be created later). You should also think if there will not be any reaction from the system administrator to these errors. Growing numbers of old errors can stop new messages from processing, so some logic to mark such messages as skipped after some time(or number of processing attempts) should be implemented.   
 
 ### Async and sync 
 
-From my experience better try to avoid synchronous calls, especially when you don't control external system. It's is not always possible, but if you can do this, better to implement some middleware storage where you can read/write messages.
+From my experience better try to avoid synchronous calls, especially when you don't control the external system. It's is not always possible, but if you can do this, better to implement some middleware storage where you can read/write messages.
 
 ### Reproduction and testing support    
 
-This is a key factor to successful implementation. It should be easy to reproduce/test single message processing. If you integration works with physical devices, you should think about device emulator, if you are processing files from the specified folder(or processing data from the messages table) your solution should allow select individual file/message to process. This allows quickly debug, test and solve potentials problems.
+It should be easy to reproduce/test single message processing. If your integration works with physical devices, you should think about device emulator; if you are processing files from the specified folder(or processing data from the messages table), your solution should allow select individual file/message to process. This allows quickly debug, test and solve potentials problems.
 
 ## Summary
 
-If you know some other methods that can be added into this class feel free to create a GitHub pull request or leave a comment.
+I uploaded this checklist to [GitHub](https://github.com/TrudAX/TRUDScripts/blob/master/Documents/Integration/Integration%20Data%20Flow%20Requirements.md). If you see that some missing questions, fill free to post a comment.
