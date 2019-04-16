@@ -4,7 +4,7 @@ date: "2019-04-12T22:12:03.284Z"
 tags: ["XppDEVTutorial"]
 path: "/xpptools-createledgerjournal"
 featuredImage: "./logo.png"
-excerpt: "Programmatically create ledger journals using X++ is quite a common task, in this post I describe possible options to perform it"
+excerpt: "Create ledger journals using X++ is quite a common task, in this post I'll try to describe possible options how to perform it"
 ---
 
 Creating LedgerJournalTrans using X++ is quite a common task, but sometimes I still see some mistakes(mostly related to fields initialization from account/offset account and voucher assignment). In this post, I'll try to describe possible options how to create ledger journals in D365FO.
