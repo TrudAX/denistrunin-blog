@@ -1,6 +1,6 @@
 ---
 title: "Create ledger journals in D365FO using X++"
-date: "2019-04-12T22:12:03.284Z"
+date: "2019-04-16T20:12:03.284Z"
 tags: ["XppDEVTutorial"]
 path: "/xpptools-createledgerjournal"
 featuredImage: "./logo.png"
