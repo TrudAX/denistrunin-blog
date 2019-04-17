@@ -7,7 +7,7 @@ featuredImage: "./logo.png"
 excerpt: "Document contains main points to consider when designing integration solutions."
 ---
 
-There are many ways to implement integration between D365FO and external system. To choose the correct approach you need clearly understand integration requirements before doing actual programming/setup. In this document, I propose the actual checklist of what you need to know to successfully design integration solution. The checklist is based on Oracle guidelines and contains questions that you need to ask while designing integration and before choosing between different integration methods(https://github.com/TrudAX/TRUDScripts/blob/master/Documents/Integration/Integration%20Data%20Flow%20Requirements.md):
+There are many ways to implement integration between D365FO and external system. To choose the correct approach you need clearly understand integration requirements before doing actual programming/setup. In this document, I propose the actual checklist of what you need to consider to successfully design integration solution. The checklist is based on Oracle guidelines and contains questions that you need to ask while designing integration and before choosing between different integration methods(https://github.com/TrudAX/TRUDScripts/blob/master/Documents/Integration/Integration%20Data%20Flow%20Requirements.md):
 
 - Defining the Integration Solution Topology
 - Defining Data Flow Requirements
@@ -41,15 +41,21 @@ In this case, you either need to implement your own transaction system(via addit
 
 ### Logging and traceability
 
-Logging and traceability should be a base requirement. For export scenarios, it should be easy to identify what and when this particular record was exported, for import scenarios - what was the original incoming request, it's processing status and created documents.
+Logging and traceability should be a base requirement. For export scenarios, it should be easy to identify what and when this particular record was exported, for import scenarios - what was the original incoming request, it's processing status and created documents. And the other way - by the document you should be able identify the original integration message.
 
 ### Errors handling
 
-Errors often divided by 2 categories - that can and that can' be resolved by subsequent executions. For example, when you are reading data from the file, and its structure is not what you expect to see - you can mark this file with error flag and move it to the Errors folder. If the file contains vendor code that doesn't exist in the system, probably you can just show an error and then try to process this file again(the vendor may be created later). You should also think if there will not be any reaction from the system administrator to these errors. Growing numbers of old errors can stop new messages from processing, so some logic to mark such messages as skipped after some time(or number of processing attempts) should be implemented.   
+Errors often divided by 2 categories - that can and that can' be resolved by subsequent executions. For example, when you are reading data from the file, and its structure is not what you expect to see - you can mark this file with error flag and move it to the Errors folder. If the file contains vendor code that doesn't exist in the system, probably you can just show an error and then try to process this file again(a vendor may be created later). 
+
+You should also think if there will not be any reaction from the system administrator to these errors. Growing numbers of old errors can stop new messages from processing, so some logic to mark such messages as skipped after some time(or a number of processing attempts) should be implemented. Import and processing stage separation(via the staging tables) is also a good idea. 
+
+### File usage
+
+As D365FO is a cloud-based system often people ask - what about our existing file based integration that reads/writes files from the network share. And the answer is - if you want you can use the same approach in the cloud, by replacing network storage to Azure file storage. From the user perspective it can look the same(mapped drive in Windows). Libraries to work with the Azure storage is very similar to the File libraries(see the example [here](https://ievgensaxblog.wordpress.com/2017/07/16/d365fo-working-with-azure-file-storage/) and one of the options to store connection strings [here](https://www.agermark.com/2018/09/how-to-setup-azure-key-vault-with.html) )  
 
 ### Async and sync 
 
-From my experience better try to avoid synchronous calls, especially when you don't control the external system. It's is not always possible, but if you can do this, better to implement some middleware storage where you can read/write messages.
+From my experience better try to avoid synchronous calls, especially when you don't control the external system. It's is not always possible, but if you can do this, better to implement some middleware storage where you can read/write messages. So if the 3-party app doesn't need real-time access, instead of providing ODATA or Webservice interfaces better to upload the data they required to SQL Azure database, File storage or somewhere else. It can solve a lot of problems - they can't slow down your system by querying a lot of data and you avoid complains like "while making ODATA request we get a timeout error".    
 
 ### Reproduction and testing support    
 
