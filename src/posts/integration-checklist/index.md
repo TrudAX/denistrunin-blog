@@ -1,10 +1,10 @@
 ---
-title: "Keys to the successful integration"
+title: "How to design a successful integration"
 date: "2019-04-17T22:12:03.284Z"
 tags: ["TRUDScripts", "Integration"]
 path: "/integration-checklist"
 featuredImage: "./logo.png"
-excerpt: "Document contains main points to consider when designing integration solutions."
+excerpt: "There are many ways to implement integration between D365FO and external systems. In this document, I propose the actual checklist of what you need to consider to successfully design an integration solution"
 ---
 
 There are many ways to implement integration between D365FO and external systems. To choose the correct approach you need to clearly understand integration requirements before doing actual programming/setup. In this document, I propose the actual checklist of what you need to consider to successfully design an integration solution. The checklist is based on Oracle guidelines and contains questions that you need to ask while designing integration and before choosing between different integration methods(https://github.com/TrudAX/TRUDScripts/blob/master/Documents/Integration/Integration%20Data%20Flow%20Requirements.md):
