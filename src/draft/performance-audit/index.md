@@ -29,7 +29,7 @@ And in this case price defines performance level, there will be noticeable chang
 
 > One of the client complained about slow overall system performance. While comparing recommended hardware with the actual I have found that instead of 4 core 3.5GHz CPUs they had used 20 cores 2.0GHz CPU. Actual client intention was good, they thought that more cores means more performance, but in that case 4 cores was more than enough, but these should be the fast cores.
 
-## Current recommendations
+## Hardware recommendations
 
 For Ax2012 use the following guidance as a baseline 
 
@@ -54,3 +54,99 @@ From the practical experience modern 2 * 4 cores CPU can easily handle 128GB mem
 #### Storage system
 
 Nowadays we have HDD, SSD, and NVMe storage. The main difference is the number IOPS they can handle(very simple 1K+, 20k+ 200k+). So if you have some storage problem you can just upgrade to the next level
+
+
+
+## Analyzing database size
+
+First thing to check is the current AX database size per table. You don't need exact size(that takes time to perform), but can get the size using the saved statistics by using sp_space_used(it is almost instant). This script provide you size per table. Copy the result to Excel and sort by size. Sometimes you see the picture like this
+
+![](DataBaseSizeTopTables.png)
+
+in this case a lot of space consumed by some temporary data and can be deleted
+
+Check the number of closed records in InventSum. If most of the records are closed, removing them can considerable increase the performance
+
+![](InventSumSize.png)
+
+For example if you get the following results, you can drop closed records(the only problem here is that some reports, for example "Onhand by date" can use closed records to displays historic data, check this before delete)
+
+Also check some table statistics(use these scripts) Often you need the following: 
+
+- Transactions per day(for logistics companies it will be number of sales lines or invent trans per day) and the difference between peek and normal days)
+- Active users per day, per hour 
+- Batch jobs and their timings 
+
+Compare these numbers with the numbers from the technical design, very often clients exceed them but "forget" to upgrade hardware.
+
+## SQL server settings 
+
+To check the current SQL server settings you need just 1 script - sp_Blitz, it performs thousands of checks and displays summarized recommendations with the explanation links
+
+## AOS settings
+
+There are number of blog posts that cover optimal settings for the AOS. 
+
+<https://community.dynamics.com/365/financeandoperations/b/axsupport/archive/2014/09/05/ax-performance-troubleshooting-checklist-part-1b-application-and-aos-configuration> 
+
+<https://blogs.msdn.microsoft.com/axinthefield/dynamics-ax-performance-step/> 
+
+
+
+### Missing indexes
+
+Missing indexes script provides overview of indexes that consider missed by the plan guide engine
+
+You have the following columns here 
+
+- Equality columns 
+- Unequality columns
+
+Don't just follow these recommendations, every recommendation should be analyzed from the logical point of view. You don't need analyze the whole output, often 30-50 top recommendations is enough 
+
+PICTURE AND EXAMPLE HERE
+
+### Unused indexes 
+
+Script provides some unused indexes statistics from the large tables. Remove the indexes only if they are related to not used functionality or different country. In some special cases for the large tables you can also consider disabling Partition and DataArea.
+
+### Wait statistics
+
+Script gives you the percentage of current wait events. You you see some disk events here, analyze disk activity by disk and by file
+
+PICTURE HERE 
+
+### Top SQL analysis
+
+Script provides the active top SQL commands, their statistics and plans from the SQL server statistics(to clear the list use DBCC FREEPROCCACHE command). Ideally you should know the 5-10 statements from this list and analyze the following
+
+- They logically make sense for the current implementation - the number of executions and the statement itself covers current system functions. Very often I see some statement here caused by incorrect system setup or not used functionality
+- They use optimal plans and indexes
+
+### AX long SQL statements tracing 
+
+You can enable tracing of the long SQL statements in the user options. Use this job to enable it for the all users. Often you need analyze statements with the executions time more than 2-5 seconds. The great advantage of having this in AX is that you see the stack trace of the statement. Also keep in mind that long time to execute can be caused by 2 reasons 
+
+- Statement was heavy and takes long to execute 
+- Statement was blocked by other session
+
+
+
+## Blocking analysis 
+
+Unwanted blocking can be caused by the following reasons
+
+Usage group update operation(like update_recordset) in X++. Check this article(LINK HERE) that explains the problem in detail. To resolve this type you need either replace "update_recordset" with "while select forupdate" or adjust indexes 
+
+Blocking escalation - if you modify more than 5000 record in one transactions sometimes SQL Server decides to escalate the blocking level. If you have a lot of memory, you can disable this behavior, but first check that you really need to update all records in one transaction.
+
+Great instrument to deal with the blocking is to enable AX long SQL statements tracing(see above) - in this case you will see the statement, user and actual operation(by using X++ stack trace). 
+
+From SQL Server side it is also useful to enable context_info(LINK HERE) for the SQL session, in this case you can link AX session with the SQL Server SPID.
+
+The most challenging part of resolving blocking problems is to find operations that cause blocking. Great technique is to try search blocking on the test version. In this case you run the client, execute the operation(for example post the sales order) and put breakpoint to the last ttscommit statement for this operation. Then run another client and start executing  operations(like another sales order or journal posting). If you catch the blocking you can easily implement and test a fix for it.
+
+###  Parameters sniffing
+
+--
+
