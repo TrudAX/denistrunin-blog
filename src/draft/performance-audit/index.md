@@ -59,7 +59,7 @@ Nowadays we have HDD, SSD, and NVMe storage. The main difference is the number I
 
 ## Analyzing database size
 
-First thing to check is the current AX database size per table. You don't need exact size(that takes time to perform), but can get the size using the saved statistics by using sp_space_used(it is almost instant). This script provide you size per table. Copy the result to Excel and sort by size. Sometimes you see the picture like this
+First thing to check is the current AX database size per table. You don't need exact size(that takes time to perform), but can get the size using the saved statistics by using sp_space_used(execution time is almost instant). This [script](https://github.com/TrudAX/TRUDScripts/blob/master/Performance/AX%20Technical%20Audit.md#database-size) provides you size per table. Copy the result to Excel and sort by size. Sometimes you see the picture like this
 
 ![](DataBaseSizeTopTables.png)
 
@@ -71,7 +71,7 @@ Check the number of closed records in InventSum. If most of the records are clos
 
 For example if you get the following results, you can drop closed records(the only problem here is that some reports, for example "Onhand by date" can use closed records to displays historic data, check this before delete)
 
-Also check some table statistics(use these scripts) Often you need the following: 
+Also check some tables [statistic](https://github.com/TrudAX/TRUDScripts/blob/master/Performance/AX%20Technical%20Audit.md#table-statistics) Often you need the following: 
 
 - Transactions per day(for logistics companies it will be number of sales lines or invent trans per day) and the difference between peek and normal days)
 - Active users per day, per hour 
@@ -81,7 +81,7 @@ Compare these numbers with the numbers from the technical design, very often cli
 
 ## SQL server settings 
 
-To check the current SQL server settings you need just 1 script - sp_Blitz, it performs thousands of checks and displays summarized recommendations with the explanation links
+To check the current SQL server settings you need just one script - [sp_Blitz](https://github.com/TrudAX/TRUDScripts/blob/master/Performance/AX%20Technical%20Audit.md#sp_blitz), it performs thousand of checks and displays summarized recommendations with the explanation links
 
 ## AOS settings
 
@@ -95,58 +95,85 @@ There are number of blog posts that cover optimal settings for the AOS.
 
 ### Missing indexes
 
-Missing indexes script provides overview of indexes that consider missed by the plan guide engine
+Missing indexes [script](https://github.com/TrudAX/TRUDScripts/blob/master/Performance/AX%20Technical%20Audit.md#missing-indexes) provides overview of indexes that consider missed by the plan guide engine
 
 You have the following columns here 
 
-- Equality columns 
-- Unequality columns
+- Table name
+- Equality columns: ''='' condition in the WHERE clause
+- Unequality columns: some logical condition(<", "!=") in the WHERE clause 
 
-Don't just follow these recommendations, every recommendation should be analyzed from the logical point of view. You don't need analyze the whole output, often 30-50 top recommendations is enough 
+Don't just follow these recommendations, every recommendation should be analyzed from the logical point of view and only indexes that really limits the actual search should be created. You don't need analyze the whole output, often 30-50 top recommendations is enough 
 
-PICTURE AND EXAMPLE HERE
+Sometimes you can see recommendations that were caused by wrong conditions(mandatory fields missed in the SQL statement). In this case better to find and correct the statement, rather than trying to create an index(in the example below RefCompanyId field is missing for DocuRef selection) 
+
+![](MissingIndexesMissingField.png)
 
 ### Unused indexes 
 
-Script provides some unused indexes statistics from the large tables. Remove the indexes only if they are related to not used functionality or different country. In some special cases for the large tables you can also consider disabling Partition and DataArea.
+[Script](https://github.com/TrudAX/TRUDScripts/blob/master/Performance/AX%20Technical%20Audit.md#unused-indexes) provides some unused indexes statistics for the large tables. 
+
+![](NotUsedIndexes.png)
+
+Remove the indexes only if they are related to not used functionality or different country. In some special cases for the large tables you can also consider disabling Partition and DataArea fields.
 
 ### Wait statistics
 
-Script gives you the percentage of current wait events. You you see some disk events here, analyze disk activity by disk and by file
+[Script](https://github.com/TrudAX/TRUDScripts/blob/master/Performance/AX%20Technical%20Audit.md#wait-statistics) gives you the overview of current wait events. You you see some IO related events here, [analyze](https://github.com/TrudAX/TRUDScripts/blob/master/Performance/AX%20Technical%20Audit.md#disk-i--o) disk activity by disk and by file
 
-PICTURE HERE 
+![](Waits.png)
 
 ### Top SQL analysis
 
-Script provides the active top SQL commands, their statistics and plans from the SQL server statistics(to clear the list use DBCC FREEPROCCACHE command). Ideally you should know the 5-10 statements from this list and analyze the following
+Script provides the active top SQL commands, their statistics and the plan from the SQL server statistics(to clear the list use DBCC FREEPROCCACHE command). 
 
-- They logically make sense for the current implementation - the number of executions and the statement itself covers current system functions. Very often I see some statement here caused by incorrect system setup or not used functionality
+![](TopSQL.png)
+
+Ideally you should know the 5-10 statements from this list and analyze the following:
+
+- They logically make sense for the current implementation - the number of executions and the statement itself relates to the current system functions. Very often I saw some statement here caused by incorrect system setup or not used functionality, or not related to AX at all.
 - They use optimal plans and indexes
+
+FETCH_API_CURSOR here means some query from the AX form. To find the original query use [Cursors for the session](https://github.com/TrudAX/TRUDScripts/blob/master/Performance/AX%20Technical%20Audit.md#cursors-for-the-session) script
 
 ### AX long SQL statements tracing 
 
-You can enable tracing of the long SQL statements in the user options. Use this job to enable it for the all users. Often you need analyze statements with the executions time more than 2-5 seconds. The great advantage of having this in AX is that you see the stack trace of the statement. Also keep in mind that long time to execute can be caused by 2 reasons 
+You can enable tracing of the long SQL statements in the user options. Use this [job](https://github.com/TrudAX/TRUDScripts/blob/master/Performance/AX%20Technical%20Audit.md#enabling-tracing) to enable it for the all users. Often you need analyze statements with the executions time more than 2-5 seconds. 
 
-- Statement was heavy and takes long to execute 
-- Statement was blocked by other session
+![](AXSQLLog.png)
 
+The great advantage of this in AX is that you see the stack trace of the statement. Also keep in mind that long time to execute can be caused by 2 reasons 
+
+- Statement is heavy and takes long to execute 
+- Statement is blocked by other session
 
 
 ## Blocking analysis 
 
-Unwanted blocking can be caused by the following reasons
+Unwanted blocking can be caused by the following reasons:
 
-Usage group update operation(like update_recordset) in X++. Check this article(LINK HERE) that explains the problem in detail. To resolve this type you need either replace "update_recordset" with "while select forupdate" or adjust indexes 
+- Group update operation(like *update_recordset*) in X++. Check this [article](https://denistrunin.com/understanding-sql-blocking/) that explains the problem in detail. To resolve this you need either replace "update_recordset" with "while select forupdate" or adjust indexes 
 
-Blocking escalation - if you modify more than 5000 record in one transactions sometimes SQL Server decides to escalate the blocking level. If you have a lot of memory, you can disable this behavior, but first check that you really need to update all records in one transaction.
+- Blocking escalation - if you modify more than 5000 record in one transactions sometimes SQL Server decides to escalate the blocking level. If you have a lot of memory, you can disable this behavior, but first check that you really need to update all records in one transaction.
 
 Great instrument to deal with the blocking is to enable AX long SQL statements tracing(see above) - in this case you will see the statement, user and actual operation(by using X++ stack trace). 
 
-From SQL Server side it is also useful to enable context_info(LINK HERE) for the SQL session, in this case you can link AX session with the SQL Server SPID.
+It is also useful to enable [context_info](https://github.com/TrudAX/TRUDScripts/blob/master/Performance/AX%20Technical%20Audit.md#show-sql-query-for-the-ax-user) for the SQL session, this allows you to link AX session with the SQL Server SPID and find a blocked user.
 
-The most challenging part of resolving blocking problems is to find operations that cause blocking. Great technique is to try search blocking on the test version. In this case you run the client, execute the operation(for example post the sales order) and put breakpoint to the last ttscommit statement for this operation. Then run another client and start executing  operations(like another sales order or journal posting). If you catch the blocking you can easily implement and test a fix for it.
+The most challenging part of resolving blocking problems is to find operation that cause blocking. Great technique is to try search blocking on the test version. In this case you run the client, execute the operation(for example post the sales order) and put breakpoint to the last ttscommit statement for this operation. Then run another client and start executing  operations(like another sales order or journal posting). If you catch the blocking you can easily implement and test a fix for it.
 
 ###  Parameters sniffing
+
+Parameters sniffing quite often becomes a reason for performance problems. For example, you have a warehouse where most of the items have one batch ID, but there are some Items and Batches with general names (like “No batch”, “Empty”). In this situation, when you query item by batch your actual plan depends on the first query values. If your query contains “general” batch values, SQL Server creates a plan that starts execution with the ItemId, as a “general batch value” is not selective in this case. But for most of your items, it will be wrong and gives huge overhead, as in most cases Batch is a unique value.
+
+There is no universal way to resolve Parameters sniffing issue(refer to the excellent BrentOzar post that describes this https://www.brentozar.com/archive/2013/06/the-elephant-and-the-mouse-or-parameter-sniffing-in-sql-server/ ), but there are several ways to deal with it in AX:
+
+- Create new indexes – you can create new indexes, to help SQL server always choose the best plan. This often works only if you have conditions to one table only
+- Use the **sp_create_plan_guide** [command](https://github.com/TrudAX/TRUDScripts/blob/master/Performance/AX%20Technical%20Audit.md#create-a-plan-guide) to force the actual plan – using this option creates a big admin overhead as you need to maintain these created plans. If you add a new field to the AX table you will need to change all the plan guides in which this table is used. Often you need to provide just a OPTIMIZE FOR UNKNOWN hint to disable sniffing for the  SQL statement, better do not specify specific indexes 
+- **forceLiterals** X++ hint –you send actual values to the SQL Server and it chooses the best plan for these values. The overhead is that the plan will need to be compiled every time
+- Use index hint (new feature D365FO only) – it is the same as sp_create_plan_guide but with no admin overhead
+
+As a basic rule add **forceliterals** hint(or **query.literals(true)**) for the single SQL statements and add create a plan guide(with the OPTIMIZE FOR UNKNOWN hint) for the small SQL statements. **Forceliterals** usage can slow down your server. Check this [article](https://denistrunin.com/forceliterals-forcePlaceholders/) for the details.
 
 --
 
