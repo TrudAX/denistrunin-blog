@@ -9,32 +9,31 @@ excerpt: "How to perform Dynamics AX performance audit to resolve performance pr
 
 ## Introduction
 
-Are your Dynamics AX users complaining about slow system performance? You started the research, found many tips on what to do, and still don’t know where to start. 
-In this post I discuss how to perform Dynamics AX performance audit to resolve performance problems.
+Are your Dynamics AX users complaining about slow system performance? You started a research, found many tips on what to do, and still don’t know where to start. 
+In this post I will discuss how to perform Dynamics AX performance audit to resolve performance problems.
 I will cover the following areas:
 
 - Current hardware analysis
 
-- SQL Server settings and monitoring
-  Blocking
-
+- SQL Server settings and blocking monitoring
+  
 - AOS settings
 
 - X++ code optimization
 
 I will also outline common performance myths and mistakes based on real-life scenarios.
 
-The main principle of the performance  audit is to start from the highest level(that allow identifying the performance problem with the minimum effort) and continue by going more deeper in the analysis. The described technique was used for more than ten customers with a number of users between 50 to 500 and database size from 100GB to 1TB. For all these customers, basics steps were the same and helped to identify and solve the problems.
+The main principle of the performance  audit is to start from the highest level(that allows to identify the performance problem with the minimum effort) and to continue by going deeper in the analysis. The described technique was used for more than ten customers with a number of users from 50 to 500 and database size from 100GB to 1TB. For all these customers, basic steps were the same and helped to identify and solve the problems.
 
 ## Current hardware analysis
 
-The initial task to start is to compare the used hardware with the specified in a project Technical design document. It will be not good if you see servers design specification like "8-core CPU". Such phases in Technical design means that you don't have a technical design. "8 cores CPU" can mean any performance level. Try to filter "8 core CPU" on the Amazon, and you will see a considerable price variation
+The initial task to begin with is to compare the used hardware with the specified one in a project Technical design document. It will not be good if you see a server design specification like "8-core CPU". Such phrases in Technical design means that you don't have a proper technical design. "8-core CPU" can mean any performance level. Try to filter "8 core CPU" on the Amazon, and you will see a considerable price variation
 
 ![](CPUPrice.png)
 
-And for a CPU price defines the performance level, there will be noticeable differences of a system working on 10$ CPU compared to 10K$ CPU. 
+For a CPU price defines the performance level, and there will be noticeable differences of a system working on 10$ CPU compared to 10K$ CPU. 
 
-> One of the clients complained about slow overall system performance. While comparing recommended with the actual hardware, I have found that instead of 4 core 3.5GHz CPUs they had used 20 cores 2.0GHz CPU. The client's original intention was correct, they thought that more cores mean more performance, but in that case, 4 cores were more than enough, but these should be the fast cores.
+> One of the clients complained about slow overall system performance. While comparing recommended hardwarewith the actual one, I have found that instead of 4-core 3.5GHz CPUs they had used 20-core 2.0GHz CPU. The client's original intention was correct, they thought that more cores means more performance, but in that case, 4 cores were more than enough, but these should be the fast cores.
 
 ### Hardware recommendations
 
@@ -42,9 +41,9 @@ For Ax2012 use the following guidance as a baseline
 
 #### AOS and Terminal servers
 
-For AOS and Terminal server - CPU with the single thread performance compared to Azure Dv3 series. Memory - about 300-500MB per user
+For AOS and Terminal server - CPU with the single thread performance equal to Azure Dv3 series. Memory - about 300-500MB per user
 
-These are the average values. The current Intel CPU [models](https://www.cpubenchmark.net/singleThread.html) give you about 30-50% more speed than these Azure Dv3 level. 
+These are the average values. The current Intel CPU [models](https://www.cpubenchmark.net/singleThread.html) give you about 30-50% more speed than Azure Dv3. 
 
 ![](E52673CPUMark.png)
 
