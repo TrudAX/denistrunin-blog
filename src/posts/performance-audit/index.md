@@ -131,26 +131,26 @@ Remove the indexes only if they are related to not used functionality or a diffe
 
 ### Top SQL analysis
 
-[The script](https://github.com/TrudAX/TRUDScripts/blob/master/Performance/AX%20Technical%20Audit.md#get-top-sql) provides the active Top SQL commands, their statistics and the saved plan from the SQL server statistics(to clear the list use **DBCC FREEPROCCACHE** command).
+[The script](https://github.com/TrudAX/TRUDScripts/blob/master/Performance/AX%20Technical%20Audit.md#get-top-sql) provides active Top SQL commands, their statistics and saved plan from the SQL server statistics(to clear the list use **DBCC FREEPROCCACHE** command).
 
 ![](TopSQL.png)
 
-Ideally, you should know the 5-10 statements from this list and analyse the following:
+Ideally, you should know first 5-10 statements from this list and analyse the following:
 
-- They logically make sense for the current implementation - the number of executions and the statement itself relates to the current system functions. Very often I saw some statement here caused by incorrect system setup or not used functionality, or not related to AX at all.
+- They logically make sense for the current implementation - the number of executions and the statement itself relate to the current system functions. Very often I saw some statements here caused by incorrect system setup, by not used functionality or they are not related to AX at all.
 - They use optimal plans and indexes
 
 FETCH_API_CURSOR here means some query from an AX form. To find the original query use [Cursors for the session](https://github.com/TrudAX/TRUDScripts/blob/master/Performance/AX%20Technical%20Audit.md#cursors-for-the-session) script.
 
 ### AX long SQL statements tracing
 
-You can enable tracing of the long SQL statements in the user options. Use this [job](https://github.com/TrudAX/TRUDScripts/blob/master/Performance/AX%20Technical%20Audit.md#enabling-tracing) to enable it for all users. Often you need to analyse statements with the executions time more than 2-5 seconds.
+You can enable tracing of long SQL statements in the user options. Use this [job](https://github.com/TrudAX/TRUDScripts/blob/master/Performance/AX%20Technical%20Audit.md#enabling-tracing) to enable it for all users. Often you need to analyse statements with the execution time more than 2-5 seconds.
 
 ![](AXSQLLog.png)
 
-The great advantage of this in AX is that you see the stack trace of the statement. Also, keep in mind that a long time to execute can be caused by 2 reasons:
+A great advantage of this in AX is that you can see a stack trace of the statement. Also, keep in mind that a long execution time can be caused by 2 reasons:
 
-- A statement is heavy and takes a long time to execute
+- A statement is heavy and it takes a long time to execute it
 - A statement is blocked by another session
 
 ## Blocking analysis
@@ -164,11 +164,11 @@ A great instrument to deal with the blocking is to enable AX long SQL statements
 
 It is also useful to enable [context_info](https://github.com/TrudAX/TRUDScripts/blob/master/Performance/AX%20Technical%20Audit.md#show-sql-query-for-the-ax-user) for the SQL session. This allows you to link AX session with the SQL Server SPID and find a blocked user.
 
-The most challenging part of resolving blocking problems is to find an operation that causes blocking. The primary technique is to try search blocking on the test version. In this case, you run the client, execute the operation(for example, post the sales order) and put a breakpoint to the last **ttscommit** statement for this operation. Then run another client and start executing operations(like another sales order or journal posting). If you catch a blocking, you can easily implement and test a fix for it.
+The most challenging part of resolving blocking problems is to find an operation that causes blocking. The primary technique is to try to search blocking on the TEST version. In this case, you run the client, execute the operation(for example, post the sales order) and put a breakpoint to the last **ttscommit** statement for this operation. Then run another client and start executing operations(like another sales order or journal posting). If you catch a SQL block, you can easily implement and test a fix for it.
 
 ### Parameters sniffing
 
-Parameters sniffing quite often becomes a reason for performance problems. For example, you have a warehouse where most of the items have one batch ID, but there are some Items and Batches with generic names (like “No batch”, “Empty”). In this situation, when you query item by batch, your actual plan depends on the first query values. If your query contains “generic” batch values, SQL Server creates a plan, that starts execution with the ItemId, as a “generic batch value” is not selective in this case. But for most of your items, it will be wrong and gives huge overhead, as in most cases Batch is a unique value.
+Parameters sniffing quite often becomes a reason for performance problems. For example, you have a warehouse where most of the items have one batch ID, but there are some Items and Batches with generic names (like “No batch”, “Empty”). In this situation, when you query item by batch, your actual plan depends on the first query values. If your query contains “generic” batch values, SQL Server creates a plan, that starts execution with the ItemId, as a “generic batch value” is not selective in this case. But for most of your items, it will be wrong and gives a huge overhead, as in most cases Batch is a unique value.
 
 There is no universal way to resolve Parameters sniffing issues(refer to the excellent BrentOzar post that describes this https://www.brentozar.com/archive/2013/06/the-elephant-and-the-mouse-or-parameter-sniffing-in-sql-server/ ), but there are several ways to deal with it in AX:
 
@@ -184,9 +184,9 @@ You can view created plan guides in the Programmability section:
 
 ![](PlanGuides.png)
 
-As a basic rule add **forceliterals** hint(or **query.literals(true)**) for the single SQL statements and create a plan guides(with the OPTIMIZE FOR UNKNOWN hint) for the small SQL statements. **Forceliterals** usage can slow down your server. Check this [article](https://denistrunin.com/forceliterals-forcePlaceholders/) for the details.
+As a basic rule add **forceliterals** hint(or **query.literals(true)**) for the single SQL statements and create a plan guide(with the OPTIMIZE FOR UNKNOWN hint) for small SQL statements. **Forceliterals** usage can slow down your server. Check this [article](https://denistrunin.com/forceliterals-forcePlaceholders/) for the details.
 
-Determining which statements are affected by parameters sniffing also can be tricky. Often you analyse statements from the Top SQL output(see above), then compare the actual plan with the estimated plan and if they are different, check the XML representation of the actual plan. At the end of this XML you can find initial(sniffed) parameter values and based on them decide is that an issue and how it should be fixed.
+Determining which statements are affected by parameters sniffing also can be tricky. Often you analyse statements from the Top SQL output(see above), then compare the actual plan with the estimated plan and if they are different, check the XML representation of the actual plan. At the end of this XML you can find initial(sniffed) parameter values and basing on them decide is that an issue and how it should be fixed.
 
 ![](PlanValues.png)
 
@@ -194,23 +194,23 @@ Determining which statements are affected by parameters sniffing also can be tri
 
 Rebuild index and statistics update jobs can cause a lot of problems.
 
-The main misconception is that these operations can improve system performance but in reality they can't. The side effect of these operations is that they clear the plan cache(the same can be done just with DBCC FREEPROCCACHE command) and due to parameters sniffing this is often considering as an improvement.
+The main misconception is that these operations can improve system performance but in reality they can't. The side effect of these operations is that they clear the plan cache(the same can be done just with DBCC FREEPROCCACHE command) and due to parameters sniffing this is often considered as an improvement.
 
 The typical scenario of going into this trap(Brent call it Index Maintenance Madness, but in my experience, the same relates to statistics update):
 
 1. System suddenly becomes very slow(due to parameters sniffing issue)
 
-2. Someone decides to run index rebuild or/and statistics update job
+2. Someone decides to run an index rebuild or/and a statistics update job
 
-3. This magically helps and these operations started to execute daily(but you can't resolve parameters sniffing issue with this)
+3. This magically helps and these operations started to be executed daily(but you can't resolve parameters sniffing issue with this)
 
 4. Then system slowness happens during the day and statistics update also helps.
 
-5. Frequency changed to 2 times a day, then 3 times a day and so on...
+5. Frequency changes to 2 times a day, then 3 times a day and so on...
 
-At the end of these events, customer decide that index rebuild or/and statistics update job should run constantly and the server load they produce can even exceed the AX business logic load, cause blocking and slow down the system.
+At the end of these events, a customer decides that index rebuild or/and statistics update job should run constantly and the server load they produce can even exceed the AX business logic load, cause blocking and slow down the system.
 
-Check this article([Index Maintenance Madness](https://www.brentozar.com/archive/2017/12/index-maintenance-madness/) and great [video](https://www.youtube.com/watch?v=iEa6_QnCFMU) from Brent Ozar that explain the theory and psychology in details.
+Check this article([Index Maintenance Madness](https://www.brentozar.com/archive/2017/12/index-maintenance-madness/) and a great [video](https://www.youtube.com/watch?v=iEa6_QnCFMU) from Brent Ozar that explains the theory and psychology in details.
 
 Recommendations here is that you should not execute these operations in any way they can affect system performance. If you have a free maintenance window, run them once a week using Ola Hallengren‘s [IndexOptimize](https://ola.hallengren.com/sql-server-index-and-statistics-maintenance.html) procedure. It is more efficient than the standard SQL agent tasks as they allow you to execute UPDATE STATISTICS command without "WITH PERCENTAGE" clause and for the index rebuild you can specify fragmentation limits.
 
@@ -238,7 +238,7 @@ The advice here is to install and setup it before the actual problem happens. In
 
 ## Summary
 
-Using these basic steps you can resolve your Dynamics AX performance problems and make your users happy. All scripts related to this post available on my [GitHub](https://github.com/TrudAX/TRUDScripts/blob/master/Performance/AX%20Technical%20Audit.md). If you see that some useful staff is missing, feel free to post a comment.
+Using these basic steps you can resolve your Dynamics AX performance problems and make your users happy. All scripts related to this post are available on my [GitHub](https://github.com/TrudAX/TRUDScripts/blob/master/Performance/AX%20Technical%20Audit.md). If you see that some useful staff is missing, feel free to post a comment.
 
 There are some Microsoft blog posts about performance: [Managing general performance issues in Microsoft Dynamics AX](https://cloudblogs.microsoft.com/dynamics365/no-audience/2014/09/11/managing-general-performance-issues-in-microsoft-dynamics-ax/?source=axsupport), [Analysis scripts for Performance Analyzer v2.0](https://cloudblogs.microsoft.com/dynamics365/no-audience/2016/09/08/analysis-scripts-for-performance-analyzer-v2-0/?source=axsupport).
 
