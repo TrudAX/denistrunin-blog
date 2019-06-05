@@ -9,7 +9,7 @@ excerpt: "How to perform Dynamics AX performance audit to resolve performance pr
 
 ## Introduction
 
-Are your Dynamics AX users complaining about slow system performance? You started a research, found many tips on what to do, and still don’t know where to start. 
+Are your Dynamics AX users complaining about slow system performance? You started a research, found many tips on what to do, and still don’t know where to start.
 In this post I will discuss how to perform Dynamics AX performance audit to resolve performance problems.
 I will cover the following areas:
 
@@ -31,29 +31,29 @@ The initial task to begin with is to compare the used hardware with the specifie
 
 ![](CPUPrice.png)
 
-For a CPU price defines the performance level, and there will be noticeable differences of a system working on 10$ CPU compared to 10K$ CPU. 
+For a CPU price defines the performance level, and there will be noticeable differences of a system working on 10$ CPU compared to 10K$ CPU.
 
 > One of the clients complained about slow overall system performance. While comparing recommended hardwarewith the actual one, I have found that instead of 4-core 3.5GHz CPUs they had used 20-core 2.0GHz CPU. The client's original intention was correct, they thought that more cores means more performance, but in that case, 4 cores were more than enough, but these should be the fast cores.
 
 ### Hardware recommendations
 
-For Ax2012 use the following guidance as a baseline 
+For Ax2012 use the following guidance as a baseline
 
 #### AOS and Terminal servers
 
 For AOS and Terminal server - CPU with the single thread performance equal to Azure Dv3 series. Memory - about 300-500MB per user
 
-These are the average values. The current Intel CPU [models](https://www.cpubenchmark.net/singleThread.html) give you about 30-50% more speed than Azure Dv3. 
+These are the average values. The current Intel CPU [models](https://www.cpubenchmark.net/singleThread.html) give you about 30-50% more speed than Azure Dv3.
 
 ![](E52673CPUMark.png)
 
 If you current CPU below these D3 values upgrade your servers can give you some noticeable performance boost. <https://www.cpubenchmark.net/> is a web site where you can check the CPU performance level(you need to check single thread performance and total performance). If you don't like comparing these numbers, search on Amazon or eBay your current CPU price.
 
-#### SQL Server 
+#### SQL Server
 
 The same principles apply to SQL Server CPU, but they are not so simple. SQL Server is licensing by cores. For the wrong selected CPU model, your SQL Server licenses can cost more than the actual hardware. Check this [blog post](https://sqlperformance.com/2014/01/system-configuration/selecting-a-processor-for-sql-server-2014-1) that explains the process in details. It is old, but the basic idea is that in every Intel's model line there is a 4-core CPU with the maximum performance per core value, the more cores you get, the less performance per core will be, so you should not use CPUs with more cores, than your system needed.
 
-As AX is an OLTP system current CPU power for a SQL Server should allow processing data from a certain amount of memory. The amount of this memory is whether the maximum amount supported by the SQL Server standard edition(64GB - pre-2016 and 128GB - for SQL 2016) or the maximum "active data" in the database. 
+As AX is an OLTP system current CPU power for a SQL Server should allow processing data from a certain amount of memory. The amount of this memory is whether the maximum amount supported by the SQL Server standard edition(64GB - pre-2016 and 128GB - for SQL 2016) or the maximum "active data" in the database.
 
 From the practical experience modern 2 * 4 cores CPU can easily handle 128GB memory. 2 * 8 cores can work with 512GB. If you need more memory probably it's time to think about 4-sockets server.
 
@@ -65,14 +65,13 @@ Nowadays we have HDD, SSD, and NVMe storage. The main difference is the number I
 
 There are several blog posts that cover optimal settings for the AOS.
 
-<https://community.dynamics.com/365/financeandoperations/b/axsupport/archive/2014/09/05/ax-performance-troubleshooting-checklist-part-1b-application-and-aos-configuration> 
+<https://community.dynamics.com/365/financeandoperations/b/axsupport/archive/2014/09/05/ax-performance-troubleshooting-checklist-part-1b-application-and-aos-configuration>
 
-<https://blogs.msdn.microsoft.com/axinthefield/dynamics-ax-performance-step/> 
+<https://blogs.msdn.microsoft.com/axinthefield/dynamics-ax-performance-step/>
 
+## SQL Server analysis
 
-## SQL Server analysis 
-
-The first thing to check is the current AX database size per table. 
+The first thing to check is the current AX database size per table.
 
 ### Analyzing database size
 
@@ -88,15 +87,15 @@ Check the number of closed records in InventSum. If most of the records are clos
 
 For example, if you get the following results, you can drop closed records(the only problem here is that some reports, for example, "On hand by date" can use closed records to display historical data, check this before delete)
 
-Also, check some tables [statistic](https://github.com/TrudAX/TRUDScripts/blob/master/Performance/AX%20Technical%20Audit.md#table-statistics). Often, you need to know the following: 
+Also, check some tables [statistic](https://github.com/TrudAX/TRUDScripts/blob/master/Performance/AX%20Technical%20Audit.md#table-statistics). Often, you need to know the following:
 
 - Transactions per day(for logistics companies it will be a number of sales lines or invent trans per day) and the difference between peek and regular days)
-- Active users per day, per hour 
-- Batch jobs and their timings 
+- Active users per day, per hour
+- Batch jobs and their timings
 
 Compare these numbers with the numbers from the technical design, very often clients exceed them but "forget" to upgrade the hardware.
 
-### SQL server settings 
+### SQL server settings
 
 To check the current SQL server settings, you need just one script - [sp_Blitz](https://github.com/TrudAX/TRUDScripts/blob/master/Performance/AX%20Technical%20Audit.md#sp_blitz). it performs thousands of checks and displays summarized recommendations with the explanation links.
 
@@ -108,17 +107,17 @@ Output contains the following columns:
 
 - Table name
 - Equality columns: ''='' condition in the WHERE clause
-- Inequality columns: some logical condition(<", "!=") in the WHERE clause 
+- Inequality columns: some logical condition(<", "!=") in the WHERE clause
 
 Don't just follow these recommendations, every recommendation should be analysed from the logical point of view, and only indexes that really limit the actual search should be created. You don't need to analyse the whole output, often 30-50 top recommendations are enough.
 
-Sometimes you can see recommendations that were caused by wrong conditions(mandatory fields missed in the SQL statement). In this case better to find and correct the statement, rather than trying to create an index(in the example below RefCompanyId field is missing for DocuRef selection) 
+Sometimes you can see recommendations that were caused by wrong conditions(mandatory fields missed in the SQL statement). In this case better to find and correct the statement, rather than trying to create an index(in the example below RefCompanyId field is missing for DocuRef selection)
 
 ![](MissingIndexesMissingField.png)
 
-### Unused indexes 
+### Unused indexes
 
-[The script](https://github.com/TrudAX/TRUDScripts/blob/master/Performance/AX%20Technical%20Audit.md#unused-indexes) provides some unused indexes statistics for the large tables. 
+[The script](https://github.com/TrudAX/TRUDScripts/blob/master/Performance/AX%20Technical%20Audit.md#unused-indexes) provides some unused indexes statistics for the large tables.
 
 ![](NotUsedIndexes.png)
 
@@ -132,7 +131,7 @@ Remove the indexes only if they are related to not used functionality or a diffe
 
 ### Top SQL analysis
 
-[The script](https://github.com/TrudAX/TRUDScripts/blob/master/Performance/AX%20Technical%20Audit.md#get-top-sql) provides the active Top SQL commands, their statistics and the saved plan from the SQL server statistics(to clear the list use **DBCC FREEPROCCACHE** command). 
+[The script](https://github.com/TrudAX/TRUDScripts/blob/master/Performance/AX%20Technical%20Audit.md#get-top-sql) provides the active Top SQL commands, their statistics and the saved plan from the SQL server statistics(to clear the list use **DBCC FREEPROCCACHE** command).
 
 ![](TopSQL.png)
 
@@ -143,9 +142,9 @@ Ideally, you should know the 5-10 statements from this list and analyse the foll
 
 FETCH_API_CURSOR here means some query from an AX form. To find the original query use [Cursors for the session](https://github.com/TrudAX/TRUDScripts/blob/master/Performance/AX%20Technical%20Audit.md#cursors-for-the-session) script.
 
-### AX long SQL statements tracing 
+### AX long SQL statements tracing
 
-You can enable tracing of the long SQL statements in the user options. Use this [job](https://github.com/TrudAX/TRUDScripts/blob/master/Performance/AX%20Technical%20Audit.md#enabling-tracing) to enable it for all users. Often you need to analyse statements with the executions time more than 2-5 seconds. 
+You can enable tracing of the long SQL statements in the user options. Use this [job](https://github.com/TrudAX/TRUDScripts/blob/master/Performance/AX%20Technical%20Audit.md#enabling-tracing) to enable it for all users. Often you need to analyse statements with the executions time more than 2-5 seconds.
 
 ![](AXSQLLog.png)
 
@@ -154,28 +153,29 @@ The great advantage of this in AX is that you see the stack trace of the stateme
 - A statement is heavy and takes a long time to execute
 - A statement is blocked by another session
 
-
-## Blocking analysis 
+## Blocking analysis
 
 The following reasons can cause unwanted blocking:
 
-- Group update operation(like **update_recordset**) in X++. Check this [article](https://denistrunin.com/understanding-sql-blocking/) that explains the problem in detail. To resolve this, you need either replace "**update_recordset**" with "**while select forupdate**" or adjust indexes 
+- Group update operation(like **update_recordset**) in X++. Check this [article](https://denistrunin.com/understanding-sql-blocking/) that explains the problem in detail. To resolve this, you need either replace "**update_recordset**" with "**while select forupdate**" or adjust indexes
 - Blocking escalation - if you modify more than 5000 records in one transaction sometimes, SQL Server decides to escalate the blocking level. If you have a lot of memory, you can disable this behaviour, but first, check that you really need to update all records in one transaction.
 
-A great instrument to deal with the blocking is to enable AX long SQL statements tracing(see above) - in this case, you will see the statement, user and actual operation(by using X++ stack trace). 
+A great instrument to deal with the blocking is to enable AX long SQL statements tracing(see above) - in this case, you will see the statement, user and actual operation(by using X++ stack trace).
 
 It is also useful to enable [context_info](https://github.com/TrudAX/TRUDScripts/blob/master/Performance/AX%20Technical%20Audit.md#show-sql-query-for-the-ax-user) for the SQL session. This allows you to link AX session with the SQL Server SPID and find a blocked user.
 
 The most challenging part of resolving blocking problems is to find an operation that causes blocking. The primary technique is to try search blocking on the test version. In this case, you run the client, execute the operation(for example, post the sales order) and put a breakpoint to the last **ttscommit** statement for this operation. Then run another client and start executing operations(like another sales order or journal posting). If you catch a blocking, you can easily implement and test a fix for it.
 
-###  Parameters sniffing
+### Parameters sniffing
 
 Parameters sniffing quite often becomes a reason for performance problems. For example, you have a warehouse where most of the items have one batch ID, but there are some Items and Batches with generic names (like “No batch”, “Empty”). In this situation, when you query item by batch, your actual plan depends on the first query values. If your query contains “generic” batch values, SQL Server creates a plan, that starts execution with the ItemId, as a “generic batch value” is not selective in this case. But for most of your items, it will be wrong and gives huge overhead, as in most cases Batch is a unique value.
 
 There is no universal way to resolve Parameters sniffing issues(refer to the excellent BrentOzar post that describes this https://www.brentozar.com/archive/2013/06/the-elephant-and-the-mouse-or-parameter-sniffing-in-sql-server/ ), but there are several ways to deal with it in AX:
 
 - Create new indexes – you can create new indexes, to help SQL server always choose the best plan. This often works only if you have conditions to one table only
-- Use the **sp_create_plan_guide** [command](https://github.com/TrudAX/TRUDScripts/blob/master/Performance/AX%20Technical%20Audit.md#create-a-plan-guide) to force the actual plan – using this option creates a big admin overhead as you need to maintain these created plans. If you add a new field to the AX table you will need to change all the plan guides in which this table is used. Often you need to provide just a OPTIMIZE FOR UNKNOWN hint to disable sniffing for the  SQL statement, better do not specify specific indexes 
+  
+- Use the **sp_create_plan_guide** [command](https://github.com/TrudAX/TRUDScripts/blob/master/Performance/AX%20Technical%20Audit.md#create-a-plan-guide) to force the actual plan – using this option creates a big admin overhead as you need to maintain these created plans. If you add a new field to the AX table you will need to change all the plan guides in which this table is used. Often you need to provide just a OPTIMIZE FOR UNKNOWN hint to disable sniffing for the  SQL statement, better do not specify specific indexes
+
 - **forceLiterals** X++ hint –you send actual values to the SQL Server, and it chooses the best plan for these values. The overhead is that the plan will need to be compiled every time
 - Use index hint (new feature D365FO only) – it is the same as sp_create_plan_guide but with no admin overhead
 
@@ -185,7 +185,7 @@ Created plan guides can be found in the Programmability section:
 
 As a basic rule add **forceliterals** hint(or **query.literals(true)**) for the single SQL statements and create a plan guides(with the OPTIMIZE FOR UNKNOWN hint) for the small SQL statements. **Forceliterals** usage can slow down your server. Check this [article](https://denistrunin.com/forceliterals-forcePlaceholders/) for the details.
 
-Determining which statements are affected by parameters sniffing also can be tricky. Often you analyse statements from the Top SQL output(see above), then compare the actual plan with the estimated plan and if they are different, check the XML representation of the actual plan. At the end of this XML you can find initial(sniffed) parameter values and based on them decide is that an issue and how it should be fixed 
+Determining which statements are affected by parameters sniffing also can be tricky. Often you analyse statements from the Top SQL output(see above), then compare the actual plan with the estimated plan and if they are different, check the XML representation of the actual plan. At the end of this XML you can find initial(sniffed) parameter values and based on them decide is that an issue and how it should be fixed
 
 ![](PlanValues.png)
 
@@ -209,7 +209,6 @@ The typical scenario of going into this trap(Brent call it Index Maintenance Mad
 
 At the end of these events customer come to decision that index rebuild or/and statistics update job should run constantly and the server load they produce can even exceed the AX business logic load, cause blocking and slow down the system.
 
-
 Check this article([Index Maintenance Madness](https://www.brentozar.com/archive/2017/12/index-maintenance-madness/) and great [video](https://www.youtube.com/watch?v=iEa6_QnCFMU) from Brent Ozar that explain the theory and psychology in details.
 
 Recommendations here is that you should not execute these operations in any way they can affect system performance. If you have free maintenance window run them once a week using Ola Hallengren‘s [IndexOptimize](https://ola.hallengren.com/sql-server-index-and-statistics-maintenance.html) procedure. It is more efficient than the standard SQL agent tasks as they allow you to execute UPDATE STATISTISCS command without "WITH PERCENTAGE" clause and for the index rebuild you can specify fragmentation limits.
@@ -218,7 +217,7 @@ Don't use rebuild index and statistics update jobs to resolve any performance pr
 
 ## Code optimization
 
-Before individual operations optimization(x++ code) you need to know the following: 
+Before individual operations optimization(x++ code) you need to know the following:
 
 - Detailed problem description
 
