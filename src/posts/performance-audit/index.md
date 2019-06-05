@@ -47,13 +47,13 @@ These are the average values. The current Intel CPU [models](https://www.cpubenc
 
 ![](E52673CPUMark.png)
 
-If you current CPU below these D3 values upgrade your servers can give you some noticeable performance boost. <https://www.cpubenchmark.net/> is a web site where you can check the CPU performance level(you need to check single thread performance and total performance). If you don't like comparing these numbers, search on Amazon or eBay your current CPU price.
+If your current CPU speed is below these D3 values, upgrading your servers can give you some noticeable performance boost. <https://www.cpubenchmark.net/> is a web site where you can check the CPU performance level(you need to check single thread performance and total performance). If you don't like comparing these numbers, search on Amazon or eBay your current CPU price.
 
 #### SQL Server
 
-The same principles apply to SQL Server CPU, but they are not so simple. SQL Server is licensing by cores. For the wrong selected CPU model, your SQL Server licenses can cost more than the actual hardware. Check this [blog post](https://sqlperformance.com/2014/01/system-configuration/selecting-a-processor-for-sql-server-2014-1) that explains the process in details. It is old, but the basic idea is that in every Intel's model line there is a 4-core CPU with the maximum performance per core value, the more cores you get, the less performance per core will be, so you should not use CPUs with more cores than your system needed.
+The same principles apply to SQL Server CPU, but they are not so simple. SQL Server is licensed by cores. For the wrong selected CPU model, your SQL Server license can cost more than the actual hardware. Check this [blog post](https://sqlperformance.com/2014/01/system-configuration/selecting-a-processor-for-sql-server-2014-1) that explains the process in details. It is old, but the basic idea is that in every Intel model line there is a 4-core CPU with the maximum performance-per-core value, the more cores you get, the less performance per core there will be, so you should not use CPUs with more cores than your system needs.
 
-As AX is an OLTP system current CPU power for a SQL Server should allow processing data from a certain amount of memory. The amount of this memory is whether the maximum amount supported by the SQL Server standard edition(64GB - pre-2016 and 128GB - for SQL 2016) or the maximum "active data" in the database.
+As AX is an OLTP system, current CPU power for a SQL Server should allow processing data from a certain amount of memory. The amount of this memory is either the maximum amount supported by the SQL Server standard edition(64GB - pre-2016 and 128GB - for SQL 2016) or the maximum "active data" in the database.
 
 From the practical experience modern 2 * 4 cores CPU can easily handle 128GB memory. 2 * 8 cores can work with 512GB. If you need more memory, probably it's time to think about 4-sockets server.
 
@@ -75,7 +75,7 @@ The first thing to check is the current AX database size per table.
 
 ### Analyzing database size
 
-You don't need exact table size(that takes time to perform), but can get the size using the saved statistics from the **sp_space_used** procedure(execution time is quite fast). This [script](https://github.com/TrudAX/TRUDScripts/blob/master/Performance/AX%20Technical%20Audit.md#database-size) provides you the size per table. Copy the result to Excel and sort by size. Sometimes you see the picture like this:
+You don't need an exact table size(that takes time to perform), but you can get the size using the saved statistics from the **sp_space_used** procedure(execution time is quite fast). This [script](https://github.com/TrudAX/TRUDScripts/blob/master/Performance/AX%20Technical%20Audit.md#database-size) provides you the size per table. Copy the result to Excel and sort by size. Sometimes you see the picture like this:
 
 ![](DataBaseSizeTopTables.png)
 
@@ -85,9 +85,9 @@ Check the number of closed records in InventSum. If most of the records are clos
 
 ![](InventSumSize.png)
 
-For example, if you get the following results, you can drop closed records(the only problem here is that some reports, for example, "On hand by date" can use closed records to display historical data, check this before delete)
+For example, if you get the following results, you can drop closed records(the only problem here is that some reports, for example, "On hand by date" can use closed records to display historical data, check this before deleting)
 
-Also, check some tables [statistic](https://github.com/TrudAX/TRUDScripts/blob/master/Performance/AX%20Technical%20Audit.md#table-statistics). Often, you need to know the following:
+Also, check some system [statistics](https://github.com/TrudAX/TRUDScripts/blob/master/Performance/AX%20Technical%20Audit.md#table-statistics). Often, you need to know the following:
 
 - Transactions per day(for logistics companies it will be a number of sales lines or invent trans per day) and the difference between peek and regular days)
 - Active users per day, per hour
@@ -97,11 +97,11 @@ Compare these numbers with the numbers from the technical design, very often cli
 
 ### SQL server settings
 
-To check the current SQL server settings, you need just one script - [sp_Blitz](https://github.com/TrudAX/TRUDScripts/blob/master/Performance/AX%20Technical%20Audit.md#sp_blitz). it performs thousands of checks and displays summarized recommendations with the explanation links.
+To check the current SQL server settings, you need just one script - [sp_Blitz](https://github.com/TrudAX/TRUDScripts/blob/master/Performance/AX%20Technical%20Audit.md#sp_blitz). it performs thousands of checks and displays summarized recommendations with explanation links.
 
 ### Missing indexes
 
-Missing indexes [script](https://github.com/TrudAX/TRUDScripts/blob/master/Performance/AX%20Technical%20Audit.md#missing-indexes) provides an overview of indexes that consider missed by the plan guide engine
+Missing indexes [script](https://github.com/TrudAX/TRUDScripts/blob/master/Performance/AX%20Technical%20Audit.md#missing-indexes) provides an overview of indexes that are considered missed by the plan guide engine
 
 Output contains the following columns:
 
@@ -109,9 +109,9 @@ Output contains the following columns:
 - Equality columns: ''='' condition in the WHERE clause
 - Inequality columns: some logical condition(<", "!=") in the WHERE clause
 
-Don't just follow these recommendations, every recommendation should be analysed from the logical point of view, and only indexes that really limit the actual search should be created. You don't need to analyse the whole output, often 30-50 top recommendations are enough.
+Don't just follow these recommendations, every recommendation should be analysed from a logical point of view, and only indexes that really limit the actual search should be created. You don't need to analyse the whole output, often 30-50 top recommendations are enough.
 
-Sometimes you can see recommendations that were caused by wrong conditions(mandatory fields missed in the SQL statement). In this case better to find and correct the statement, rather than trying to create an index(in the example below RefCompanyId field is missing for DocuRef selection)
+Sometimes you can see recommendations that were caused by wrong conditions(mandatory fields missed in the SQL statement). In this case it is better to find and correct the statement, rather than trying to create an index(in the example below RefCompanyId field is missing for DocuRef selection)
 
 ![](MissingIndexesMissingField.png)
 
@@ -121,11 +121,11 @@ Sometimes you can see recommendations that were caused by wrong conditions(manda
 
 ![](NotUsedIndexes.png)
 
-Remove the indexes only if they are related to not used functionality or a different country. In some specific cases for the large tables, you can also consider disabling Partition and DataArea fields.
+Remove the indexes only if they are related to not used functionality or a different country. In some specific cases for large tables, you can also consider disabling Partition and DataArea fields.
 
 ### Wait statistics
 
-[Script](https://github.com/TrudAX/TRUDScripts/blob/master/Performance/AX%20Technical%20Audit.md#wait-statistics) gives you an overview of current wait events. You see some IO related events here, [analyze](https://github.com/TrudAX/TRUDScripts/blob/master/Performance/AX%20Technical%20Audit.md#disk-i--o) disk activity by the disk and by file.
+[Script](https://github.com/TrudAX/TRUDScripts/blob/master/Performance/AX%20Technical%20Audit.md#wait-statistics) gives you an overview of current wait events. If you see some IO related events here, [analyze](https://github.com/TrudAX/TRUDScripts/blob/master/Performance/AX%20Technical%20Audit.md#disk-i--o) disk activity by disk and by file.
 
 ![](Waits.png)
 
