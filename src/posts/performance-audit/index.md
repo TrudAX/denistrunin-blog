@@ -228,7 +228,7 @@ Before individual operations optimization(x++ code) you need to know the followi
 
 - How you can test the optimization
 
-Testing is quite easy for reports or operations than don't modify the data, but can be complex for posting operations. Try to minimize number of manual testing steps, ideally the testing should be possible by one click(in this case you can try different ideas during the optimization process). For posting often you write a job that opens a transactions at the beginning and then generate a ttsabort at the end.
+Testing is quite easy for reports or operations than don't modify the data, but can be complex for posting operations. Try to minimize number of manual testing steps, ideally the testing should be possible by one click(in this case you can try different ideas during the optimization process). For posting often you write a job that opens a transactions at the beginning and then generate a **ttsabort** at the end.
 
 Trace parser is a great tool for analyzing operations execution. It will trace all sessions in the AOS and provides detailed output. For production tracing better to have a dedicated AOS as trace file can grow very rapidly when you have a lot of user sessions.
 
@@ -239,3 +239,7 @@ The advice here is to install and setup it before the actual problem happens. In
 ## Summary
 
 Using these basic steps you can resolve your Dynamics AX performance problems and make your users happy. All scripts related to this post available on my [GitHub](https://github.com/TrudAX/TRUDScripts/blob/master/Performance/AX%20Technical%20Audit.md). If you see that some useful staff is missing, feel free to post a comment.
+
+There are some Microsoft blog posts about performance: [Managing general performance issues in Microsoft Dynamics AX](https://cloudblogs.microsoft.com/dynamics365/no-audience/2014/09/11/managing-general-performance-issues-in-microsoft-dynamics-ax/?source=axsupport), [Analysis scripts for Performance Analyzer v2.0](https://cloudblogs.microsoft.com/dynamics365/no-audience/2016/09/08/analysis-scripts-for-performance-analyzer-v2-0/?source=axsupport).
+
+Also worth to check this great SQL Server resources collection - [SQL Server KIT](https://github.com/ktaranov/sqlserver-kit).
