@@ -23,7 +23,7 @@ I will cover the following areas:
 
 I will also outline common performance myths and mistakes based on real-life scenarios.
 
-The main principle of the performance  audit is to start from the highest level(that allows to identify the performance problem with the minimum effort) and to continue by going deeper in the analysis. The described technique was used for more than ten customers with a number of users from 50 to 500 and database size from 100GB to 1TB. For all these customers, basic steps were the same and helped to identify and solve the problems.
+The main principle of the performance audit is to start from the highest level(that allows to identify the performance problem with the minimum effort) and to continue by going deeper in the analysis. The described technique was used for more than ten customers with a number of users from 50 to 500 and database size from 100GB to 1TB. For all these customers, basic steps were the same and helped to identify and solve the problems.
 
 ## Current hardware analysis
 
@@ -31,13 +31,13 @@ The initial task to begin with is to compare the used hardware with the specifie
 
 ![](CPUPrice.png)
 
-For a CPU price defines the performance level, and there will be noticeable differences of a system working on 10$ CPU compared to 10K$ CPU. 
+For a CPU price defines the performance level, and there will be  a noticeable difference of a system working on 10$ CPU compared to 10K$ CPU. 
 
-> One of the clients complained about slow overall system performance. While comparing recommended hardwarewith the actual one, I have found that instead of 4-core 3.5GHz CPUs they had used 20-core 2.0GHz CPU. The client's original intention was correct, they thought that more cores means more performance, but in that case, 4 cores were more than enough, but these should be the fast cores.
+> One of the clients complained about slow overall system performance. While comparing recommended hardware with the actual one, I have found that instead of 4-core 3.5GHz CPU, they had used 20-core 2.0GHz CPU. The client's original intention was correct, they thought that more cores mean more performance, but in that case, 4 cores were more than enough, but these should be the fast cores.
 
 ### Hardware recommendations
 
-For Ax2012 use the following guidance as a baseline 
+For Ax2012 use the following guidance as a baseline.
 
 #### AOS and Terminal servers
 
@@ -51,15 +51,15 @@ If you current CPU below these D3 values upgrade your servers can give you some 
 
 #### SQL Server 
 
-The same principles apply to SQL Server CPU, but they are not so simple. SQL Server is licensing by cores. For the wrong selected CPU model, your SQL Server licenses can cost more than the actual hardware. Check this [blog post](https://sqlperformance.com/2014/01/system-configuration/selecting-a-processor-for-sql-server-2014-1) that explains the process in details. It is old, but the basic idea is that in every Intel's model line there is a 4-core CPU with the maximum performance per core value, the more cores you get, the less performance per core will be, so you should not use CPUs with more cores, than your system needed.
+The same principles apply to SQL Server CPU, but they are not so simple. SQL Server is licensing by cores. For the wrong selected CPU model, your SQL Server licenses can cost more than the actual hardware. Check this [blog post](https://sqlperformance.com/2014/01/system-configuration/selecting-a-processor-for-sql-server-2014-1) that explains the process in details. It is old, but the basic idea is that in every Intel's model line there is a 4-core CPU with the maximum performance per core value, the more cores you get, the less performance per core will be, so you should not use CPUs with more cores than your system needed.
 
 As AX is an OLTP system current CPU power for a SQL Server should allow processing data from a certain amount of memory. The amount of this memory is whether the maximum amount supported by the SQL Server standard edition(64GB - pre-2016 and 128GB - for SQL 2016) or the maximum "active data" in the database. 
 
-From the practical experience modern 2 * 4 cores CPU can easily handle 128GB memory. 2 * 8 cores can work with 512GB. If you need more memory probably it's time to think about 4-sockets server.
+From the practical experience modern 2 * 4 cores CPU can easily handle 128GB memory. 2 * 8 cores can work with 512GB. If you need more memory, probably it's time to think about 4-sockets server.
 
 #### Storage system
 
-Nowadays we have HDD, SSD, and NVMe storage. The main difference is the number IOPS they can handle(very simple 1K+, 20k+ 200k+). So if you have some storage problem(main source for this - is IO related SQL waits), you can just upgrade to the next level.
+Nowadays we have HDD, SSD, and NVMe storage. The main difference is the number IOPS they can handle(very simple 1K+, 20k+ 200k+). So if you have some storage problem(the main indication for this is IO related SQL waits), you can just upgrade to the next level.
 
 ## AOS settings
 
@@ -82,7 +82,7 @@ You don't need exact table size(that takes time to perform), but can get the siz
 
 in this case, a lot of space consumed by some temporary/tracing data and can be deleted.
 
-Check the number of closed records in InventSum. If most of the records are closed, removing them can considerably increase the performance
+Check the number of closed records in InventSum. If most of the records are closed, removing them can considerably increase the performance.
 
 ![](InventSumSize.png)
 
@@ -122,7 +122,7 @@ Sometimes you can see recommendations that were caused by wrong conditions(manda
 
 ![](NotUsedIndexes.png)
 
-Remove the indexes only if they are related to not used functionality or a different country. In some special cases for the large tables, you can also consider disabling Partition and DataArea fields.
+Remove the indexes only if they are related to not used functionality or a different country. In some specific cases for the large tables, you can also consider disabling Partition and DataArea fields.
 
 ### Wait statistics
 
@@ -160,7 +160,7 @@ The great advantage of this in AX is that you see the stack trace of the stateme
 The following reasons can cause unwanted blocking:
 
 - Group update operation(like **update_recordset**) in X++. Check this [article](https://denistrunin.com/understanding-sql-blocking/) that explains the problem in detail. To resolve this, you need either replace "**update_recordset**" with "**while select forupdate**" or adjust indexes 
-- Blocking escalation - if you modify more than 5000 records in one transaction sometimes, SQL Server decides to escalate the blocking level. If you have a lot of memory, you can disable this behaviour, but first, check that you really need to update all records in one transaction.
+- Blocking escalation - if you modify more than 5000 records in one transaction sometimes, SQL Server decides to escalate the blocking level. If you have a lot of memory, you can disable this behaviour(ALTER TABLE myTable set (LOCK_ESCALATION = DISABLE)), but first, check that you really need to update all records in one transaction.
 
 A great instrument to deal with the blocking is to enable AX long SQL statements tracing(see above) - in this case, you will see the statement, user and actual operation(by using X++ stack trace). 
 
@@ -174,18 +174,18 @@ Parameters sniffing quite often becomes a reason for performance problems. For e
 
 There is no universal way to resolve Parameters sniffing issues(refer to the excellent BrentOzar post that describes this https://www.brentozar.com/archive/2013/06/the-elephant-and-the-mouse-or-parameter-sniffing-in-sql-server/ ), but there are several ways to deal with it in AX:
 
-- Create new indexes – you can create new indexes, to help SQL server always choose the best plan. This often works only if you have conditions to one table only
+- Create new indexes – you can create new indexes, to help SQL server always choose the best plan. 
 - Use the **sp_create_plan_guide** [command](https://github.com/TrudAX/TRUDScripts/blob/master/Performance/AX%20Technical%20Audit.md#create-a-plan-guide) to force the actual plan – using this option creates a big admin overhead as you need to maintain these created plans. If you add a new field to the AX table you will need to change all the plan guides in which this table is used. Often you need to provide just a OPTIMIZE FOR UNKNOWN hint to disable sniffing for the  SQL statement, better do not specify specific indexes 
 - **forceLiterals** X++ hint –you send actual values to the SQL Server, and it chooses the best plan for these values. The overhead is that the plan will need to be compiled every time
-- Use index hint (new feature D365FO only) – it is the same as sp_create_plan_guide but with no admin overhead
+- Use index hint (new feature D365FO only) 
 
-Created plan guides can be found in the Programmability section:
+You can view created plan guides in the Programmability section:
 
 ![](PlanGuides.png)
 
 As a basic rule add **forceliterals** hint(or **query.literals(true)**) for the single SQL statements and create a plan guides(with the OPTIMIZE FOR UNKNOWN hint) for the small SQL statements. **Forceliterals** usage can slow down your server. Check this [article](https://denistrunin.com/forceliterals-forcePlaceholders/) for the details.
 
-Determining which statements are affected by parameters sniffing also can be tricky. Often you analyse statements from the Top SQL output(see above), then compare the actual plan with the estimated plan and if they are different, check the XML representation of the actual plan. At the end of this XML you can find initial(sniffed) parameter values and based on them decide is that an issue and how it should be fixed 
+Determining which statements are affected by parameters sniffing also can be tricky. Often you analyse statements from the Top SQL output(see above), then compare the actual plan with the estimated plan and if they are different, check the XML representation of the actual plan. At the end of this XML you can find initial(sniffed) parameter values and based on them decide is that an issue and how it should be fixed.
 
 ![](PlanValues.png)
 
@@ -193,26 +193,26 @@ Determining which statements are affected by parameters sniffing also can be tri
 
 Rebuild index and statistics update jobs can cause a lot of problems.
 
-The main myth is that these operations can speed up the system, but the reality is their can't. The side effect of this operations is that they clear the plan cache(the same can be done just with DBCC FREEPROCCACHE command) and due to parameters sniffing this is often considering as an improvement.
+The main misconception is that these operations can improve system performance but in reality they can't. The side effect of these operations is that they clear the plan cache(the same can be done just with DBCC FREEPROCCACHE command) and due to parameters sniffing this is often considering as an improvement.
 
-The typical scenario of going into this trap(Brent call it Index Maintenance Madness, but in my experience it's often related to statistics update):
+The typical scenario of going into this trap(Brent call it Index Maintenance Madness, but in my experience, the same relates to statistics update):
 
 1. System suddenly becomes very slow(due to parameters sniffing issue)
 
 2. Someone decides to run index rebuild or/and statistics update job
 
-3. This magically helps and these operations started to execute on daily basis(but you can't resolve parameters sniffing issue with this)
+3. This magically helps and these operations started to execute daily(but you can't resolve parameters sniffing issue with this)
 
 4. Then system slowness happens during the day and statistics update also helps.
 
-5. Update statistics change to 2 times a day, then 3 times a day and so on...
+5. Frequency changed to 2 times a day, then 3 times a day and so on...
 
-At the end of these events customer come to decision that index rebuild or/and statistics update job should run constantly and the server load they produce can even exceed the AX business logic load, cause blocking and slow down the system.
+At the end of these events, customer decide that index rebuild or/and statistics update job should run constantly and the server load they produce can even exceed the AX business logic load, cause blocking and slow down the system.
 
 
 Check this article([Index Maintenance Madness](https://www.brentozar.com/archive/2017/12/index-maintenance-madness/) and great [video](https://www.youtube.com/watch?v=iEa6_QnCFMU) from Brent Ozar that explain the theory and psychology in details.
 
-Recommendations here is that you should not execute these operations in any way they can affect system performance. If you have free maintenance window run them once a week using Ola Hallengren‘s [IndexOptimize](https://ola.hallengren.com/sql-server-index-and-statistics-maintenance.html) procedure. It is more efficient than the standard SQL agent tasks as they allow you to execute UPDATE STATISTISCS command without "WITH PERCENTAGE" clause and for the index rebuild you can specify fragmentation limits.
+Recommendations here is that you should not execute these operations in any way they can affect system performance. If you have a free maintenance window, run them once a week using Ola Hallengren‘s [IndexOptimize](https://ola.hallengren.com/sql-server-index-and-statistics-maintenance.html) procedure. It is more efficient than the standard SQL agent tasks as they allow you to execute UPDATE STATISTICS command without "WITH PERCENTAGE" clause and for the index rebuild you can specify fragmentation limits.
 
 Don't use rebuild index and statistics update jobs to resolve any performance problems.
 
@@ -222,20 +222,20 @@ Before individual operations optimization(x++ code) you need to know the followi
 
 - Detailed problem description
 
-- Reproduction steps. That is the most complex part, sometimes reproducing the problem can take more time than the optimization
+- Reproduction steps. That is the most complicated part, sometimes reproducing the problem can take more time than the optimization
 
 - What is the current and what is the required execution time
 
 - How you can test the optimization
 
-Testing is quite easy for reports or operations than don't modify the data, but can be complex for posting operations. Try to minimize number of manual testing steps, ideally the testing should be possible by one click(in this case you can try different ideas during the optimization process). For posting often you write a job that opens a transactions at the beginning and then generate a ttsabort at the end.
+Testing is quite easy for reports or operations that don't modify the data, but can be complex for posting operations. Try to minimize the number of manual testing steps, ideally, the test should be possible to run  by one click(in this case you can try different ideas during the optimization process). For posting often you write a job that opens a transaction at the beginning and then generate a **ttsabort** at the end.
 
-Trace parser is a great tool for analyzing operations execution. It will trace all sessions in the AOS and provides detailed output. For production tracing better to have a dedicated AOS as trace file can grow very rapidly when you have a lot of user sessions.
+Trace Parser is a great tool for analysing operations execution. It will trace all sessions in the AOS and provides detailed output. For production tracing better to have a dedicated AOS as trace file can grow very rapidly when you have a lot of user sessions.
 
 ![](TraceCockpit.png)
 
-The advice here is to install and setup it before the actual problem happens. In this case you can easily run the trace when needed.
+The advice here is to install and setup it before the actual problem happens. In this case, you can easily run the trace when needed.
 
 ## Summary
 
-Using these basic steps you can resolve your Dynamics AX performance problems and make your users happy. All scripts related to this post available on my [GitHub](https://github.com/TrudAX/TRUDScripts/blob/master/Performance/AX%20Technical%20Audit.md). If you see that some useful staff is missing, feel free to post a comment.
+Using these basic steps, you can resolve your Dynamics AX performance problems and make your users happy. All scripts related to this post available on my [GitHub](https://github.com/TrudAX/TRUDScripts/blob/master/Performance/AX%20Technical%20Audit.md). If you see that some helpful staff is missing, feel free to post a comment.
