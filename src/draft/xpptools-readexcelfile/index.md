@@ -4,25 +4,32 @@ date: "2019-04-16T20:12:03.284Z"
 tags: ["XppDEVTutorial", "XppDEVCommon"]
 path: "/xpptools-readexcelfile"
 featuredImage: "./logo.png"
-excerpt: "Helper classes to read the data from Excel(xlsx) and CSV files using X++"
+excerpt: "Helper classes to read the data from Excel(xlsx) and CSV files using X++ code"
 ---
 
-Sometimes you need to write  X++ code to read the data from Excel(xlsx) or CSV files in D365FO. Often the task looks like display a dialog to the user with some parameters, allow to specify a file and then after OK perform some action. In this blog post I try to provide sample X++ code template for such tasks. 
+Sometimes you need to write  X++ code to read the data from Excel(xlsx) or CSV files in D365FO. 
+
+This can be used in the following scenarios: 
+
+- User interface operation, for example a dialog to the user with some parameters, allow to specify a file and then after OK reads this file and perform some action(in some cases standard Excel add-in or Data managements module can perform the same task) 
+- Batch job that reads files from the network share(Azure storage, see [example](https://ievgensaxblog.wordpress.com/2017/07/16/d365fo-working-with-azure-file-storage/)) and process them(as standard DMF doesn't support import in transaction, in case you have multi-line documents, you need to write a custom code)
+
+In this blog post I provide example of X++ classes that can be used to read XLSX and CSV files. 
 
 ## File reading engines
 
-To read an Excel file I will use EPPlus library(https://github.com/JanKallman/EPPlus). The big advantage of this library that it is already a part of D365FO installation, you don't need to add external references
+To read an Excel file I use **EPPlus** library(https://github.com/JanKallman/EPPlus). The big advantage of this library that it is already a part of D365FO installation, you don't need to add external references.
 
-With CSV file it is more complex. Standard D365FO installation doesn't include libraries that can read CSV format(it is quite complex). Often people use TextIO class than can read simple delimiter separated files, but this class can't handle more complex scenarios(for example delimiter in the data, or new line symbol in the data). To read such files I will  use  Microsoft.VisualBasic.FileIO library. It contains the proper CSV format reader, so if file can be opened in Excel, this library can read it.
+With CSV file it is more complex. Standard D365FO installation doesn't include libraries that can read CSV format(it is quite complex). Often people use **TextIO** class than can read simple delimiter separated files, but this class can't handle more complex scenarios(for example delimiter symbol is presented in the data, or new line symbol is in the data). To read such files I use **Microsoft.VisualBasic.FileIO** library. It contains the proper CSV format reader, so if a file can be opened in Excel, this library can read it.
 
-## Helper classes
+## Reader classes
 
-As reading CSV and XLSX is very similar from the programming perspective I created one base class DEVFileReaderBase and two DEVFileReaderCSV and  DEVFileReaderExcel. Reading often include the following stages:
+As reading CSV and XLSX is very similar from the programming perspective I created one base class **DEVFileReaderBase** and two **DEVFileReaderCSV** and  **DEVFileReaderExcel**. Reading often include the following stages:
 
 - Open the file and read it's content to the container, close the file
 - Read the header row (if your file contains headers)
 - Loop thought rows 
-- Get the cell value for the current row (this can be done by column name - if you have the header row, of by column index)
+- Get the cell value for the current row (this can be done by column name - if you have the header row, or by column index)
 - Try to convert the cell value to the required type(for CSV it will be always string to type conversion, for xlsx - convert from the type of cell to the required AX type)
 
 ```csharp
@@ -60,11 +67,13 @@ Both examples print out the file content to the infolog
 
 ## Generate user dialog
 
-To create user dialog for the file import I extended my Create RunBase class utility(https://github.com/TrudAX/TRUDUtilsD365#runbase-class-builder)
+To create user dialog for the file import I extended my **Create RunBase class** utility(https://github.com/TrudAX/TRUDUtilsD365#runbase-class-builder)
 
 ![](CreateRunBase.png)
 
-Right now it accept Excel and CSV and upload file parameters, so if you enter the following parameters
+Right now it accept Excel or CSV value in the "Add file upload" parameter. 
+
+If you enter the following parameters into this utility
 
 ```
 DEVReadFromFileExample2
@@ -77,35 +86,133 @@ LedgerJournalNameIdDaily*
 TransDate*
 ```
 
-you can automatically generate all required code to read a file
+it automatically generates all required code to read a file in a RunBase dialog
 
 ![](ExcelDialog.png)
 
 
 
-
-
-
-
 ## Performance testing
 
-Let's test the performance. First I created a test journal with the 1000 lines(***createByCombination* method) and then copied it using these 3 different methods. I got the following results:
+Let's test the performance. To perform a test I created Excel file with 10k lines and 10 columns with the different types(100k cells total)
 
-| Method                        | Time to create 1000 lines(sec) |      |
-| :---------------------------- | :----------------------------- | ---- |
-| Using ledgerJournalEngine     | 30.54                          |      |
-| Using DataEntity              | 33.09                          |      |
-| Using Table defaultRow method | 15.18                          |      |
+Main code for this performance testing is the following(full example available in the **DEVReadFromFileExamplePerf**) :
 
-There are some differences between the copy speed in my example, but it is caused by a different logic for the dimension creation, so the result is that all methods are almost equal and quite fast. In a real-life scenario, you can expect an insert speed 10-30 lines per second.
+![](PerfCode.png)
 
-## Choosing the right method and things to avoid
+Results:
 
-In general, you have 2 options - to create a journal similar to the manual user entry or create it similar to the import procedure(for the second scenario choice between entity and table mostly depends on what input data you have and whether the entity supports all the required fields). So the choice between these two should be made by answering the question: if the user wants to create the same journal manually, does he use manual entry or data import?  
+| File type                     | Time to read 10k lines(sec) |      |
+| :---------------------------- | :-------------------------- | ---- |
+| Excel                         | 1.54                        |      |
+| CSV                           | 0.56                        |      |
 
-Probably in D365FO it is better to avoid creation using *JournalTransData* classes or when you simply populate *ledgerJournalTrans* fields and call *insert()*. This initially can work, but later users may complain - e.g. _"Why when I create a journal manually and specify a vendor account the Due date field is calculated, but your procedure doesn't fill it"._
+As you see, reading itself is quite fast, in most cases you spend more time to process this data.
+
+## More complex example - Journal creation
+
+Let's consider more complex example - create ledger journal based on Excel file. 
+
+Input Excel file with 3 columns(Main account, BusinessUnit, Amount) and a user dialog with Journal name. 
+
+To generate a dialog class we need to specify the following parameters to **Create RunBase class** utility:
+
+```
+DEVReadFromFileExampleCreateJournal
+Create ledger journal from Excel
+
+
+excel
+
+LedgerJournalNameIdDaily*
+```
+
+Journal creation logic can be copied from my previous post - https://denistrunin.com/xpptools-createledgerjournal/, working with dimension from the following post - https://denistrunin.com/xpptools-devfindim/ 
+
+In our case this code is used for journal creation:
+
+```csharp
+void createLedgerJournal()
+{
+LedgerJournalTable      ledgerJournalTable;
+LedgerJournalEngine     ledgerJournalEngine;
+ledgerJournalTrans      ledgerJournalTrans;
+
+ttsbegin;
+while (fileReader.readNextRow())
+{           
+    if (!ledgerJournalTable.RecId)
+    {
+        ledgerJournalTable.clear();
+        ledgerJournalTable.initValue();
+        ledgerJournalTable.JournalName = ledgerJournalNameIdDaily;  // highlight-line
+        ledgerJournalTable.initFromLedgerJournalName();
+        ledgerJournalTable.JournalNum = JournalTableData::newTable(ledgerJournalTable).nextJournalId();
+        ledgerJournalTable.Name = strFmt("Excel file, Date %1", DEV::systemdateget());
+        ledgerJournalTable.insert();
+
+        info(strFmt("Journal %1 created", ledgerJournalTable.JournalNum));
+
+        ledgerJournalEngine = LedgerJournalEngine::construct(ledgerJournalTable.JournalType);
+        ledgerJournalEngine.newJournalActive(ledgerJournalTable);
+    }
+
+ledgerJournalTrans.clear();
+ledgerJournalTrans.initValue();
+ledgerJournalEngine.initValue(ledgerJournalTrans);
+ledgerJournalTrans.JournalNum           =   ledgerJournalTable.JournalNum;
+ledgerJournalTrans.TransDate            =   DEV::systemdateget();
+ledgerJournalTrans.AccountType          =   LedgerJournalACType::Ledger;
+ledgerJournalTrans.modifiedField(fieldNum(LedgerJournalTrans, AccountType));
+
+ledgerJournalTrans.LedgerDimension = LedgerDimensionFacade::serviceCreateLedgerDimension(
+LedgerDefaultAccountHelper::getDefaultAccountFromMainAccountId(fileReader.getStringByName('Main account')),
+DEVDimensionHelper::setValueToDefaultDimension(0, DEVDimensionHelper::BusinessUnit, fileReader.getStringByName('BusinessUnit')));  // highlight-line
+
+if (!ledgerJournalTrans.LedgerDimension)
+{
+	throw error("Missing or invalid ledger dimension for journal process");
+}
+ledgerJournalTrans.modifiedField(fieldNum(LedgerJournalTrans, LedgerDimension));
+ledgerJournalEngine.accountModified(LedgerJournalTrans);
+
+//amounts
+ledgerJournalTrans.CurrencyCode         =   Ledger::accountingCurrency();
+ledgerJournalEngine.currencyModified(LedgerJournalTrans);
+ledgerJournalTrans.amountCur2DebCred(fileReader.getRealByName('Amount'));  // highlight-line
+
+//additional fields
+ledgerJournalTrans.Approver           = HcmWorker::userId2Worker(curuserid());
+ledgerJournalTrans.Approved           = NoYes::Yes;
+
+DEV::validateWriteRecordCheck(ledgerJournalTrans);
+ledgerJournalTrans.insert();
+ledgerJournalEngine.write(ledgerJournalTrans);
+}
+ttscommit;
+}
+```
+
+As the result a new journal will be created
+
+![](LedgerJournalCreated.png)
+
+Full code is available in **DEVReadFromFileExampleCreateJournal** class
 
 ## Summary
 
-You can download this class using the following link https://github.com/TrudAX/XppTools/blob/master/DEVTutorial/DEVTutorial/AxClass/DEVTutorialCreateLedgerJournal.xml. The idea is that you can use this code as a template when you have a task to create(or post) a ledger journal using X++.
+The following classes are used in this post:
+
+**DEVCommon** model:
+
+Classes: [**DEVFileReaderBase**](https://github.com/TrudAX/XppTools/blob/master/DEVCommon/DEVCommon/AxClass/DEVFileReaderBase.xml),  [**DEVFileReaderCSV**](https://github.com/TrudAX/XppTools/blob/master/DEVCommon/DEVCommon/AxClass/DEVFileReaderCSV.xml) and  [**DEVFileReaderExcel**](https://github.com/TrudAX/XppTools/blob/master/DEVCommon/DEVCommon/AxClass/DEVFileReaderExcel.xml)  - read from CSV and XLSX files
+
+**DEVTutorial** model:
+
+Class [**DEVReadFromFileExamplePerf**](https://github.com/TrudAX/XppTools/blob/master/DEVTutorial/DEVTutorial/AxClass/DEVReadFromFileExamplePerf.xml) - measure read from file performance
+
+Class [**DEVReadFromFileExampleCreateJournal**](https://github.com/TrudAX/XppTools/blob/master/DEVTutorial/DEVTutorial/AxClass/DEVReadFromFileExampleCreateJournal.xml)  - sample code to create a ledger journal from Excel file
+
+Sample Excel files used in this post can be downloaded [here](https://github.com/TrudAX/XppTools/blob/master/assets/ImportFromExcelExample.zip)
+
 Comments are welcome.
