@@ -1,6 +1,6 @@
 ---
 title: "Read Excel and CSV files in D365FO using X++"
-date: "2019-04-16T20:12:03.284Z"
+date: "2019-07-03T20:12:03.284Z"
 tags: ["XppDEVTutorial", "XppDEVCommon"]
 path: "/xpptools-readexcelfile"
 featuredImage: "./logo.png"
