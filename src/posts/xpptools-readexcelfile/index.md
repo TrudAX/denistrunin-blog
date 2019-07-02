@@ -1,7 +1,7 @@
 ---
 title: "How to read Excel and CSV files in D365FO using X++"
 date: "2019-07-03T20:12:03.284Z"
-tags: ["XppDEVTutorial", "XppDEVCommon"]
+tags: ["XppDEVTutorial", "XppDEVCommon", "Excel", "Integration"]
 path: "/xpptools-readexcelfile"
 featuredImage: "./logo.png"
 excerpt: "Helper classes to read the data from Excel(xlsx) and CSV files using X++ code"
