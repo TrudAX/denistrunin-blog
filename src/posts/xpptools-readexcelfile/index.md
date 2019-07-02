@@ -1,5 +1,5 @@
 ---
-title: "Read Excel and CSV files in D365FO using X++"
+title: "How to read Excel and CSV files in D365FO using X++"
 date: "2019-07-03T20:12:03.284Z"
 tags: ["XppDEVTutorial", "XppDEVCommon"]
 path: "/xpptools-readexcelfile"
@@ -7,30 +7,30 @@ featuredImage: "./logo.png"
 excerpt: "Helper classes to read the data from Excel(xlsx) and CSV files using X++ code"
 ---
 
-Sometimes you need to write  X++ code to read the data from Excel(xlsx) or CSV files in D365FO. 
+Sometimes you need to write X++ code to read the data from Excel(xlsx) or CSV files in D365FO.
 
-This can be used in the following scenarios: 
+This can be used in the following scenarios:
 
-- User interface operation, for example a dialog to the user with some parameters, allow to specify a file and then after OK reads this file and perform some action(in some cases standard Excel add-in or Data managements module can perform the same task) 
-- Batch job that reads files from the network share(Azure storage, see [example](https://ievgensaxblog.wordpress.com/2017/07/16/d365fo-working-with-azure-file-storage/)) and process them(as standard DMF doesn't support import in transaction, in case you have multi-line documents, you need to write a custom code)
+- User interface operation, for example, a dialog to the user with some parameters, that allows to specify a file and then after OK reads this file and perform some action(in some cases standard Excel add-in or Data management module can perform the same task)
+- A batch job that reads files from the network share(Azure storage, see [example](https://ievgensaxblog.wordpress.com/2017/07/16/d365fo-working-with-azure-file-storage/)) and processes them(as standard DMF doesn't support import in transaction, in case you have multi-line documents, you need to write custom code)
 
-In this blog post I provide example of X++ classes that can be used to read XLSX and CSV files. 
+In this blog post, I provide an example of X++ classes that can be used to read XLSX and CSV files.
 
 ## File reading engines
 
 To read an Excel file I use **EPPlus** library(https://github.com/JanKallman/EPPlus). The big advantage of this library that it is already a part of D365FO installation, you don't need to add external references.
 
-With CSV file it is more complex. Standard D365FO installation doesn't include libraries that can read CSV format(it is quite complex). Often people use **TextIO** class than can read simple delimiter separated files, but this class can't handle more complex scenarios(for example delimiter symbol is presented in the data, or new line symbol is in the data). To read such files I use **Microsoft.VisualBasic.FileIO** library. It contains the proper CSV format reader, so if a file can be opened in Excel, this library can read it.
+With CSV file it is more complex. Standard D365FO installation doesn't include libraries that can read CSV format(it is quite complex). Often people use **TextIO** class that can read simple delimiter separated files, but this class can't handle more complex scenarios(for example delimiter symbol is presented in the data, or "new line" symbol is in the data). To read such files I use **Microsoft.VisualBasic.FileIO** library. It contains the proper CSV format reader, so if a file can be opened in Excel, this library can read it.
 
 ## Reader classes
 
-As reading CSV and XLSX is very similar from the programming perspective I created one base class **DEVFileReaderBase** and two **DEVFileReaderCSV** and  **DEVFileReaderExcel**. Reading often include the following stages:
+As reading CSV and XLSX is very similar from the programming perspective I created one base class **DEVFileReaderBase** and two **DEVFileReaderCSV** and  **DEVFileReaderExcel**. Reading often includes the following stages:
 
 - Open the file and read it's content to the container, close the file
 - Read the header row (if your file contains headers)
-- Loop thought rows 
+- Loop though rows
 - Get the cell value for the current row (this can be done by column name - if you have the header row, or by column index)
-- Try to convert the cell value to the required type(for CSV it will be always string to type conversion, for xlsx - convert from the type of cell to the required AX type)
+- Try to convert the cell value to the required type(for CSV it will be always "string to type" conversion, for xlsx - convert from the type of cell to the required AX type)
 
 ```csharp
 //Sample code to read an Excel file
@@ -40,7 +40,7 @@ fileReader.readHeaderRow();
 while (fileReader.readNextRow())
 {
     info(strFmt("row: %1", fileReader.getCurRow()));
-    info(strFmt("%1, %2, %3",   
+    info(strFmt("%1, %2, %3",
                 fileReader.getStringByName("Main account"),
                 fileReader.getStringByName("BusinessUnit"),
                 fileReader.getRealByName("Amount")
@@ -53,7 +53,7 @@ fileReader.readHeaderRow();
 while (fileReader.readNextRow())
 {
     info(strFmt("row: %1", fileReader.getCurRow()));
-    info(strFmt("%1, %2, %3",   
+    info(strFmt("%1, %2, %3",
                 fileReader.getStringByName("Main account"),
                 fileReader.getStringByName("BusinessUnit"),
                 fileReader.getRealByName("Amount")
@@ -71,7 +71,7 @@ To create user dialog for the file import I extended my **Create RunBase class**
 
 ![](CreateRunBase.png)
 
-Right now it accept Excel or CSV value in the "Add file upload" parameter. 
+Right now it accepts Excel or CSV value in the "Add file upload" parameter.
 
 If you enter the following parameters into this utility
 
@@ -90,13 +90,11 @@ it automatically generates all required code to read a file in a RunBase dialog
 
 ![](ExcelDialog.png)
 
-
-
 ## Performance testing
 
 Let's test the performance. To perform a test I created Excel file with 10k lines and 10 columns with the different types(100k cells total)
 
-Main code for this performance testing is the following(full example available in the **DEVReadFromFileExamplePerf**) :
+The main code for this performance testing is the following(full example available in the **DEVReadFromFileExamplePerf** class) :
 
 ![](PerfCode.png)
 
@@ -111,9 +109,9 @@ As you see, reading itself is quite fast, in most cases you spend more time to p
 
 ## More complex example - Journal creation
 
-Let's consider more complex example - create ledger journal based on Excel file. 
+Let's consider more complex example - create ledger journal based on Excel file.
 
-Input Excel file with 3 columns(Main account, BusinessUnit, Amount) and a user dialog with Journal name. 
+Input Excel file with 3 columns(Main account, BusinessUnit, Amount) and a user dialog with Journal name.
 
 To generate a dialog class we need to specify the following parameters to **Create RunBase class** utility:
 
@@ -127,7 +125,7 @@ excel
 LedgerJournalNameIdDaily*
 ```
 
-Journal creation logic can be copied from my previous post - https://denistrunin.com/xpptools-createledgerjournal/, working with dimension from the following post - https://denistrunin.com/xpptools-devfindim/ 
+Journal creation logic can be copied from my previous post - https://denistrunin.com/xpptools-createledgerjournal/, working with dimension from the following post - https://denistrunin.com/xpptools-devfindim/
 
 In our case this code is used for journal creation:
 
@@ -140,7 +138,7 @@ ledgerJournalTrans      ledgerJournalTrans;
 
 ttsbegin;
 while (fileReader.readNextRow())
-{           
+{
     if (!ledgerJournalTable.RecId)
     {
         ledgerJournalTable.clear();
@@ -171,7 +169,7 @@ DEVDimensionHelper::setValueToDefaultDimension(0, DEVDimensionHelper::BusinessUn
 
 if (!ledgerJournalTrans.LedgerDimension)
 {
-	throw error("Missing or invalid ledger dimension for journal process");
+    throw error("Missing or invalid ledger dimension for journal process");
 }
 ledgerJournalTrans.modifiedField(fieldNum(LedgerJournalTrans, LedgerDimension));
 ledgerJournalEngine.accountModified(LedgerJournalTrans);
@@ -197,7 +195,7 @@ As the result a new journal will be created
 
 ![](LedgerJournalCreated.png)
 
-Full code is available in **DEVReadFromFileExampleCreateJournal** class
+The full code is available in **DEVReadFromFileExampleCreateJournal** class
 
 ## Summary
 
