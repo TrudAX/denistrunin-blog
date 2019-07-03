@@ -2,7 +2,6 @@ import React from "react";
 
 import profilePic from "./profile.jpg";
 import { Link } from "gatsby";
-import SearchBox from "./SearchBox";
 
 class Navigation extends React.Component {
   render() {

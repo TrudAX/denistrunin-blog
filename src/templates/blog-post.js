@@ -8,18 +8,12 @@ import Tags from "../components/Tags";
 import { Link } from "gatsby";
 import {
   FacebookShareButton,
-  GooglePlusShareButton,
   LinkedinShareButton,
   TwitterShareButton,
-  RedditShareButton,
-  TumblrShareButton,
   EmailShareButton,
   FacebookIcon,
-  GooglePlusIcon,
   TwitterIcon,
-  RedditIcon,
   LinkedinIcon,
-  TumblrIcon,
   EmailIcon
 } from "react-share";
 import { OutboundLink } from "gatsby-plugin-google-analytics";
