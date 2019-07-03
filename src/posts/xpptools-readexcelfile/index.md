@@ -11,7 +11,7 @@ Sometimes you need to write X++ code to read the data from Excel(xlsx) or CSV fi
 
 This can be used in the following scenarios:
 
-- User interface operation, for example, a dialog to the user with some parameters, that allows to specify a file and then after OK reads this file and perform some action(in some cases standard Excel add-in or Data management module can perform the same task)
+- User interface operation, for example, a dialog to the user with some parameters, that allows to specify a file and then after OK reads this file and perform some action(in some cases standard Excel add-in or Data management module or [Electronic reporting](https://ievgensaxblog.wordpress.com/2019/07/02/msdyn365fo-how-to-import-csv-file-using-electronic-reporting-part-5-run-import-from-x-code/) can perform the same task)
 - A batch job that reads files from the network share(Azure storage, see [example](https://ievgensaxblog.wordpress.com/2017/07/16/d365fo-working-with-azure-file-storage/)) and processes them(as standard DMF doesn't support import in transaction, in case you have multi-line documents, you need to write custom code)
 
 In this blog post, I provide an example of X++ classes that can be used to read XLSX and CSV files.
