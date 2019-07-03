@@ -9,9 +9,9 @@ excerpt: "Helper classes to read the data from Excel(xlsx) and CSV files using X
 
 Sometimes you need to write X++ code to read the data from Excel(xlsx) or CSV files in D365FO.
 
-This can be used in the following scenarios:
+Typical scenario for this:
 
-- User interface operation, for example, a dialog to the user with some parameters, that allows to specify a file and then after OK reads this file and perform some action(in some cases standard Excel add-in or Data management module or [Electronic reporting](https://ievgensaxblog.wordpress.com/2019/07/02/msdyn365fo-how-to-import-csv-file-using-electronic-reporting-part-5-run-import-from-x-code/) can perform the same task)
+- User interface operation, for example, a dialog with some parameters, where user can  specify a file. Then this operations reads the file and performs some actions(in some cases standard Excel add-in or Data management module or [Electronic reporting](https://ievgensaxblog.wordpress.com/2019/07/02/msdyn365fo-how-to-import-csv-file-using-electronic-reporting-part-5-run-import-from-x-code/) can perform the same task)
 - A batch job that reads files from the network share(Azure storage, see [example](https://ievgensaxblog.wordpress.com/2017/07/16/d365fo-working-with-azure-file-storage/)) and processes them(as standard DMF doesn't support import in transaction, in case you have multi-line documents, you need to write custom code)
 
 In this blog post, I provide an example of X++ classes that can be used to read XLSX and CSV files.
@@ -24,9 +24,9 @@ With CSV file it is more complex. Standard D365FO installation doesn't include l
 
 ## Reader classes
 
-As reading CSV and XLSX is very similar from the programming perspective I created one base class **DEVFileReaderBase** and two **DEVFileReaderCSV** and  **DEVFileReaderExcel**. Reading often includes the following stages:
+As reading CSV and XLSX is very similar from the programming perspective I created one base class **DEVFileReaderBase** and two derived **DEVFileReaderCSV** and  **DEVFileReaderExcel**. Reading often includes the following stages:
 
-- Open the file and read it's content to the container, close the file
+- Open the file and read its content to the container, close the file
 - Read the header row (if your file contains headers)
 - Loop though rows
 - Get the cell value for the current row (this can be done by column name - if you have the header row, or by column index)
@@ -67,7 +67,7 @@ Both examples print out the file content to the infolog
 
 ## Generate user dialog
 
-To create user dialog for the file import I extended my **Create RunBase class** utility(https://github.com/TrudAX/TRUDUtilsD365#runbase-class-builder)
+To create a user dialog for the file import I extended my **Create RunBase class** utility(https://github.com/TrudAX/TRUDUtilsD365#runbase-class-builder)
 
 ![](CreateRunBase.png)
 
@@ -86,15 +86,15 @@ LedgerJournalNameIdDaily*
 TransDate*
 ```
 
-it automatically generates all required code to read a file in a RunBase dialog
+it automatically generates the required code to read a file in a RunBase dialog
 
 ![](ExcelDialog.png)
 
 ## Performance testing
 
-Let's test the performance. To perform a test I created Excel file with 10k lines and 10 columns with the different types(100k cells total)
+Let's test the performance. To perform a test I created an Excel file with 10k lines and 10 columns with different types(100k cells total)
 
-The main code for this performance testing is the following(full example available in the **DEVReadFromFileExamplePerf** class) :
+The main code for this performance testing is the following(full example is available in the **DEVReadFromFileExamplePerf** class) :
 
 ![](PerfCode.png)
 
@@ -109,11 +109,11 @@ As you see, reading itself is quite fast, in most cases you spend more time to p
 
 ## More complex example - Journal creation
 
-Let's consider more complex example - create ledger journal based on Excel file.
+Let's consider more complex example - create a ledger journal based on the data from Excel file.
 
-Input Excel file with 3 columns(Main account, BusinessUnit, Amount) and a user dialog with Journal name.
+In this case we will use an Excel file with 3 columns(Main account, BusinessUnit, Amount) and a user dialog with a "Journal name" parameter.
 
-To generate a dialog class we need to specify the following parameters to **Create RunBase class** utility:
+To generate a dialog class we need to specify the following parameters in **Create RunBase class** utility:
 
 ```
 DEVReadFromFileExampleCreateJournal
@@ -125,7 +125,7 @@ excel
 LedgerJournalNameIdDaily*
 ```
 
-Journal creation logic can be copied from my previous post - https://denistrunin.com/xpptools-createledgerjournal/, working with dimension from the following post - https://denistrunin.com/xpptools-devfindim/
+Journal creation logic can be copied from my previous post - https://denistrunin.com/xpptools-createledgerjournal/, dimension processing is from the following post - https://denistrunin.com/xpptools-devfindim/
 
 In our case this code is used for journal creation:
 
@@ -211,6 +211,6 @@ Class [**DEVReadFromFileExamplePerf**](https://github.com/TrudAX/XppTools/blob/m
 
 Class [**DEVReadFromFileExampleCreateJournal**](https://github.com/TrudAX/XppTools/blob/master/DEVTutorial/DEVTutorial/AxClass/DEVReadFromFileExampleCreateJournal.xml)  - sample code to create a ledger journal from Excel file
 
-Sample Excel files used in this post can be downloaded [here](https://github.com/TrudAX/XppTools/blob/master/assets/ImportFromExcelExample.zip)
+ Excel files used in this post can be downloaded [here](https://github.com/TrudAX/XppTools/blob/master/assets/ImportFromExcelExample.zip)
 
 Comments are welcome.
