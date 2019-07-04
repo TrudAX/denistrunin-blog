@@ -98,4 +98,4 @@ After that, you can run the Reset command without errors. If you check Integrati
 
 ## Summary
 
-I posted the whole script to GitHub - <https://github.com/TrudAX/TRUDScripts/tree/master/FinancialReporting.> It has been tested for the 8.1 version. If you find any issues or have ideas how to improve it, Pull requests are always welcome. Hope Microsoft will fix this in the new version, as right now it looks like a missing documentation step.
+I posted the whole script to GitHub - <https://github.com/TrudAX/TRUDScripts/tree/master/FinancialReporting> It has been tested for the 8.1 version. If you find any issues or have ideas how to improve it, Pull requests are always welcome. Hope Microsoft will fix this in the new version, as right now it looks like a missing documentation step.
