@@ -1,0 +1,460 @@
+Compiling module: ApplicationPlatform
+Module ApplicationPlatform build operation Report RDL generation completed (12 ms). 
+Module ApplicationFoundation build operation Report RDL generation completed (2419 ms). 
+Module ApplicationCommon build operation Report RDL generation completed (0 ms). 
+Module BankTypes build operation Report RDL generation completed (0 ms). 
+Module CustomFields build operation Report RDL generation completed (1 ms). 
+Module DataExpansionTool build operation Report RDL generation completed (0 ms). 
+Module DataSharing build operation Report RDL generation completed (0 ms). 
+Module DataUpgradePlatform build operation Report RDL generation completed (0 ms). 
+Module Directory build operation Report RDL generation completed (1615 ms). 
+Module Calendar build operation Report RDL generation completed (0 ms). 
+Module ContactPerson build operation Report RDL generation completed (0 ms). 
+Module Currency build operation Report RDL generation completed (0 ms). 
+Module Dimensions build operation Report RDL generation completed (0 ms). 
+Module DirectoryUpgrade build operation Report RDL generation completed (0 ms). 
+Module ElectronicReportingDotNetUtils build operation Report RDL generation completed (0 ms). 
+Module ElectronicReportingCore build operation Report RDL generation completed (0 ms). 
+Module ElectronicReportingMapping build operation Report RDL generation completed (0 ms). 
+Module ElectronicReportingForAx build operation Report RDL generation completed (0 ms). 
+Module ElectronicReporting build operation Report RDL generation completed (0 ms). 
+Module Measurement build operation Report RDL generation completed (0 ms). 
+Module Policy build operation Report RDL generation completed (0 ms). 
+Module Project build operation Report RDL generation completed (0 ms). 
+Module SystemHealth build operation Report RDL generation completed (0 ms). 
+Module TestEssentials build operation Report RDL generation completed (0 ms). 
+Module ApplicationFoundationFormAdaptor build operation Report RDL generation completed (0 ms). 
+Module ApplicationPlatformFormAdaptor build operation Report RDL generation completed (0 ms). 
+Module UnitOfMeasure build operation Report RDL generation completed (0 ms). 
+Module CostAccounting build operation Report RDL generation completed (0 ms). 
+Module SourceDocumentationTypes build operation Report RDL generation completed (0 ms). 
+Module Ledger build operation Report RDL generation completed (0 ms). 
+Module SourceDocumentation build operation Report RDL generation completed (0 ms). 
+Module FleetManagement build operation Report RDL generation completed (625 ms). 
+Module FleetManagementExtension build operation Report RDL generation completed (0 ms). 
+Module FleetManagementUnitTests build operation Report RDL generation completed (1 ms). 
+Module PersonnelCore build operation Report RDL generation completed (0 ms). 
+Module BusinessProcess build operation Report RDL generation completed (0 ms). 
+Module CaseManagement build operation Report RDL generation completed (0 ms). 
+Module PersonnelManagement build operation Report RDL generation completed (13402 ms). 
+Module Personnel build operation Report RDL generation completed (1 ms). 
+Module PersonnelMobile build operation Report RDL generation completed (0 ms). 
+Module PersonnelUpgrade build operation Report RDL generation completed (0 ms). 
+Module SelfHealing build operation Report RDL generation completed (0 ms). 
+Module Subledger build operation Report RDL generation completed (0 ms). 
+Module GeneralLedger build operation Report RDL generation completed (180 ms). 
+Module FinancialReporting build operation Report RDL generation completed (0 ms). 
+Module GeneralLedgerFormAdaptor build operation Report RDL generation completed (0 ms). 
+Module Retail build operation Report RDL generation completed (114 ms). 
+Module RetailFormAdaptor build operation Report RDL generation completed (1 ms). 
+Module Tax build operation Report RDL generation completed (0 ms). 
+Module FiscalBooks build operation Report RDL generation completed (0 ms). 
+Module FiscalBooksFormAdaptor build operation Report RDL generation completed (0 ms). 
+Module TaxEngine build operation Report RDL generation completed (0 ms). 
+Module ApplicationPlatform build operation Compile Labels completed (37492 ms). 
+The xml log file is located at: file:///K:/AosService/PackagesLocalDirectory/ApplicationPlatform/CompileLabels.xml.
+The xml log file is located at file:///K:/AosService/PackagesLocalDirectory/ApplicationPlatform/BuildModelResult.xml.
+Module ApplicationPlatform build operation X++ compilation, label generation and resource deployment completed (58813 ms). 
+Module ApplicationFoundation build operation Compile Labels completed (22165 ms). 
+The xml log file is located at: file:///K:/AosService/PackagesLocalDirectory/ApplicationFoundation/CompileLabels.xml.
+Compiling module: ApplicationFoundation
+Module ApplicationCommon build operation Compile Labels completed (60303 ms). 
+The xml log file is located at: file:///K:/AosService/PackagesLocalDirectory/ApplicationCommon/CompileLabels.xml.
+Module BankTypes build operation Compile Labels completed (9361 ms). 
+The xml log file is located at: file:///K:/AosService/PackagesLocalDirectory/BankTypes/CompileLabels.xml.
+Module CustomFields build operation Compile Labels completed (1524 ms). 
+The xml log file is located at: file:///K:/AosService/PackagesLocalDirectory/CustomFields/CompileLabels.xml.
+Module DataExpansionTool build operation Compile Labels completed (1522 ms). 
+The xml log file is located at: file:///K:/AosService/PackagesLocalDirectory/DataExpansionTool/CompileLabels.xml.
+Module DataSharing build operation Compile Labels completed (1521 ms). 
+The xml log file is located at: file:///K:/AosService/PackagesLocalDirectory/DataSharing/CompileLabels.xml.
+Module DataUpgradePlatform build operation Compile Labels completed (1526 ms). 
+The xml log file is located at: file:///K:/AosService/PackagesLocalDirectory/DataUpgradePlatform/CompileLabels.xml.
+The xml log file is located at file:///K:/AosService/PackagesLocalDirectory/ApplicationFoundation/BuildModelResult.xml.
+Module ApplicationFoundation build operation X++ compilation, label generation and resource deployment completed (83833 ms). 
+Compiling module: ApplicationCommon
+Module Directory build operation Compile Labels completed (23388 ms). 
+The xml log file is located at: file:///K:/AosService/PackagesLocalDirectory/Directory/CompileLabels.xml.
+The xml log file is located at file:///K:/AosService/PackagesLocalDirectory/ApplicationCommon/BuildModelResult.xml.
+Module ApplicationCommon build operation X++ compilation, label generation and resource deployment completed (20371 ms). 
+Compiling module: BankTypes
+Module Calendar build operation Compile Labels completed (10066 ms). 
+The xml log file is located at: file:///K:/AosService/PackagesLocalDirectory/Calendar/CompileLabels.xml.
+The xml log file is located at file:///K:/AosService/PackagesLocalDirectory/BankTypes/BuildModelResult.xml.
+Module BankTypes build operation X++ compilation, label generation and resource deployment completed (9094 ms). 
+Compiling module: CustomFields
+Module ContactPerson build operation Compile Labels completed (12390 ms). 
+The xml log file is located at: file:///K:/AosService/PackagesLocalDirectory/ContactPerson/CompileLabels.xml.
+Module Currency build operation Compile Labels completed (16606 ms). 
+The xml log file is located at: file:///K:/AosService/PackagesLocalDirectory/Currency/CompileLabels.xml.
+The xml log file is located at file:///K:/AosService/PackagesLocalDirectory/CustomFields/BuildModelResult.xml.
+Module CustomFields build operation X++ compilation, label generation and resource deployment completed (22382 ms). 
+Compiling module: DataExpansionTool
+Module Dimensions build operation Compile Labels completed (12662 ms). 
+The xml log file is located at: file:///K:/AosService/PackagesLocalDirectory/Dimensions/CompileLabels.xml.
+The xml log file is located at file:///K:/AosService/PackagesLocalDirectory/DataExpansionTool/BuildModelResult.xml.
+Module DataExpansionTool build operation X++ compilation, label generation and resource deployment completed (18380 ms). 
+Compiling module: DataSharing
+Module DirectoryUpgrade build operation Compile Labels completed (11758 ms). 
+The xml log file is located at: file:///K:/AosService/PackagesLocalDirectory/DirectoryUpgrade/CompileLabels.xml.
+Module ElectronicReportingDotNetUtils build operation Compile Labels completed (0 ms). 
+Module ElectronicReportingCore build operation Compile Labels completed (10273 ms). 
+The xml log file is located at: file:///K:/AosService/PackagesLocalDirectory/ElectronicReportingCore/CompileLabels.xml.
+The xml log file is located at file:///K:/AosService/PackagesLocalDirectory/DataSharing/BuildModelResult.xml.
+Module DataSharing build operation X++ compilation, label generation and resource deployment completed (19137 ms). 
+Compiling module: DataUpgradePlatform
+Module ElectronicReportingMapping build operation Compile Labels completed (12970 ms). 
+The xml log file is located at: file:///K:/AosService/PackagesLocalDirectory/ElectronicReportingMapping/CompileLabels.xml.
+The xml log file is located at file:///K:/AosService/PackagesLocalDirectory/DataUpgradePlatform/BuildModelResult.xml.
+Module DataUpgradePlatform build operation X++ compilation, label generation and resource deployment completed (12120 ms). 
+Compiling module: Directory
+Module ElectronicReportingForAx build operation Compile Labels completed (13579 ms). 
+The xml log file is located at: file:///K:/AosService/PackagesLocalDirectory/ElectronicReportingForAx/CompileLabels.xml.
+Module ElectronicReporting build operation Compile Labels completed (19411 ms). 
+The xml log file is located at: file:///K:/AosService/PackagesLocalDirectory/ElectronicReporting/CompileLabels.xml.
+Module Measurement build operation Compile Labels completed (10012 ms). 
+The xml log file is located at: file:///K:/AosService/PackagesLocalDirectory/Measurement/CompileLabels.xml.
+The xml log file is located at file:///K:/AosService/PackagesLocalDirectory/Directory/BuildModelResult.xml.
+Module Directory build operation X++ compilation, label generation and resource deployment completed (42988 ms). 
+Compiling module: Calendar
+Module Policy build operation Compile Labels completed (11654 ms). 
+The xml log file is located at: file:///K:/AosService/PackagesLocalDirectory/Policy/CompileLabels.xml.
+Module Project build operation Compile Labels completed (1824 ms). 
+The xml log file is located at: file:///K:/AosService/PackagesLocalDirectory/Project/CompileLabels.xml.
+Module SystemHealth build operation Compile Labels completed (1822 ms). 
+The xml log file is located at: file:///K:/AosService/PackagesLocalDirectory/SystemHealth/CompileLabels.xml.
+Module TestEssentials build operation Compile Labels completed (1535 ms). 
+The xml log file is located at: file:///K:/AosService/PackagesLocalDirectory/TestEssentials/CompileLabels.xml.
+Module ApplicationFoundationFormAdaptor build operation Compile Labels completed (1 ms). 
+Module ApplicationPlatformFormAdaptor build operation Compile Labels completed (0 ms). 
+Module UnitOfMeasure build operation Compile Labels completed (11769 ms). 
+The xml log file is located at: file:///K:/AosService/PackagesLocalDirectory/UnitOfMeasure/CompileLabels.xml.
+The xml log file is located at file:///K:/AosService/PackagesLocalDirectory/Calendar/BuildModelResult.xml.
+Module Calendar build operation X++ compilation, label generation and resource deployment completed (20215 ms). 
+Compiling module: ContactPerson
+Module CostAccounting build operation Compile Labels completed (9960 ms). 
+The xml log file is located at: file:///K:/AosService/PackagesLocalDirectory/CostAccounting/CompileLabels.xml.
+Module SourceDocumentationTypes build operation Compile Labels completed (9670 ms). 
+The xml log file is located at: file:///K:/AosService/PackagesLocalDirectory/SourceDocumentationTypes/CompileLabels.xml.
+The xml log file is located at file:///K:/AosService/PackagesLocalDirectory/ContactPerson/BuildModelResult.xml.
+Module ContactPerson build operation X++ compilation, label generation and resource deployment completed (22610 ms). 
+Compiling module: Currency
+Module ApplicationSuite build operation Report RDL generation completed (337199 ms). 
+Module AccountsPayableMobile build operation Report RDL generation completed (0 ms). 
+Module ApplicationSuiteFormAdaptor build operation Report RDL generation completed (0 ms). 
+Module ApplicationWorkspaces build operation Report RDL generation completed (0 ms). 
+Module ApplicationWorkspacesFormAdaptor build operation Report RDL generation completed (0 ms). 
+Module CostAccountingAX build operation Report RDL generation completed (0 ms). 
+Module DataImpExpApplication build operation Report RDL generation completed (0 ms). 
+Module ElectronicReportingAppSuiteIntegration build operation Report RDL generation completed (0 ms). 
+Module ExpenseMobile build operation Report RDL generation completed (0 ms). 
+Module FinancialReportingAdaptors build operation Report RDL generation completed (0 ms). 
+Module FinancialReportingEntityStore build operation Report RDL generation completed (0 ms). 
+Module InventoryDimensionConversion build operation Report RDL generation completed (0 ms). 
+Module DOM build operation Report RDL generation completed (0 ms). 
+Module PaymentPredictor build operation Report RDL generation completed (1 ms). 
+Module ProcessGuide build operation Report RDL generation completed (0 ms). 
+Module ProjectMobile build operation Report RDL generation completed (0 ms). 
+Module PublicSector build operation Report RDL generation completed (836 ms). 
+Module PublicSectorFormAdaptor build operation Report RDL generation completed (0 ms). 
+Module RegulatoryServices build operation Report RDL generation completed (0 ms). 
+Module RetailEod build operation Report RDL generation completed (0 ms). 
+Module SCMMobile build operation Report RDL generation completed (0 ms). 
+Module SelfHealingRules build operation Report RDL generation completed (0 ms). 
+Module DemoDataSuite build operation Report RDL generation completed (0 ms). 
+Module TimesheetMobile build operation Report RDL generation completed (0 ms). 
+Module Tutorial build operation Report RDL generation completed (0 ms). 
+Module WMSAdvancedMigration build operation Report RDL generation completed (0 ms). 
+Module DataUpgrade build operation Report RDL generation completed (0 ms). 
+Module Ledger build operation Compile Labels completed (22974 ms). 
+The xml log file is located at: file:///K:/AosService/PackagesLocalDirectory/Ledger/CompileLabels.xml.
+The xml log file is located at file:///K:/AosService/PackagesLocalDirectory/Currency/BuildModelResult.xml.
+Module Currency build operation X++ compilation, label generation and resource deployment completed (29523 ms). 
+Compiling module: Dimensions
+Module SourceDocumentation build operation Compile Labels completed (19295 ms). 
+The xml log file is located at: file:///K:/AosService/PackagesLocalDirectory/SourceDocumentation/CompileLabels.xml.
+Module FleetManagement build operation Compile Labels completed (2125 ms). 
+The xml log file is located at: file:///K:/AosService/PackagesLocalDirectory/FleetManagement/CompileLabels.xml.
+Module FleetManagementExtension build operation Compile Labels completed (1828 ms). 
+The xml log file is located at: file:///K:/AosService/PackagesLocalDirectory/FleetManagementExtension/CompileLabels.xml.
+Module FleetManagementUnitTests build operation Compile Labels completed (0 ms). 
+Module PersonnelCore build operation Compile Labels completed (11479 ms). 
+The xml log file is located at: file:///K:/AosService/PackagesLocalDirectory/PersonnelCore/CompileLabels.xml.
+The xml log file is located at file:///K:/AosService/PackagesLocalDirectory/Dimensions/BuildModelResult.xml.
+Module Dimensions build operation X++ compilation, label generation and resource deployment completed (30425 ms). 
+Compiling module: DirectoryUpgrade
+Module BusinessProcess build operation Compile Labels completed (11177 ms). 
+The xml log file is located at: file:///K:/AosService/PackagesLocalDirectory/BusinessProcess/CompileLabels.xml.
+Module CaseManagement build operation Compile Labels completed (11768 ms). 
+The xml log file is located at: file:///K:/AosService/PackagesLocalDirectory/CaseManagement/CompileLabels.xml.
+The xml log file is located at file:///K:/AosService/PackagesLocalDirectory/DirectoryUpgrade/BuildModelResult.xml.
+Module DirectoryUpgrade build operation X++ compilation, label generation and resource deployment completed (16568 ms). 
+Compiling module: ElectronicReportingDotNetUtils
+The xml log file is located at file:///K:/AosService/PackagesLocalDirectory/ElectronicReportingDotNetUtils/BuildModelResult.xml.
+Module ElectronicReportingDotNetUtils build operation X++ compilation, label generation and resource deployment completed (10266 ms). 
+Compiling module: ElectronicReportingCore
+The xml log file is located at file:///K:/AosService/PackagesLocalDirectory/ElectronicReportingCore/BuildModelResult.xml.
+Module ElectronicReportingCore build operation X++ compilation, label generation and resource deployment completed (10563 ms). 
+Compiling module: ElectronicReportingMapping
+The xml log file is located at file:///K:/AosService/PackagesLocalDirectory/ElectronicReportingMapping/BuildModelResult.xml.
+Module ElectronicReportingMapping build operation X++ compilation, label generation and resource deployment completed (10706 ms). 
+Compiling module: ElectronicReportingForAx
+The xml log file is located at file:///K:/AosService/PackagesLocalDirectory/ElectronicReportingForAx/BuildModelResult.xml.
+Module ElectronicReportingForAx build operation X++ compilation, label generation and resource deployment completed (11001 ms). 
+Compiling module: ElectronicReporting
+Module PersonnelManagement build operation Compile Labels completed (53940 ms). 
+The xml log file is located at: file:///K:/AosService/PackagesLocalDirectory/PersonnelManagement/CompileLabels.xml.
+Module Personnel build operation Compile Labels completed (10271 ms). 
+The xml log file is located at: file:///K:/AosService/PackagesLocalDirectory/Personnel/CompileLabels.xml.
+Module PersonnelMobile build operation Compile Labels completed (10598 ms). 
+The xml log file is located at: file:///K:/AosService/PackagesLocalDirectory/PersonnelMobile/CompileLabels.xml.
+The xml log file is located at file:///K:/AosService/PackagesLocalDirectory/ElectronicReporting/BuildModelResult.xml.
+Module ElectronicReporting build operation X++ compilation, label generation and resource deployment completed (37573 ms). 
+Compiling module: Measurement
+Module PersonnelUpgrade build operation Compile Labels completed (11521 ms). 
+The xml log file is located at: file:///K:/AosService/PackagesLocalDirectory/PersonnelUpgrade/CompileLabels.xml.
+Module SelfHealing build operation Compile Labels completed (1832 ms). 
+The xml log file is located at: file:///K:/AosService/PackagesLocalDirectory/SelfHealing/CompileLabels.xml.
+Module Subledger build operation Compile Labels completed (10559 ms). 
+The xml log file is located at: file:///K:/AosService/PackagesLocalDirectory/Subledger/CompileLabels.xml.
+The xml log file is located at file:///K:/AosService/PackagesLocalDirectory/Measurement/BuildModelResult.xml.
+Module Measurement build operation X++ compilation, label generation and resource deployment completed (17295 ms). 
+Compiling module: Policy
+Module GeneralLedger build operation Compile Labels completed (1531 ms). 
+The xml log file is located at: file:///K:/AosService/PackagesLocalDirectory/GeneralLedger/CompileLabels.xml.
+Module FinancialReporting build operation Compile Labels completed (1833 ms). 
+The xml log file is located at: file:///K:/AosService/PackagesLocalDirectory/FinancialReporting/CompileLabels.xml.
+Module GeneralLedgerFormAdaptor build operation Compile Labels completed (0 ms). 
+Module Retail build operation Compile Labels completed (13260 ms). 
+The xml log file is located at: file:///K:/AosService/PackagesLocalDirectory/Retail/CompileLabels.xml.
+Module RetailFormAdaptor build operation Compile Labels completed (0 ms). 
+Module Tax build operation Compile Labels completed (1527 ms). 
+The xml log file is located at: file:///K:/AosService/PackagesLocalDirectory/Tax/CompileLabels.xml.
+The xml log file is located at file:///K:/AosService/PackagesLocalDirectory/Policy/BuildModelResult.xml.
+Module Policy build operation X++ compilation, label generation and resource deployment completed (23503 ms). 
+Compiling module: Project
+Module FiscalBooks build operation Compile Labels completed (6946 ms). 
+The xml log file is located at: file:///K:/AosService/PackagesLocalDirectory/FiscalBooks/CompileLabels.xml.
+Module FiscalBooksFormAdaptor build operation Compile Labels completed (0 ms). 
+The xml log file is located at file:///K:/AosService/PackagesLocalDirectory/Project/BuildModelResult.xml.
+Module Project build operation X++ compilation, label generation and resource deployment completed (12767 ms). 
+Compiling module: SystemHealth
+Module TaxEngine build operation Compile Labels completed (27751 ms). 
+The xml log file is located at: file:///K:/AosService/PackagesLocalDirectory/TaxEngine/CompileLabels.xml.
+The xml log file is located at file:///K:/AosService/PackagesLocalDirectory/SystemHealth/BuildModelResult.xml.
+Module SystemHealth build operation X++ compilation, label generation and resource deployment completed (17772 ms). 
+Compiling module: TestEssentials
+The xml log file is located at file:///K:/AosService/PackagesLocalDirectory/TestEssentials/BuildModelResult.xml.
+Module TestEssentials build operation X++ compilation, label generation and resource deployment completed (27800 ms). 
+Compiling module: ApplicationFoundationFormAdaptor
+The xml log file is located at file:///K:/AosService/PackagesLocalDirectory/ApplicationFoundationFormAdaptor/BuildModelResult.xml.
+Module ApplicationFoundationFormAdaptor build operation X++ compilation, label generation and resource deployment completed (27561 ms). 
+Compiling module: ApplicationPlatformFormAdaptor
+Module ApplicationSuite build operation Compile Labels completed (64193 ms). 
+The xml log file is located at: file:///K:/AosService/PackagesLocalDirectory/ApplicationSuite/CompileLabels.xml.
+Module AccountsPayableMobile build operation Compile Labels completed (1831 ms). 
+The xml log file is located at: file:///K:/AosService/PackagesLocalDirectory/AccountsPayableMobile/CompileLabels.xml.
+Module ApplicationSuiteFormAdaptor build operation Compile Labels completed (0 ms). 
+Module ApplicationWorkspaces build operation Compile Labels completed (1828 ms). 
+The xml log file is located at: file:///K:/AosService/PackagesLocalDirectory/ApplicationWorkspaces/CompileLabels.xml.
+Module ApplicationWorkspacesFormAdaptor build operation Compile Labels completed (0 ms). 
+Module CostAccountingAX build operation Compile Labels completed (1521 ms). 
+The xml log file is located at: file:///K:/AosService/PackagesLocalDirectory/CostAccountingAX/CompileLabels.xml.
+Module DataImpExpApplication build operation Compile Labels completed (1821 ms). 
+The xml log file is located at: file:///K:/AosService/PackagesLocalDirectory/DataImpExpApplication/CompileLabels.xml.
+Module ElectronicReportingAppSuiteIntegration build operation Compile Labels completed (0 ms). 
+The xml log file is located at file:///K:/AosService/PackagesLocalDirectory/ApplicationPlatformFormAdaptor/BuildModelResult.xml.
+Module ApplicationPlatformFormAdaptor build operation X++ compilation, label generation and resource deployment completed (12670 ms). 
+Compiling module: UnitOfMeasure
+Module ExpenseMobile build operation Compile Labels completed (1531 ms). 
+The xml log file is located at: file:///K:/AosService/PackagesLocalDirectory/ExpenseMobile/CompileLabels.xml.
+Module FinancialReportingAdaptors build operation Compile Labels completed (0 ms). 
+Module FinancialReportingEntityStore build operation Compile Labels completed (1825 ms). 
+The xml log file is located at: file:///K:/AosService/PackagesLocalDirectory/FinancialReportingEntityStore/CompileLabels.xml.
+Module InventoryDimensionConversion build operation Compile Labels completed (1533 ms). 
+The xml log file is located at: file:///K:/AosService/PackagesLocalDirectory/InventoryDimensionConversion/CompileLabels.xml.
+Module DOM build operation Compile Labels completed (1536 ms). 
+The xml log file is located at: file:///K:/AosService/PackagesLocalDirectory/DOM/CompileLabels.xml.
+Module PaymentPredictor build operation Compile Labels completed (1522 ms). 
+The xml log file is located at: file:///K:/AosService/PackagesLocalDirectory/PaymentPredictor/CompileLabels.xml.
+Module ProcessGuide build operation Compile Labels completed (1 ms). 
+Module ProjectMobile build operation Compile Labels completed (1834 ms). 
+The xml log file is located at: file:///K:/AosService/PackagesLocalDirectory/ProjectMobile/CompileLabels.xml.
+Module PublicSector build operation Compile Labels completed (1522 ms). 
+The xml log file is located at: file:///K:/AosService/PackagesLocalDirectory/PublicSector/CompileLabels.xml.
+Module PublicSectorFormAdaptor build operation Compile Labels completed (0 ms). 
+Module RegulatoryServices build operation Compile Labels completed (4543 ms). 
+The xml log file is located at: file:///K:/AosService/PackagesLocalDirectory/RegulatoryServices/CompileLabels.xml.
+Module RetailEod build operation Compile Labels completed (1530 ms). 
+The xml log file is located at: file:///K:/AosService/PackagesLocalDirectory/RetailEod/CompileLabels.xml.
+Module SCMMobile build operation Compile Labels completed (2132 ms). 
+The xml log file is located at: file:///K:/AosService/PackagesLocalDirectory/SCMMobile/CompileLabels.xml.
+Module SelfHealingRules build operation Compile Labels completed (1828 ms). 
+The xml log file is located at: file:///K:/AosService/PackagesLocalDirectory/SelfHealingRules/CompileLabels.xml.
+The xml log file is located at file:///K:/AosService/PackagesLocalDirectory/UnitOfMeasure/BuildModelResult.xml.
+Module UnitOfMeasure build operation X++ compilation, label generation and resource deployment completed (21984 ms). 
+Compiling module: CostAccounting
+Module DemoDataSuite build operation Compile Labels completed (2740 ms). 
+The xml log file is located at: file:///K:/AosService/PackagesLocalDirectory/DemoDataSuite/CompileLabels.xml.
+Module TimesheetMobile build operation Compile Labels completed (1521 ms). 
+The xml log file is located at: file:///K:/AosService/PackagesLocalDirectory/TimesheetMobile/CompileLabels.xml.
+Module Tutorial build operation Compile Labels completed (0 ms). 
+Module WMSAdvancedMigration build operation Compile Labels completed (1827 ms). 
+The xml log file is located at: file:///K:/AosService/PackagesLocalDirectory/WMSAdvancedMigration/CompileLabels.xml.
+Module DataUpgrade build operation Compile Labels completed (1827 ms). 
+The xml log file is located at: file:///K:/AosService/PackagesLocalDirectory/DataUpgrade/CompileLabels.xml.
+The xml log file is located at file:///K:/AosService/PackagesLocalDirectory/CostAccounting/BuildModelResult.xml.
+Module CostAccounting build operation X++ compilation, label generation and resource deployment completed (28982 ms). 
+Compiling module: SourceDocumentationTypes
+The xml log file is located at file:///K:/AosService/PackagesLocalDirectory/SourceDocumentationTypes/BuildModelResult.xml.
+Module SourceDocumentationTypes build operation X++ compilation, label generation and resource deployment completed (11751 ms). 
+Compiling module: Ledger
+The xml log file is located at file:///K:/AosService/PackagesLocalDirectory/Ledger/BuildModelResult.xml.
+Module Ledger build operation X++ compilation, label generation and resource deployment completed (30211 ms). 
+Compiling module: SourceDocumentation
+The xml log file is located at file:///K:/AosService/PackagesLocalDirectory/SourceDocumentation/BuildModelResult.xml.
+Module SourceDocumentation build operation X++ compilation, label generation and resource deployment completed (23601 ms). 
+Compiling module: FleetManagement
+The xml log file is located at file:///K:/AosService/PackagesLocalDirectory/FleetManagement/BuildModelResult.xml.
+Module FleetManagement build operation X++ compilation, label generation and resource deployment completed (20530 ms). 
+Compiling module: FleetManagementExtension
+The xml log file is located at file:///K:/AosService/PackagesLocalDirectory/FleetManagementExtension/BuildModelResult.xml.
+Module FleetManagementExtension build operation X++ compilation, label generation and resource deployment completed (13692 ms). 
+Compiling module: FleetManagementUnitTests
+The xml log file is located at file:///K:/AosService/PackagesLocalDirectory/FleetManagementUnitTests/BuildModelResult.xml.
+Module FleetManagementUnitTests build operation X++ compilation, label generation and resource deployment completed (9341 ms). 
+Compiling module: PersonnelCore
+The xml log file is located at file:///K:/AosService/PackagesLocalDirectory/PersonnelCore/BuildModelResult.xml.
+Module PersonnelCore build operation X++ compilation, label generation and resource deployment completed (22904 ms). 
+Compiling module: BusinessProcess
+The xml log file is located at file:///K:/AosService/PackagesLocalDirectory/BusinessProcess/BuildModelResult.xml.
+Module BusinessProcess build operation X++ compilation, label generation and resource deployment completed (17569 ms). 
+Compiling module: CaseManagement
+The xml log file is located at file:///K:/AosService/PackagesLocalDirectory/CaseManagement/BuildModelResult.xml.
+Module CaseManagement build operation X++ compilation, label generation and resource deployment completed (25393 ms). 
+Compiling module: PersonnelManagement
+The xml log file is located at file:///K:/AosService/PackagesLocalDirectory/PersonnelManagement/BuildModelResult.xml.
+Module PersonnelManagement build operation X++ compilation, label generation and resource deployment completed (68113 ms). 
+Compiling module: Personnel
+The xml log file is located at file:///K:/AosService/PackagesLocalDirectory/Personnel/BuildModelResult.xml.
+Module Personnel build operation X++ compilation, label generation and resource deployment completed (7559 ms). 
+Compiling module: PersonnelMobile
+The xml log file is located at file:///K:/AosService/PackagesLocalDirectory/PersonnelMobile/BuildModelResult.xml.
+Module PersonnelMobile build operation X++ compilation, label generation and resource deployment completed (16009 ms). 
+Compiling module: PersonnelUpgrade
+The xml log file is located at file:///K:/AosService/PackagesLocalDirectory/PersonnelUpgrade/BuildModelResult.xml.
+Module PersonnelUpgrade build operation X++ compilation, label generation and resource deployment completed (16042 ms). 
+Compiling module: SelfHealing
+The xml log file is located at file:///K:/AosService/PackagesLocalDirectory/SelfHealing/BuildModelResult.xml.
+Module SelfHealing build operation X++ compilation, label generation and resource deployment completed (13889 ms). 
+Compiling module: Subledger
+The xml log file is located at file:///K:/AosService/PackagesLocalDirectory/Subledger/BuildModelResult.xml.
+Module Subledger build operation X++ compilation, label generation and resource deployment completed (18996 ms). 
+Compiling module: GeneralLedger
+The xml log file is located at file:///K:/AosService/PackagesLocalDirectory/GeneralLedger/BuildModelResult.xml.
+Module GeneralLedger build operation X++ compilation, label generation and resource deployment completed (23357 ms). 
+Compiling module: FinancialReporting
+The xml log file is located at file:///K:/AosService/PackagesLocalDirectory/FinancialReporting/BuildModelResult.xml.
+Module FinancialReporting build operation X++ compilation, label generation and resource deployment completed (14241 ms). 
+Compiling module: GeneralLedgerFormAdaptor
+The xml log file is located at file:///K:/AosService/PackagesLocalDirectory/GeneralLedgerFormAdaptor/BuildModelResult.xml.
+Module GeneralLedgerFormAdaptor build operation X++ compilation, label generation and resource deployment completed (15432 ms). 
+Compiling module: Retail
+The xml log file is located at file:///K:/AosService/PackagesLocalDirectory/Retail/BuildModelResult.xml.
+Module Retail build operation X++ compilation, label generation and resource deployment completed (33254 ms). 
+Compiling module: RetailFormAdaptor
+The xml log file is located at file:///K:/AosService/PackagesLocalDirectory/RetailFormAdaptor/BuildModelResult.xml.
+Module RetailFormAdaptor build operation X++ compilation, label generation and resource deployment completed (11786 ms). 
+Compiling module: Tax
+The xml log file is located at file:///K:/AosService/PackagesLocalDirectory/Tax/BuildModelResult.xml.
+Module Tax build operation X++ compilation, label generation and resource deployment completed (17506 ms). 
+Compiling module: FiscalBooks
+The xml log file is located at file:///K:/AosService/PackagesLocalDirectory/FiscalBooks/BuildModelResult.xml.
+Module FiscalBooks build operation X++ compilation, label generation and resource deployment completed (22903 ms). 
+Compiling module: FiscalBooksFormAdaptor
+The xml log file is located at file:///K:/AosService/PackagesLocalDirectory/FiscalBooksFormAdaptor/BuildModelResult.xml.
+Module FiscalBooksFormAdaptor build operation X++ compilation, label generation and resource deployment completed (12102 ms). 
+Compiling module: TaxEngine
+The xml log file is located at file:///K:/AosService/PackagesLocalDirectory/TaxEngine/BuildModelResult.xml.
+Module TaxEngine build operation X++ compilation, label generation and resource deployment completed (23140 ms). 
+Compiling module: ApplicationSuite
+The xml log file is located at file:///K:/AosService/PackagesLocalDirectory/ApplicationSuite/BuildModelResult.xml.
+Module ApplicationSuite build operation X++ compilation, label generation and resource deployment completed (808969 ms). 
+Compiling module: AccountsPayableMobile
+The xml log file is located at file:///K:/AosService/PackagesLocalDirectory/AccountsPayableMobile/BuildModelResult.xml.
+Module AccountsPayableMobile build operation X++ compilation, label generation and resource deployment completed (20905 ms). 
+Compiling module: ApplicationSuiteFormAdaptor
+The xml log file is located at file:///K:/AosService/PackagesLocalDirectory/ApplicationSuiteFormAdaptor/BuildModelResult.xml.
+Module ApplicationSuiteFormAdaptor build operation X++ compilation, label generation and resource deployment completed (173981 ms). 
+Compiling module: ApplicationWorkspaces
+The xml log file is located at file:///K:/AosService/PackagesLocalDirectory/ApplicationWorkspaces/BuildModelResult.xml.
+Module ApplicationWorkspaces build operation X++ compilation, label generation and resource deployment completed (52894 ms). 
+Compiling module: ApplicationWorkspacesFormAdaptor
+The xml log file is located at file:///K:/AosService/PackagesLocalDirectory/ApplicationWorkspacesFormAdaptor/BuildModelResult.xml.
+Module ApplicationWorkspacesFormAdaptor build operation X++ compilation, label generation and resource deployment completed (24044 ms). 
+Compiling module: CostAccountingAX
+The xml log file is located at file:///K:/AosService/PackagesLocalDirectory/CostAccountingAX/BuildModelResult.xml.
+Module CostAccountingAX build operation X++ compilation, label generation and resource deployment completed (23866 ms). 
+Compiling module: DataImpExpApplication
+The xml log file is located at file:///K:/AosService/PackagesLocalDirectory/DataImpExpApplication/BuildModelResult.xml.
+Module DataImpExpApplication build operation X++ compilation, label generation and resource deployment completed (25640 ms). 
+Compiling module: ElectronicReportingAppSuiteIntegration
+The xml log file is located at file:///K:/AosService/PackagesLocalDirectory/ElectronicReportingAppSuiteIntegration/BuildModelResult.xml.
+Module ElectronicReportingAppSuiteIntegration build operation X++ compilation, label generation and resource deployment completed (22805 ms). 
+Compiling module: ExpenseMobile
+The xml log file is located at file:///K:/AosService/PackagesLocalDirectory/ExpenseMobile/BuildModelResult.xml.
+Module ExpenseMobile build operation X++ compilation, label generation and resource deployment completed (28229 ms). 
+Compiling module: FinancialReportingAdaptors
+The xml log file is located at file:///K:/AosService/PackagesLocalDirectory/FinancialReportingAdaptors/BuildModelResult.xml.
+Module FinancialReportingAdaptors build operation X++ compilation, label generation and resource deployment completed (15862 ms). 
+Compiling module: FinancialReportingEntityStore
+The xml log file is located at file:///K:/AosService/PackagesLocalDirectory/FinancialReportingEntityStore/BuildModelResult.xml.
+Module FinancialReportingEntityStore build operation X++ compilation, label generation and resource deployment completed (22985 ms). 
+Compiling module: InventoryDimensionConversion
+The xml log file is located at file:///K:/AosService/PackagesLocalDirectory/InventoryDimensionConversion/BuildModelResult.xml.
+Module InventoryDimensionConversion build operation X++ compilation, label generation and resource deployment completed (22278 ms). 
+Compiling module: DOM
+The xml log file is located at file:///K:/AosService/PackagesLocalDirectory/DOM/BuildModelResult.xml.
+Module DOM build operation X++ compilation, label generation and resource deployment completed (33908 ms). 
+Compiling module: PaymentPredictor
+The xml log file is located at file:///K:/AosService/PackagesLocalDirectory/PaymentPredictor/BuildModelResult.xml.
+Module PaymentPredictor build operation X++ compilation, label generation and resource deployment completed (21747 ms). 
+Compiling module: ProcessGuide
+The xml log file is located at file:///K:/AosService/PackagesLocalDirectory/ProcessGuide/BuildModelResult.xml.
+Module ProcessGuide build operation X++ compilation, label generation and resource deployment completed (23298 ms). 
+Compiling module: ProjectMobile
+The xml log file is located at file:///K:/AosService/PackagesLocalDirectory/ProjectMobile/BuildModelResult.xml.
+Module ProjectMobile build operation X++ compilation, label generation and resource deployment completed (22117 ms). 
+Compiling module: PublicSector
+The xml log file is located at file:///K:/AosService/PackagesLocalDirectory/PublicSector/BuildModelResult.xml.
+Module PublicSector build operation X++ compilation, label generation and resource deployment completed (29228 ms). 
+Compiling module: PublicSectorFormAdaptor
+The xml log file is located at file:///K:/AosService/PackagesLocalDirectory/PublicSectorFormAdaptor/BuildModelResult.xml.
+Module PublicSectorFormAdaptor build operation X++ compilation, label generation and resource deployment completed (12712 ms). 
+Compiling module: RegulatoryServices
+The xml log file is located at file:///K:/AosService/PackagesLocalDirectory/RegulatoryServices/BuildModelResult.xml.
+Module RegulatoryServices build operation X++ compilation, label generation and resource deployment completed (29499 ms). 
+Compiling module: RetailEod
+The xml log file is located at file:///K:/AosService/PackagesLocalDirectory/RetailEod/BuildModelResult.xml.
+Module RetailEod build operation X++ compilation, label generation and resource deployment completed (37980 ms). 
+Compiling module: SCMMobile
+The xml log file is located at file:///K:/AosService/PackagesLocalDirectory/SCMMobile/BuildModelResult.xml.
+Module SCMMobile build operation X++ compilation, label generation and resource deployment completed (30210 ms). 
+Compiling module: SelfHealingRules
+The xml log file is located at file:///K:/AosService/PackagesLocalDirectory/SelfHealingRules/BuildModelResult.xml.
+Module SelfHealingRules build operation X++ compilation, label generation and resource deployment completed (20305 ms). 
+Compiling module: DemoDataSuite
+The xml log file is located at file:///K:/AosService/PackagesLocalDirectory/DemoDataSuite/BuildModelResult.xml.
+Module DemoDataSuite build operation X++ compilation, label generation and resource deployment completed (33731 ms). 
+Compiling module: TimesheetMobile
+The xml log file is located at file:///K:/AosService/PackagesLocalDirectory/TimesheetMobile/BuildModelResult.xml.
+Module TimesheetMobile build operation X++ compilation, label generation and resource deployment completed (26204 ms). 
+Compiling module: Tutorial
+The xml log file is located at file:///K:/AosService/PackagesLocalDirectory/Tutorial/BuildModelResult.xml.
+Module Tutorial build operation X++ compilation, label generation and resource deployment completed (19466 ms). 
+Compiling module: WMSAdvancedMigration
+The xml log file is located at file:///K:/AosService/PackagesLocalDirectory/WMSAdvancedMigration/BuildModelResult.xml.
+Module WMSAdvancedMigration build operation X++ compilation, label generation and resource deployment completed (22291 ms). 
+Compiling module: DataUpgrade
+The xml log file is located at file:///K:/AosService/PackagesLocalDirectory/DataUpgrade/BuildModelResult.xml.
+Module DataUpgrade build operation X++ compilation, label generation and resource deployment completed (43003 ms). 
