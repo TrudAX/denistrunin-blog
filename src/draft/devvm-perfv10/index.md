@@ -6,15 +6,15 @@ D365FO version required more resources to perform development. In this post I tr
 
 Configuration to compare
 
-| Name         | Local                               | SSD                                        | HDD                                        |
-| ------------ | ----------------------------------- | ------------------------------------------ | ------------------------------------------ |
-| VM Type      | Local Hyper-V Image                 | Standard D8s v3                            | Standard D12 v2                            |
-| CPU          | Core i7-8700 3.2GHz, 6 cores        | E5-2673 v4 2.30GHz, 8 vcpus, 32 GiB memory | E5-2673 v4 2.30GHz, 4 vcpus, 28 GiB memory |
-| Storage      | Samsung 970(more than 100k IOPS)    | 5 premium disks                            | 16 HDD disks                               |
-| Run cost     | system for run 3 VMs - around 1.5k$ | 0.75$ per hour                             | 0.52$ per hour                             |
-| Storage cost | 0                                   | ~4$ per day                                | ~0                                         |
-|              |                                     |                                            |                                            |
-|              |                                     |                                            |                                            |
+| Name         | Local                            | SSD                                        | HDD                                        |
+| ------------ | -------------------------------- | ------------------------------------------ | ------------------------------------------ |
+| VM Type      | Local Hyper-V Image              | Standard D8s v3                            | Standard D12 v2                            |
+| CPU          | Core i7-8700 3.2GHz, 6 cores     | E5-2673 v4 2.30GHz, 8 vcpus, 32 GiB memory | E5-2673 v4 2.30GHz, 4 vcpus, 28 GiB memory |
+| Storage      | Samsung 970(more than 100k IOPS) | 5 premium disks                            | 16 HDD disks                               |
+| Run cost     | Box for run 3 VMs - around 1.5k$ | 0.75$ per hour                             | 0.52$ per hour                             |
+| Storage cost | 0                                | ~4$ per day                                | ~0                                         |
+|              |                                  |                                            |                                            |
+|              |                                  |                                            |                                            |
 
 Preparation steps - both 3 VMs used the same D365FO version - 10.0 PU24. After installation I disabled the following services:
 
@@ -33,47 +33,53 @@ For compile I got the following results:
 
 ![](FullCompileTime.png)
 
-What is interesting here - SSD VM time is very close to HDD despite of the fact that SSD has 8 cores. The main reason for this - is that Dv3 series has CPUs with Hyperthreading 
+Compile is a CPU intensive task. 
 
+What is interesting here - SSD VM time is very close to HDD despite of the fact that SSD has 8 cores and HDD 4 cores. The main reason for this - is that Dv3 series has CPUs with Hyperthreading enabled but Dv2 - CPUs with Hyperthreading disabled. Hyperthreading gives only a small boost, that is why very important when you plan you virtual infrastructure keep in mind - when we say for example '8 core VM' - are these real cores or virtual one. 
 
+Local VM has CPU with the higher clock speed and CPU itself has 6 physical cores - that explains more than 2 times difference in performances with the Azure based machines.
 
-And for database synchronize: 
+Next test is database synchronize: 
 
 ![](FullSyncTime.png)
 
+Synchronize operation is IO and CPU intensive. Local VM has more powerful IO system, and more powerful CPU, that explains its time. SSD also performed much better in this test due to faster disks. 
 
+## Daily task tests
 
-The next test is time to hit breakpoint
+In order to test performance for the more often developers task I choose 2 tasks - time to hit breakpoint and time to display 'Hello world' from the job. In AX2012 both these task has zero time, you don't need to wait.
 
-To prepare for this I switched off Load symbols for items in the solution. Then Open AOT, Locate SalesTable form and add it into the new project. Mark the form as a startup object. Open the code and add a new breapoint to the init() method 
+### Time to hit breakpoint test
 
-Created a new project with the SalesTable form, set breakpoint 
+Before the test I executed the AX main screen
 
-Local - 
+To prepare for this test I switched off 'Load symbols for items in the solution'. Then opened AOT, seached for **SalesTable** form and added it into the new project. Marked the form as a startup object. Opened the code and added a new breapoint to the **init()** method. Time in this test - is the time between I pressed **Start** and the time when the breakpoint was hit.
 
-SSD - First run st - 04.4 end- 0.51.1, Second 01.0.3, 01.18.5
+![Breakpoint image](HitTheBreakpoint.jpg)
 
-HDD - first 09.4 ; end 03.03.8??
+Two tests were performed to see how cache is change this time
 
+![TimeToHitBreakpoint results](TimeToHitBreakpoint.png)
 
+HDD VM was very slow in this test. You need to wait almost 5 minutes to see your first breakpoint! SSD and Local first run was the same, but the second run local was faster.
 
+### Hello world test
 
+This test was performed straight after the breakpoint test, but I restarted Visual Studio. In this test I created a new project and added a Runnable class with the following code 
 
-test hello world
+```
+info("Hello world");  
+```
 
-Create a new project and add a Runnable class with 
+On the second run I change this test to "Hello world2". On the Third run I didn't change the text, just run the same job. 
 
-Info("Hello world");  
+I measured the time between press Start and the time when message displayed in the browser. Results are the following:
 
-In this case I measured the time between pressing the start Button to Display "Hello world" in the browser
+![](HelloWorldTest.png)
 
-Local - 
+You need to wait almost a minute for the HDD to see the results of the simple job. For local and SSD it is 70% faster. Local also executed your job faster if you didn't change it - probably due to high single core CPU speed(but still you need to wait 7 second, it is not instant)
 
-SSD - First run st 5.3  end 41.6, Second 58.6 end 01.08
-
-HDD - 03.5 end 38.6, 50.2 end 01.01.5
-
-
+## Conclusion 
 
 
 
