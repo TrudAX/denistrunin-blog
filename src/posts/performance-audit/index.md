@@ -85,7 +85,9 @@ Check the number of closed records in InventSum. If most of the records are clos
 
 ![](InventSumSize.png)
 
-For example, if you get the following results, you can drop closed records(the only problem here is that some reports, for example, "On hand by date" can use closed records to display historical data, check this before deleting)
+For example, if you get the following results, you can drop closed records(the only problem here is that some reports, for example, "On hand by date" can use closed records to display historical data, check this before deleting).
+
+Use this link to find all standard cleanup jobs - [Cleanup routines in Dynamics 365 for Finance and Operations](https://blogs.msdn.microsoft.com/axsa/2018/09/05/cleanup-routines-in-dynamics-365-for-finance-and-operations/) 
 
 Also, check some system [statistics](https://github.com/TrudAX/TRUDScripts/blob/master/Performance/AX%20Technical%20Audit.md#table-statistics). Often, you need to know the following:
 
