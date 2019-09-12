@@ -13,13 +13,13 @@ I have chosen the following VMs: Local Hyper-V Image, Azure VM based on SSD disk
 
 There are detail specifications of these VMs:
 
-| Name         | Local                            | SSD                                        | HDD                                        |
-| ------------ | -------------------------------- | ------------------------------------------ | ------------------------------------------ |
-| VM Type      | Local Hyper-V Image              | Standard D8s v3                            | Standard D12 v2                            |
-| CPU          | Core i7-8700 3.2GHz, 6 cores     | E5-2673 v4 2.30GHz, 8 vcpus, 32 GiB memory | E5-2673 v4 2.30GHz, 4 vcpus, 28 GiB memory |
-| Storage      | Samsung 970(more than 100k IOPS) | 5 premium disks                            | 16 HDD disks                               |
-| Run cost     | Box for run 3 VMs - around 1.5k$ | 0.75$ per hour                             | 0.52$ per hour                             |
-| Storage cost | 0                                | ~4$ per day                                | ~0                                         |
+| Name         | Local                                       | SSD                                        | HDD                                        |
+| ------------ | ------------------------------------------- | ------------------------------------------ | ------------------------------------------ |
+| VM Type      | Local Hyper-V Image                         | Standard D8s v3                            | Standard D12 v2                            |
+| CPU          | Core i7-8700 3.2GHz, 6 cores, 24 GiB memory | E5-2673 v4 2.30GHz, 8 vcpus, 32 GiB memory | E5-2673 v4 2.30GHz, 4 vcpus, 28 GiB memory |
+| Storage      | Samsung 970(more than 100k IOPS)            | 5 premium disks                            | 16 HDD disks                               |
+| Run cost     | Box for run 3 VMs - around 1.5k$            | 0.75$ per hour                             | 0.52$ per hour                             |
+| Storage cost | 0                                           | ~4$ per day                                | ~0                                         |
 
 Both 3 VMs have used the same D365FO version - 10.0 PU24. After installation I disabled the following services:
 
