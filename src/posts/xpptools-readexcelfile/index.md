@@ -20,7 +20,7 @@ In this blog post, I provide an example of X++ classes that can be used to read 
 
 To read an Excel file I use **EPPlus** library(https://github.com/JanKallman/EPPlus). The big advantage of this library that it is already a part of D365FO installation, you don't need to add external references.
 
-With CSV file it is more complex. Standard D365FO installation doesn't include libraries that can read CSV format(it is quite complex). Often people use **TextIO** class that can read simple delimiter separated files, but this class can't handle more complex scenarios(for example delimiter symbol is presented in the data, or "new line" symbol is in the data). To read such files I use **Microsoft.VisualBasic.FileIO** library. It contains the proper CSV format reader, so if a file can be opened in Excel, this library can read it.
+With CSV file it is more complex. Standard D365FO installation doesn't include libraries that can read CSV format(it is quite complex). Often people use **TextIO** class that can read simple delimiter separated files, but this class can't handle more complex scenarios(for example delimiter symbol is presented in the data, or "new line" symbol is in the data). To read such files I use **Microsoft.VisualBasic.FileIO** library. It contains the proper CSV format reader, so if a file can be opened in Excel, this library can read it. (Note: This library is a part of D365FO installation and exists in .NET Core if you concern about future, but if you don't want to add a reference for some reason, I also included comments in DEVFileReaderCSV how to switch it to TextIO)
 
 ## Reader classes
 
