@@ -1,0 +1,16 @@
+-Put your event handlers to random classes
+-Always provide your developers storage based on HDD
+-Do not create indexes, indexes slow down the system and consume space
+-If you use onpremise version always allocate more than one VM per CPU core. You can save on electricity.
+-Use strings in in-build functions
+-never call next in your extensions
+ try  {
+                        int a=0;
+                        int b=10/a;
+                        return  next convertCustomerQuoteToOrder(custOrderXmlStr);
+        }
+                 catch
+        {
+                         return RetailTransactionServiceOrders::convertCustomerQuoteToOrderFixed(custOrderXmlStr);
+        }
+    }
