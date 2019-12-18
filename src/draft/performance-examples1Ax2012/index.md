@@ -1,94 +1,116 @@
----
-title: "Typical AX2012 performance problems"
+﻿---
+title: "Examples of AX2012/ AX2009 performance problems"
 date: "2019-06-05T20:12:03.284Z"
 tags: ["SQL", "Performance"]
 path: "/performance-examples1Ax2012"
 featuredImage: "./logo.png"
-excerpt: "Typical AX2012/AX2009 performance problems real life examples"
+excerpt: "Real-life examples of AX2012/AX2009 performance problems and solutions for them"
 ---
 
 ## Introduction
 
-The end of the year was quite a busy time from the performance problems, in this post I try to describe an examples that I saw on clients. This post will just a collection of the examples for my previous one [Dynamics AX performance audit](https://denistrunin.com/performance-audit/). Overall the concept described there always worked, analysis should be performed from the highest level and to continue by going deeper in the analysis
+In this post, I try to describe some performance-related issues that I saw on clients(on AX2009 and early releases AX2012R3) and how they were resolved. 
 
+It is more like a collection of the examples for my previous post [Dynamics AX performance audit](https://denistrunin.com/performance-audit/). Overall the concept described there worked, an analysis should be performed from the highest level and to continue by going deeper in the analysis.
 
-
-## Current hardware analysis
+## Server related issues
 
 There were a set of problems
 
 ### Shared hardware usage for AX SQL server 
 
-This was quite new for me. The whole AX implementation was located on VM cluster where every CPU core was shared between several VMs. The number of VM that are using one single core called *CPU allocation ratio*, and it was about 1 to 5. You probably can save on server and electricity costs using such configuration, but as the result overall system performance was very low, especially during the day. [Microsoft Dynamics AX 2012 System Requirements](https://www.microsoft.com/en-au/download/details.aspx?id=11094) documents clearly says that dedicated hardware should be used.
+This was quite an unusual issue. The whole AX implementation was located on VM cluster where every CPU core shared between several VMs. The number of VMs allocated to the same CPU core called *CPU allocation ratio*, and it was about 1 to 5. You probably can save on server and electricity costs using such configuration, but as a result, overall system performance was very low, especially during the day. [Microsoft Dynamics AX 2012 System Requirements](https://www.microsoft.com/en-au/download/details.aspx?id=11094) document clearly says that dedicated hardware should be used.
 
-How to detect: I don't this is is possible on Windows level, the best option just to ask IT support. Main cloud providers always provide you dedicated hardware
+**How to detect:** I don't this is possible on Windows level, the best option just to ask IT support. Main cloud providers always provide you with dedicated hardware
+
+### Database mirroring setup
+
+One client set up a database mirroring using “High safety without automatic failover” mode. In this mode, a process waits for transactions commit on both servers. This caused huge IO delays(like one record inserts for several seconds), not [supported](https://docs.microsoft.com/en-us/dynamicsax-2012/appuser-itpro/sql-server-topology-recommendations-for-availability-and-performance) by Microsoft and solution was to change mirroring to High-performance mode.
 
 
 
 SQL Server issues
 
-Batch deadlocks
+
 
 Implement history logs cleanup
 
-Missing indexes
+### Missing indexes
 
-That was a common problem. After fixing some 
+That was a common problem. Usually, you use a missing index [query](https://github.com/TrudAX/TRUDScripts/blob/master/Performance/AX%20Technical%20Audit.md#missing-indexes) to find such indexes, but I also added a new column to TOP SQL [query](https://github.com/TrudAX/TRUDScripts/blob/master/Performance/AX%20Technical%20Audit.md#get-top-sql) - "Has 99%" that allows to quickly see your TOP SQL queries that have 99% missing index impact recommendation
+
+
 
 ### Parameters sniffing
 
+Parameter sniffing can be a huge problem, especially if you have separate teams responsible for SQL Server and AX. In this case, there was just one custom query executed during a ledger journal posting. Before the performance audit client spent about a month with tons of e-mails between AX team, SQL team and Microsoft support trying to implement typical recommendations like statistics refresh, re-indexes with a different fill-factor and so on..
+
+The issue has been quickly resolved by creating a new plan guide with [OPTIMIZE FOR UNKNOWN](https://github.com/TrudAX/TRUDScripts/blob/master/Performance/AX%20Technical%20Audit.md#create-a-plan-guide) hint.
+
+The advice here is never using statistics or re-indexes to solve such issues, in the origin blog post I have some links what the approach should be.
 
 
 
-
-### AOS and Terminal servers
-
-
-
-Waiting time for batch tasks
+### AOS and Terminal servers issues
 
 
 
+### Waiting time for batch tasks
+
+There is some old recommendation on the Internet that when you setup an AX batch server you should allocate only several threads per CPU core. In this case batch server was setup with 32 threads and such low setting caused batch execution delays(as there were no free threads available). To identify such problems, I created a SQL [query](https://github.com/TrudAX/TRUDScripts/blob/master/Performance/Jobs/DelayedBatchTasks.txt ) that compares batch job "Planned execution start time" with the "Actual start time". It is not good if you see some differences between these numbers. 
+
+![Batch delays](BatchDelays.png)
+
+The advice here is to increase this "Maximum batch threads" number until you have CPU and Memory resources on AOS(modern server can handle hundreds of threads). What is interesting that in the new D365FO version Microsoft has added **Batch priority-based scheduling**(PU31), but this feature probably hides the problem.
 
 
-Printing delay
+
+#### Printing delay
 
 
 
-Application issues
+### Slow operations
+
+A lot of clients experienced issues with operations already fixed by Microsoft.
+
+Top 2 problems here that were almost on every client: 
+
+- **Batch tables deadlocks** - was fixed in CU13 *KB3209851Continuous deadlocks in batch tables* - Microsoft switched locks processing to application locks
+- **Locks and deadlocks on InventSumDeltaDim** - was fixed in *KB4019571 Deadlocking on InventSumDeltaDim causes Sales order release batch to fail*. The solution is quite simple - delete RecId index and replace it with TTSItemCheckDimIdx
+
+The best way to start any performance investigation if users are complaining to individual operations is to search for the solution on LCS issue search(you can search by description or by AOT element). For example for AX2012R3, there are 120 performance-related fixes to different parts of the system(you can view the full list searching by "slow")
+
+![](SlowLCS.png)
+
+Also is it helpful to install on your project the latest standard version on AX2012 and use it as a reference(if you have such application, hotfixes is much easy to install by extracting them as)
+
+With the latest version definition there is a trick - if you google "latest AX version" you probably find this page - [Overview of Microsoft Dynamics AX build numbers](https://cloudblogs.microsoft.com/dynamics365/no-audience/2012/03/29/overview-of-microsoft-dynamics-ax-build-numbers/). The problem with this site that it is no more updated. Current AX2012R3 latest version(both for the Binary and application) is called "August 2019 release". It can be downloaded from *LCS - AX2012 project - Updates -  UPDATE INSTALLER FOR MICROSOFT DYNAMICS AX 2012 R3*
 
 
 
-Unused Financial dimension sets
+### Application issues
 
-Each dimension set is a different ledger transaction view. The current setup means when we create a one ledger transaction – 16 different transactions will be created(they are used in Trial balance report) 
+I saw these settings that affected performance:
 
- 
+#### Unused Financial dimension sets
+
+Some customers initially created a lot of “Financial dimension sets” but used only several from this list. For example, the setup below means when the system creates a one ledger transaction – 16 different dimension set transactions will be created(they are used in Trial balance report)  
 
 ![UnusedFinancialSets](UnusedFinancialSets.png)
 
-The problem that most of the dimensions set are not used by users(see the number of unprocessed records per dimension set)
+To get what is used, I created the following query(it displays the number of unprocessed records per dimension set):
 
- 
-
-select count(*) as NumberOfRecords, DimensionHierarchy.NAME from DIMENSIONFOCUSUNPROCESSEDTRANSACTIONS
-
-join DimensionHierarchy on DIMENSIONFOCUSUNPROCESSEDTRANSACTIONS.FOCUSDIMENSIONHIERARCHY = DimensionHierarchy.RECID
-
+```sql
+select count(*) as NumberOfRecords, DimensionHierarchy.NAME from DIMENSIONFOCUSUNPROCESSEDTRANSACTIONS join DimensionHierarchy on DIMENSIONFOCUSUNPROCESSEDTRANSACTIONS.FOCUSDIMENSIONHIERARCHY = DimensionHierarchy.RECID
 group by DIMENSIONFOCUSUNPROCESSEDTRANSACTIONS.FOCUSDIMENSIONHIERARCHY, DimensionHierarchy.NAME
+```
 
-Probable dimension sets where the number of unprocessed records is more than 10k can be deleted
+Solution was to delete unused sets
 
-**Recommendation:**
+#### Pending workflow tasks 
 
-Need to delete not used Dimension sets and clean DIMENSIONFOCUSUNPROCESSEDTRANSACTIONS table 
-
-
+If you use workflow, you need to check that the number of tasks in Pending status will not grow. You can check for such tasks in Workflow history form and if there are some Pending tasks that more than 1 year old - delete such tasks  
 
 ## Summary
 
-Using these basic steps you can resolve your Dynamics AX performance problems and make your users happy. All scripts related to this post are available on my [GitHub](https://github.com/TrudAX/TRUDScripts/blob/master/Performance/AX%20Technical%20Audit.md). If you see that some useful staff is missing, feel free to post a comment.
-
-There are some Microsoft blog posts about performance: [Managing general performance issues in Microsoft Dynamics AX](https://cloudblogs.microsoft.com/dynamics365/no-audience/2014/09/11/managing-general-performance-issues-in-microsoft-dynamics-ax/?source=axsupport), [Analysis scripts for Performance Analyzer v2.0](https://cloudblogs.microsoft.com/dynamics365/no-audience/2016/09/08/analysis-scripts-for-performance-analyzer-v2-0/?source=axsupport).
-
-Also worth to check this great SQL Server resources collection - [SQL Server KIT](https://github.com/ktaranov/sqlserver-kit).
+In this post, I tried to provide some examples of what can be found during the performance review. The original post is [here](https://denistrunin.com/performance-audit/), all scripts related to this post are available on my [GitHub](https://github.com/TrudAX/TRUDScripts/blob/master/Performance/AX%20Technical%20Audit.md). If you see that something is missing or what to share some performance-related story, feel free to post a comment.
