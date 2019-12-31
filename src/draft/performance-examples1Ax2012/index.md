@@ -1,4 +1,4 @@
-﻿---
+---
 title: "Examples of AX2012/ AX2009 performance problems"
 date: "2019-06-05T20:12:03.284Z"
 tags: ["SQL", "Performance"]
@@ -15,7 +15,7 @@ It is more like a collection of the examples for my previous post [Dynamics AX p
 
 ## Server related issues
 
-There were a set of problems
+There were a set of problems where users complain about "slow system" in general
 
 ### Shared hardware usage for AX SQL server 
 
@@ -26,6 +26,17 @@ This was quite an unusual issue. The whole AX implementation was located on VM c
 ### Database mirroring setup
 
 One client set up a database mirroring using “High safety without automatic failover” mode. In this mode, a process waits for transactions commit on both servers. This caused huge IO delays(like one record inserts for several seconds), not [supported](https://docs.microsoft.com/en-us/dynamicsax-2012/appuser-itpro/sql-server-topology-recommendations-for-availability-and-performance) by Microsoft and solution was to change mirroring to High-performance mode.
+
+**How to detect:** Such issue is quite easy to detect using [Wait statistics](https://github.com/TrudAX/TRUDScripts/blob/master/Performance/AX%20Technical%20Audit.md#wait-statistics) script. If you see that more that 80% waits are disk related it is a time to check what is a reason for this.
+
+### Slow performance due to low SQL Server memory
+
+AX is an OLTP system; it should not read any data from the disk during the normal daily operations. So SQL Server should have enough memory to hold the active data. If you don't have it - the available memory should be increased
+
+**How to detect:** Check TOP SQL queries during the day – if you have a lot physical disk reads, it is time to increase SQL Server memory(queries of cause should have proper indexes)
+
+![Physical reads](PhysicalReads.png)
+
 
 
 
@@ -57,6 +68,8 @@ The advice here is never using statistics or re-indexes to solve such issues, in
 
 ### Waiting time for batch tasks
 
+Original client complain was that integration very slow. During the analysis  
+
 There is some old recommendation on the Internet that when you setup an AX batch server you should allocate only several threads per CPU core. In this case batch server was setup with 32 threads and such low setting caused batch execution delays(as there were no free threads available). To identify such problems, I created a SQL [query](https://github.com/TrudAX/TRUDScripts/blob/master/Performance/Jobs/DelayedBatchTasks.txt ) that compares batch job "Planned execution start time" with the "Actual start time". It is not good if you see some differences between these numbers. 
 
 ![Batch delays](BatchDelays.png)
@@ -65,7 +78,9 @@ The advice here is to increase this "Maximum batch threads" number until you hav
 
 
 
-#### Printing delay
+#### Huge delays during orders posing and printing
+
+That was quite interesting case. Client complained about periodic huge delays during the Sales order posting. The issue can't be 
 
 
 
@@ -78,7 +93,7 @@ Top 2 problems here that were almost on every client:
 - **Batch tables deadlocks** - was fixed in CU13 *KB3209851Continuous deadlocks in batch tables* - Microsoft switched locks processing to application locks
 - **Locks and deadlocks on InventSumDeltaDim** - was fixed in *KB4019571 Deadlocking on InventSumDeltaDim causes Sales order release batch to fail*. The solution is quite simple - delete RecId index and replace it with TTSItemCheckDimIdx
 
-The best way to start any performance investigation if users are complaining to individual operations is to search for the solution on LCS issue search(you can search by description or by AOT element). For example for AX2012R3, there are 120 performance-related fixes to different parts of the system(you can view the full list searching by "slow")
+The best way to start any performance investigation if users are complaining to individual operations is to search for the solution on LCS issue search(you can search by description or by AOT element). For example for AX2012R3, there are 120 resolved performance-related fixes to different parts of the system(you can view the full list searching by "slow")
 
 ![](SlowLCS.png)
 
