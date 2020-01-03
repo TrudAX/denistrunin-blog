@@ -46,15 +46,32 @@ AX is an OLTP system; it should not read any data from the disk during the norma
 
 That was a common problem. Usually, you use a missing index [query](https://github.com/TrudAX/TRUDScripts/blob/master/Performance/AX%20Technical%20Audit.md#missing-indexes) to find such indexes, but I also added a new column to TOP SQL [query](https://github.com/TrudAX/TRUDScripts/blob/master/Performance/AX%20Technical%20Audit.md#get-top-sql) - "Has 99%" that allows to quickly see your TOP SQL queries that have 99% missing index impact recommendation
 
+![TopSQL99](TopSQL99.png)
+
 ### Parameters sniffing
 
-Parameter sniffing can be a huge problem, especially if you have separate teams responsible for SQL Server and AX. We had a case where a client complained about periodic slow ledger journal posting.
+Parameter sniffing can be a huge problem, especially if you have separate teams responsible for SQL Server and AX. We had a case where a client complained about periodic slow ledger journal posting that stopped the work of a whole accounting department.
 
 In that case there was just one custom query executed during a posting affected by parameters sniffing(non optimal plan was initially selected and cached). Before the performance audit client spent about a month with tons of e-mails between AX team, SQL team and Microsoft support trying to implement typical recommendations like statistics refresh, re-indexes with a different fill-factor and so on..
 
 The issue has been quickly resolved by creating a new plan guide with [OPTIMIZE FOR UNKNOWN](https://github.com/TrudAX/TRUDScripts/blob/master/Performance/AX%20Technical%20Audit.md#create-a-plan-guide) hint.
 
-The advice here is never use statistics or re-indexes to solve such issues, in the origin blog post I have some links what the approach should be.
+**How to detect:** To start with you need to analyze "Get Top SQL" output and check queries from the top. Often the first action is to compare the actual plan with the Unknown parameters plan. To do this: 
+
+- Copy a query to a new SQL window and replace “(“ with “declare” and remove the last “)”
+- Press “Display estimated execution plan” button  
+
+Compare it with the plan from the "Get Top SQL" output, if they are different, you need to analyze why.
+
+![ActualPlanWithUnknown](ComparePlanWithUnknown.png)
+
+You need to know what is a logical reason for this query, how data is distributed in your tables, how unique(or how selective) each condition in the select query, why SQL generates 2 different plans and which plan is the correct one. 
+
+To view the actual parameters for the plan in cache you need to press "Show Execution Plan XML.." on plan itself and scroll to the bottom. You can use a handy tool [MSSQLPlanToSpExecuteSql](https://github.com/denissukhotin/MSSQLPlanToSpExecuteSql) by Denis Sukhotin to convert this XLM to a normal SQL with the actual values instead of @P1. This allows you to execute this query from SSMS with different parameter values. 
+
+![PlanXML](PlanXML.png)
+
+The main advice here is never use statistics update or re-indexing to solve such issues, in the origin blog post I have some links what the approach should be(like additional indexes, hints in AX, convert to **forceliterals**, create custom plan..)
 
 ### AOS and Terminal servers issues
 
@@ -70,9 +87,9 @@ The advice here is to increase this "Maximum batch threads" parameter for AOS un
 
 #### Huge delays during sales orders posing and printing
 
-That was quite interesting case. Client complained about periodic delays(1-2 minutes) during sales orders posting. The issue couldn't be replicated(initially it looked like typical parameters sniffing or blocking issue). The problem was that they also had a lot of other performance issues(a lot of missing indexes, old SQL version, High CPU load on SQL server and so on...). Client used AX2009 and they outsource 3 different companies to support Infrastructure, SQL and AX side.
+That was quite interesting and complex case. Client complained about periodic delays(1-2 minutes) during sales orders posting. The issue couldn't be replicated(initially it looked like typical parameters sniffing or blocking issue). The problem was that they also had a lot of other performance issues(a lot of missing indexes, old SQL version, High CPU load on SQL server and so on...). Client used AX2009 and they outsource 3 different companies to support Infrastructure, SQL and AX side.
 
-When all issues were fixed, system load become low they still sometimes complained about the original issue and we still can't replicate it. Setting up a SQL blocking alert and analyzing TOP SQL also didn't show any problem. We ended up with a monitoring modification that logged different stages of sales invoice posing. First finding was that duration didn't depends on number of SO lines, next iterations showed that delay actually caused by "print" method. Finally we found the reason for this delay - for users whey used Windows2016 Citrix clients(that is not supported by AX2009) and we in our tests used Windows2008R2 RDP to run AX client.  Printer driver reconfiguration solved this issue.
+When all issues were fixed, system load become low they still sometimes complained about the original issue and we still can't replicate it(in all our tests small orders posted within several seconds). Setting up a SQL blocking alert and analyzing TOP SQL also didn't show any problem. We ended up with a monitoring modification that logged different stages of sales invoice posing. First finding was that duration didn't depends on number of SO lines, next iterations showed that delay actually caused by "print" method. Finally we found the reason for this delay - for users whey used Windows2016 Citrix clients(that is not supported by AX2009) and we in our tests used Windows2008R2 RDP to run AX client.  Printer driver reconfiguration solved this issue.
 
 ### Slow standard operations
 
