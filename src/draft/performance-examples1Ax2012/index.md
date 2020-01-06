@@ -1,6 +1,6 @@
 ---
 title: "Examples of AX2012/ AX2009 performance problems"
-date: "2019-06-05T20:12:03.284Z"
+date: "2020-01-07T20:12:03.284Z"
 tags: ["SQL", "Performance"]
 path: "/performance-examples1Ax2012"
 featuredImage: "./logo.png"
@@ -66,10 +66,23 @@ Compare it with the plan from the "Get Top SQL" output, if they are different, y
 ![ActualPlanWithUnknown](ComparePlanWithUnknown.png)
 
 You need to know what is a logical reason for this query, how data is distributed in your tables, how unique(or how selective) each condition in the select query, why SQL generates 2 different plans and which plan is the correct one. 
+       
 
-To view the actual parameters for the plan in cache you need to press "Show Execution Plan XML.." on plan itself and scroll to the bottom. You can use a handy tool [MSSQLPlanToSpExecuteSql](https://github.com/denissukhotin/MSSQLPlanToSpExecuteSql) by Denis Sukhotin to convert this XLM to a normal SQL with the actual values instead of @P1. This allows you to execute this query from SSMS with different parameter values. 
+To view actual parameters for the plan in cache you need to press "Show Execution Plan XML.." on plan itself and scroll to the bottom. You can use a handy tool [MSSQLPlanToSpExecuteSql](https://github.com/denissukhotin/MSSQLPlanToSpExecuteSql) by Denis Sukhotin to convert this XLM to a normal SQL with the actual values instead of @P1. This allows you to execute this query from SSMS with different parameter values. 
 
 ![PlanXML](PlanXML.png)
+
+Some queries can be fixed only by changing X++ code. For example consider the following code, that  gets total quantity for the specified **Item** on a **License plate**.
+
+```csharp
+select sum(AvailPhysical) from inventSum
+	where inventSum.ItemId == @P1
+join inventDim 
+	where inventDim.inventDimId == inventSum.InventDimId &&
+          inventDim.LicensePlateId == @P2;
+```
+
+"License plate" is a very selective field, so for the normal parameters **InventDim(LicensePlateIdIdx)** index will be used. But what happens if we try to execute this statement with **@P2=""**. If we had this plan in cache, system will scan all **InventDim** records with empty **LicensePlateId**(and this will be a huge number of records) or if it will be the first run, starts processing this select with **ItemId** field, that is not so selective. Both options are incorrect and will lead to problems. But from the logical point of view **LicensePlateId=""** doesn't make any sense, so instead trying to fix this statement we need to fix it's parameters. In this case developer just forgot to add a check for the empty value, solution was to add this check and do not run this statement if **@P2** is empty.  
 
 The main advice here is never use statistics update or re-indexing to solve such issues, in the origin blog post I have some links what the approach should be(like additional indexes, hints in AX, convert to **forceliterals**, create custom plan..)
 
@@ -77,13 +90,13 @@ The main advice here is never use statistics update or re-indexing to solve such
 
 ### Waiting time for batch tasks
 
-A client complain was that integration is very slow. During the analysis I found that for integration they used a batch job that should be executed every minute, and some time it didn't.
+A client complain was that integration is very slow. During the analysis I found that for integration they used a batch job that should be executed every minute, and sometimes it didn't.
 
 There is some old recommendation on the Internet that when you setup an AX batch server you should allocate only several threads per CPU core. In this case batch server was setup with 32 threads and such low setting caused batch execution delays(as there were no free threads available). To identify such problems, I created a SQL [query](https://github.com/TrudAX/TRUDScripts/blob/master/Performance/Jobs/DelayedBatchTasks.txt ) that compares batch job "Planned execution start time" with the "Actual start time". It is not good if you see some differences between these numbers. 
 
 ![Batch delays](BatchDelays.png)
 
-The advice here is to increase this "Maximum batch threads" parameter for AOS until you have CPU and Memory resources(modern server can handle hundreds of threads). What is interesting that in the new D365FO version Microsoft has added **Batch priority-based scheduling**(PU31), but this feature probably hides the problem.
+The advice here is to increase this "Maximum batch threads" parameter for AOS until you have CPU and Memory resources(modern server can handle hundreds of threads). What is interesting that in the new D365FO version Microsoft has added **Batch priority-based scheduling**(PU31), but this feature probably just hides the problem.
 
 #### Huge delays during sales orders posing and printing
 
