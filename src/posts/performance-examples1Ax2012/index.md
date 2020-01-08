@@ -1,7 +1,7 @@
 ---
 title: "Examples of AX2012/ AX2009 performance problems"
 date: "2020-01-08T20:12:03.284Z"
-tags: ["SQL", "Performance"]
+tags: ["SQL", "Performance", "AX2012"]
 path: "/performance-examples1Ax2012"
 featuredImage: "./logo.png" 
 excerpt: "This post describes some real-life examples of AX2012/AX2009 performance problems and solutions for them."
