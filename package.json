@@ -32,7 +32,7 @@
     "typeface-merriweather": "0.0.72",
     "typeface-montserrat": "0.0.54",
     "typography": "^0.16.19",
-    "disqus-react": "^1.0.6",
+    "disqus-react": "^1.0.7",
     "gatsby-plugin-canonical-urls": "^2.1.0",
     "gatsby-plugin-netlify": "^2.1.0",
     "gatsby-plugin-remove-serviceworker": "^1.0.0",
