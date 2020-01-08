@@ -30,7 +30,7 @@ class BlogPostTemplate extends React.Component {
     const disqusShortname = "denis-trunin-programming-blog";
     const url = "https://denistrunin.com" + post.frontmatter.path;
     let disqusArticleIdentifier;
-    disqusArticleIdentifier = post.frontmatter.path;
+    disqusArticleIdentifier = location.pathname;//post.frontmatter.path;
     
       /*
     const disqusConfig = {
@@ -62,6 +62,7 @@ class BlogPostTemplate extends React.Component {
           <p>
             <strong>Similar posts:</strong>
           </p>
+
           <ul>
             {relatedPosts.map((post, index) => {
               return (
