@@ -28,7 +28,7 @@ class BlogPostTemplate extends React.Component {
     const shareIconSize = 32;
 
     const disqusShortname = "denis-trunin-programming-blog";
-    const url = "https://denistrunin.com" + post.frontmatter.path;
+    const url = "https://denistrunin.com" + location.pathname;//post.frontmatter.path;
     let disqusArticleIdentifier;
     disqusArticleIdentifier = location.pathname;//post.frontmatter.path;
     
@@ -40,7 +40,7 @@ class BlogPostTemplate extends React.Component {
     };
     */
    const disqusConfig = {
-    url: "https://denistrunin.com/",
+    url: url,//"https://denistrunin.com/",
     identifier: disqusArticleIdentifier,
     title: post.frontmatter.title
   };
@@ -62,7 +62,6 @@ class BlogPostTemplate extends React.Component {
           <p>
             <strong>Similar posts:</strong>
           </p>
-
           <ul>
             {relatedPosts.map((post, index) => {
               return (
