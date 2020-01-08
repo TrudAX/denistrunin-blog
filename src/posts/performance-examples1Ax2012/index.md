@@ -4,36 +4,36 @@ date: "2020-01-07T20:12:03.284Z"
 tags: ["SQL", "Performance"]
 path: "/performance-examples1Ax2012"
 featuredImage: "./logo.png"
-excerpt: "Real-life examples of AX2012/AX2009 performance problems and solutions for them."
+excerpt: "This post describes some real-life examples of AX2012/AX2009 performance problems and solutions for them."
 ---
 
 ## Introduction
 
-In this post, I try to describe some performance-related issues that I saw on clients(on AX2009 and  AX2012R3) and how they were resolved.
+In this post, I try to describe some performance-related issues that I faced on client projects(mostly versions AX2009 and  AX2012R3) and how they were resolved.
 
-It is more like a collection of the examples for my previous post [Dynamics AX performance audit](https://denistrunin.com/performance-audit/). Overall the concept described there worked, an analysis should be performed from the highest level and to continue by going deeper in the analysis.
+It is more like a collection of examples for my previous post [Dynamics AX performance audit](https://denistrunin.com/performance-audit/). It also ilustrates the initial concept described in this post: a performance analysis should be performed from the highest level and to continue by going deeper in details.
 
 ## Server related issues
 
-There were a set of problems where users complain about "slow system" in general
+There was a set of problems where users complained about "slow system" in general
 
 ### Shared hardware usage for AX SQL server
 
-This issue was quite an unusual one. The whole AX implementation was installed on VM cluster where every CPU core shared between several VMs. The number of VMs allocated to the same CPU core called *CPU allocation ratio*, and it was 1 to 5. You probably can save on hardware and electricity costs using such configuration, but as a result, overall system performance was very slow, especially during the day. [Microsoft Dynamics AX 2012 System Requirements](https://www.microsoft.com/en-au/download/details.aspx?id=11094) document clearly says that dedicated hardware should be used.
+This issue was quite an unusual one. The whole AX implementation was installed on VM cluster where every CPU core shared between several VMs. The number of VMs allocated to the same CPU core is called *CPU allocation ratio*, and it was 1 to 5. You probably can save your money on hardware and electricity costs using such configuration, but as a result, overall system performance was very slow, especially during the day. [Microsoft Dynamics AX 2012 System Requirements](https://www.microsoft.com/en-au/download/details.aspx?id=11094) document clearly says that dedicated hardware should be used.
 
-**How to detect:** I don't this is possible on Windows level, the best option just to ask IT support. Main cloud providers always provide you with dedicated hardware
+**How to detect:** I don't think is possible on Windows level, the best option is just to ask IT support. Main cloud providers always provide you with dedicated hardware
 
 ### Database mirroring setup
 
-One client set up a database mirroring using “High safety without automatic failover” mode. In this mode, a process waits for transactions commit on both servers. This setting caused huge IO delays(like one record inserts for several seconds), not [supported](https://docs.microsoft.com/en-us/dynamicsax-2012/appuser-itpro/sql-server-topology-recommendations-for-availability-and-performance) by Microsoft and solution was to change mirroring to High-performance mode.
+One client set up a database mirroring using “High safety without automatic failover” mode. In this mode, a process waits for transactions to commit on both servers. This setting caused huge IO delays(like one record inserts for several seconds), not [supported](https://docs.microsoft.com/en-us/dynamicsax-2012/appuser-itpro/sql-server-topology-recommendations-for-availability-and-performance) by Microsoft and solution was to switch on "High-performance" mode for mirroring settings .
 
-**How to detect:** Such issue is quite easy to detect using [Wait statistics](https://github.com/TrudAX/TRUDScripts/blob/master/Performance/AX%20Technical%20Audit.md#wait-statistics) script. If you see that more than 80% waits are disk related, it is a time to check what is a reason for this.
+**How to detect:** Such issue is quite easy to detect using [Wait statistics](https://github.com/TrudAX/TRUDScripts/blob/master/Performance/AX%20Technical%20Audit.md#wait-statistics) script. If you see that more than 80% waits are disk related, it is a time to check what the reason for this is.
 
 ### Slow performance due to low SQL Server memory
 
-Dynamics AX is an OLTP system; it should not read any data from the disk during the normal daily operations and SQL Server should have enough memory to hold the active data. If you don't have it - the available memory should be increased
+Dynamics AX is an OLTP system; it should not read any data from the disk during normal daily operations and SQL Server should have enough memory to hold the active data. If you don't have it - the available memory should be increased
 
-**How to detect:** Check TOP SQL queries during the day – if you have a lot physical disk reads, it is time to increase SQL Server memory(queries of cause should have proper indexes)
+**How to detect:** Check TOP SQL queries during the day – if you have a lot of physical disk reads, it is time to increase SQL Server memory(queries of course should have proper indexes)
 
 ![Physical reads](PhysicalReads.png)
 
@@ -49,11 +49,11 @@ That is a common problem. Usually, you use a missing index [query](https://githu
 
 Parameter sniffing can be a huge problem, especially if you have separate teams responsible for SQL Server and AX. We had a case where a client complained about periodic slow ledger journal posting that stopped the work of a whole accounting department.
 
-In that case, there was just one custom query executed during a posting affected by parameters sniffing(the not optimal plan was initially selected and cached). Before the performance audit client spent about a month with tons of e-mails between AX team, SQL team and Microsoft support trying to implement typical recommendations like statistics refresh, re-indexes with a different fill-factor and so on...
+In that case, the reason was just one custom query affected by parameters sniffing(not the optimal plan was initially selected and cached). Before the performance audit client spent about a month with tons of e-mails between AX team, SQL team and Microsoft support trying to implement typical recommendations like statistics refresh, re-indexes with a different fill-factor and so on...
 
 The issue has been quickly resolved by creating a new plan guide with [OPTIMIZE FOR UNKNOWN](https://github.com/TrudAX/TRUDScripts/blob/master/Performance/AX%20Technical%20Audit.md#create-a-plan-guide) hint.
 
-**How to detect:** To start with you need to analyse "Get Top SQL" output and check queries from the top. Often, the first action is to compare the actual plan with the Unknown parameters plan. To do this:
+**How to detect:** To start with you need to analyse "Get Top SQL" output and check queries from the top. Often, the first step is to compare the actual plan with the Unknown parameters plan. To do this:
 
 - Copy a query to a new SQL window and replace “(“ with “declare” and remove the last “)”
 - Press “Display estimated execution plan” button  
