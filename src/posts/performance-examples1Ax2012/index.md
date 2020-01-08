@@ -1,9 +1,9 @@
-﻿---
+---
 title: "Examples of AX2012/ AX2009 performance problems"
-date: "2020-01-07T20:12:03.284Z"
+date: "2020-01-08T20:12:03.284Z"
 tags: ["SQL", "Performance"]
 path: "/performance-examples1Ax2012"
-featuredImage: "./logo.png"
+featuredImage: "./logo.png" 
 excerpt: "This post describes some real-life examples of AX2012/AX2009 performance problems and solutions for them."
 ---
 
@@ -11,29 +11,29 @@ excerpt: "This post describes some real-life examples of AX2012/AX2009 performan
 
 In this post, I try to describe some performance-related issues that I faced on client projects(mostly versions AX2009 and  AX2012R3) and how they were resolved.
 
-It is more like a collection of examples for my previous post [Dynamics AX performance audit](https://denistrunin.com/performance-audit/). It also ilustrates the initial concept described in this post: a performance analysis should be performed from the highest level and to continue by going deeper in details.
+It is more like a collection of examples for my previous post [Dynamics AX performance audit](https://denistrunin.com/performance-audit/). It also illustrates the initial concept described in this post: a performance analysis should be performed from the highest level and to continue by going deeper in details.
 
 ## Server related issues
 
-There was a set of problems where users complained about "slow system" in general
+There was a set of problems where users complained about the "slow system" in general
 
 ### Shared hardware usage for AX SQL server
 
 This issue was quite an unusual one. The whole AX implementation was installed on VM cluster where every CPU core shared between several VMs. The number of VMs allocated to the same CPU core is called *CPU allocation ratio*, and it was 1 to 5. You probably can save your money on hardware and electricity costs using such configuration, but as a result, overall system performance was very slow, especially during the day. [Microsoft Dynamics AX 2012 System Requirements](https://www.microsoft.com/en-au/download/details.aspx?id=11094) document clearly says that dedicated hardware should be used.
 
-**How to detect:** I don't think is possible on Windows level, the best option is just to ask IT support. Main cloud providers always provide you with dedicated hardware
+**How to detect:** I don't think is possible on Windows level, the best option is to ask IT support. Leading cloud providers always provide you with dedicated hardware
 
 ### Database mirroring setup
 
-One client set up a database mirroring using “High safety without automatic failover” mode. In this mode, a process waits for transactions to commit on both servers. This setting caused huge IO delays(like one record inserts for several seconds), not [supported](https://docs.microsoft.com/en-us/dynamicsax-2012/appuser-itpro/sql-server-topology-recommendations-for-availability-and-performance) by Microsoft and solution was to switch on "High-performance" mode for mirroring settings .
+One client set up a database mirroring using “High safety without automatic failover” mode. In this mode, a process waits for transactions to commit on both servers. This setting caused massive IO delays(like one record inserts for several seconds), not [supported](https://docs.microsoft.com/en-us/dynamicsax-2012/appuser-itpro/sql-server-topology-recommendations-for-availability-and-performance) by Microsoft and solution was to switch on "High-performance" mode for mirroring settings.
 
-**How to detect:** Such issue is quite easy to detect using [Wait statistics](https://github.com/TrudAX/TRUDScripts/blob/master/Performance/AX%20Technical%20Audit.md#wait-statistics) script. If you see that more than 80% waits are disk related, it is a time to check what the reason for this is.
+**How to detect:** Such issue is quite easy to identify using [Wait statistics](https://github.com/TrudAX/TRUDScripts/blob/master/Performance/AX%20Technical%20Audit.md#wait-statistics) script. If you see that more than 80% waits are disk related, it is a time to check what the reason for this is.
 
 ### Slow performance due to low SQL Server memory
 
-Dynamics AX is an OLTP system; it should not read any data from the disk during normal daily operations and SQL Server should have enough memory to hold the active data. If you don't have it - the available memory should be increased
+Dynamics AX is an OLTP system; it should not read any data from the disk during routine daily operations and SQL Server should have enough memory to hold the active data. If you don't have it - the available memory should be increased
 
-**How to detect:** Check TOP SQL queries during the day – if you have a lot of physical disk reads, it is time to increase SQL Server memory(queries of course should have proper indexes)
+**How to detect:** Check TOP SQL queries during the day – if you have a lot of physical disk reads, it is time to increase SQL Server memory(queries, of course, should have proper indexes)
 
 ![Physical reads](PhysicalReads.png)
 
@@ -86,9 +86,9 @@ The main advice here is never use statistics update or re-indexing to solve such
 
 ### Waiting time for batch tasks
 
-A client complain was that integration was very slow. During the analysis, I found that for integration they used a batch job that should be executed every minute, and sometimes it wasn't.
+A client complained about slow integration. During the analysis, I found that for the integration they used a batch job that should be executed every minute, and sometimes it wasn't.
 
-There is one old recommendation on the Internet that when you set up an AX batch server you should allocate only several threads per CPU core. In this case batch server was set up with 32 threads and such low setting caused batch execution delays(as there were no free threads available). To identify such problems, I created a SQL [query](https://github.com/TrudAX/TRUDScripts/blob/master/Performance/Jobs/DelayedBatchTasks.txt ) that compares batch job "Planned execution start time" with the "Actual start time". If you see some differences between these numbers you have the same problem.
+There is one old recommendation on the Internet that when you set up an AX batch server, you should allocate only several threads per CPU core. In this case batch server was set up with 32 threads and such low setting caused batch execution delays(as there were no free threads available). To identify such problems, I created a SQL [query](https://github.com/TrudAX/TRUDScripts/blob/master/Performance/Jobs/DelayedBatchTasks.txt ) that compares batch job "Planned execution start time" with the "Actual start time". If you see some differences between these numbers, you have the same problem.
 
 ![Batch delays](BatchDelays.png)
 
@@ -113,7 +113,7 @@ The best way to start any performance investigation if users are complaining to 
 
 ![LCS Search](SlowLCS.png)
 
-Also it is helpful to have the latest standard version on AX2012 and use it as a reference(if you have such application you can also extract hotfixes from it as xpo)
+Also, it is helpful to have the latest standard version on AX2012 and use it as a reference(if you have such application you can also extract hotfixes from it as xpo)
 
 With the latest version definition there is a trick - if you google "latest AX version" you will probably find this page - [Overview of Microsoft Dynamics AX build numbers](https://cloudblogs.microsoft.com/dynamics365/no-audience/2012/03/29/overview-of-microsoft-dynamics-ax-build-numbers/). The problem with this site that it is not updated anymore. Current AX2012R3 latest version(both for the Binary and application) is called "August 2019 release". It can be downloaded from *LCS - AX2012 project - Updates -  UPDATE INSTALLER FOR MICROSOFT DYNAMICS AX 2012 R3*
 
