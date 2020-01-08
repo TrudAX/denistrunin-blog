@@ -28,9 +28,9 @@ class BlogPostTemplate extends React.Component {
     const shareIconSize = 32;
 
     const disqusShortname = "denis-trunin-programming-blog";
-    const url = "https://denistrunin.com" + location.pathname;//post.frontmatter.path;
+    const url = "https://denistrunin.com" + this.props.location.pathname;//post.frontmatter.path;
     let disqusArticleIdentifier;
-    disqusArticleIdentifier = location.pathname;//post.frontmatter.path;
+    disqusArticleIdentifier = this.props.location.pathname;//post.frontmatter.path;
     
       /*
     const disqusConfig = {
