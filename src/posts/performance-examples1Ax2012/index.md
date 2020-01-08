@@ -62,7 +62,7 @@ Compare it with the plan from the "Get Top SQL" output; if they are different, y
 
 ![ActualPlanWithUnknown](ComparePlanWithUnknown.png)
 
-You need to know what is a logical reason for this query, how data is distributed in your tables, how unique(or how selective) each condition in the select query, why SQL generates two different plans and which plan is the correct one.
+You need to know what logical reason for this query is, how data is distributed in your tables, how unique(or how selective) each condition in the select query is, why SQL Server generates two different plans and which plan is the correct one.
 
 To view actual parameters for the plan in the cache you need to press "Show Execution Plan XML.." on the plan itself and scroll to the bottom. You can use a handy tool [MSSQLPlanToSpExecuteSql](https://github.com/denissukhotin/MSSQLPlanToSpExecuteSql) by Denis Sukhotin to convert this XLM to a normal SQL with the actual values instead of @P1. Then you can execute this query from SSMS with different parameter values.
 
@@ -78,7 +78,7 @@ join inventDim
           inventDim.LicensePlateId == @P2;
 ```
 
-"License plate" is a very selective field, so for the normal parameters **InventDim(LicensePlateIdIdx)** index will be used. But what happens if we try to execute this statement with **@P2=""**. If we had this plan in cache, the system would scan all **InventDim** records with empty **LicensePlateId**(and this will be a huge number of records) or if it will be the first run, starts processing this select with **ItemId** field, that is not so selective. Both options are incorrect and will lead to problems. But from the logical point of view **LicensePlateId=""** doesn't make any sense, so instead of trying to fix this statement, we need to fix its parameters. In this case, a developer just forgot to add a check for an empty value, and the solution was to add this check and do not run this statement if **@P2** is empty.  
+"License plate" is a very selective field, so for the normal parameters **InventDim(LicensePlateIdIdx)** index will be used. But what happens if we try to execute this statement with **@P2=""**. If we had this plan in the cache, the system would scan all **InventDim** records with empty **LicensePlateId**(and this will be a huge number of records) or if it were the first run, it would start processing this select with **ItemId** field, that is not so selective. Both options are incorrect and will lead to problems. But from the logical point of view **LicensePlateId=""** doesn't make any sense, so instead of trying to fix this statement, we need to fix its parameters. In this case, a developer just forgot to add a check for an empty value, and the solution was to add this check and not to run this statement if **@P2** is empty.  
 
 The main advice here is never use statistics update or re-indexing to solve such issues, in the origin blog post I have some links what the approach should be(like additional indexes, hints in AX, convert to **forceliterals**, create custom plan..)
 
@@ -86,36 +86,36 @@ The main advice here is never use statistics update or re-indexing to solve such
 
 ### Waiting time for batch tasks
 
-A client complains was that integration is very slow. During the analysis, I found that for integration they used a batch job that should be executed every minute, and sometimes it didn't.
+A client complain was that integration was very slow. During the analysis, I found that for integration they used a batch job that should be executed every minute, and sometimes it wasn't.
 
-There is some old recommendation on the Internet that when you set up an AX batch server you should allocate only several threads per CPU core. In this case batch server was set up with 32 threads and such low setting caused batch execution delays(as there were no free threads available). To identify such problems, I created a SQL [query](https://github.com/TrudAX/TRUDScripts/blob/master/Performance/Jobs/DelayedBatchTasks.txt ) that compares batch job "Planned execution start time" with the "Actual start time". It is not good if you see some differences between these numbers.
+There is one old recommendation on the Internet that when you set up an AX batch server you should allocate only several threads per CPU core. In this case batch server was set up with 32 threads and such low setting caused batch execution delays(as there were no free threads available). To identify such problems, I created a SQL [query](https://github.com/TrudAX/TRUDScripts/blob/master/Performance/Jobs/DelayedBatchTasks.txt ) that compares batch job "Planned execution start time" with the "Actual start time". If you see some differences between these numbers you have the same problem.
 
 ![Batch delays](BatchDelays.png)
 
-The advice here is to increase this "Maximum batch threads" parameter for AOS until you have CPU and Memory resources(modern server can handle hundreds of threads). What is interesting that in the new D365FO version Microsoft has added **Batch priority-based scheduling**(PU31), but this feature probably just hides the problem.
+My advice here is to increase this "Maximum batch threads" parameter for AOS until you have CPU and Memory resources(modern server can handle hundreds of threads). It is interesting that in the new D365FO version Microsoft has added **Batch priority-based scheduling**(PU31), but this feature probably just hides the problem.
 
 #### Huge delays during sales orders posing and printing
 
-That was a quite interesting and complex case. A client complained about periodic delays(1-2 minutes) during sales orders posting. The issue couldn't be replicated(initially it looked like typical parameters sniffing or blocking issue). The problem was that they also had a lot of other performance issues(a lot of missing indexes, old SQL version, High CPU load on SQL server and so on...). The client used AX2009 and they outsource three different companies to support Infrastructure, SQL and AX side.
+That was a quite interesting and complex case. A client complained about periodic delays(1-2 minutes) during sales orders posting. The issue couldn't be replicated(initially it looked like typical parameters sniffing or blocking issue). The problem was that they also had a lot of other performance issues(a lot of missing indexes, old SQL version, High CPU load on SQL server and so on...). The client used AX2009 and they outsourced three different companies to support Infrastructure, SQL and AX side.
 
-When we fixed all performance issues, the system load become low, but they still sometimes complained about the original issue and we still can't replicate it(in all our tests small orders posted within several seconds). Setting up a SQL blocking alert and analysing TOP SQL also didn't show any problem. We ended up with a monitoring modification that logged different stages of sales invoice posing. The first finding was that posting time didn't depend on number of SO lines, next iterations showed that delay caused by the "print" method. Finally, we found the reason for this delay - for users whey used Windows2016 Citrix clients(AX2009 does not support that) and we in our tests used Windows2008R2 RDP to run AX client.  Printer driver reconfiguration solved this issue.
+When we fixed all performance issues, the system load became low, but they still sometimes complained about the original issue and we still couldn't replicate it(in all our tests small orders posted within several seconds). Setting up a SQL blocking alert and analysing TOP SQL also didn't show any problem. We ended up with a monitoring modification that logged different stages of sales invoice posing. The first finding was that posting time didn't depend on the number of sales order lines, next iterations showed that delay was caused by the "print" method. Finally, we found the reason for this delay - users used Windows2016 Citrix clients(AX2009 does not support that) and in our tests we used Windows2008R2 RDP to run AX client. Printer driver reconfiguration solved this issue.
 
 ### Slow standard operations
 
 A lot of clients experienced issues with operations already fixed by Microsoft.
 
-Top 2 problems here that were almost on every client:
+Top 2 problems that almost all clients had:
 
 - **Batch tables deadlocks** - was fixed in CU13 *KB3209851Continuous deadlocks in batch tables* - Microsoft switched locks processing to application locks
 - **Locks and deadlocks on InventSumDeltaDim** - was fixed in *KB4019571 Deadlocking on InventSumDeltaDim causes Sales order release batch to fail*. The solution is quite simple - delete RecId index and replace it with TTSItemCheckDimIdx
 
-The best way to start any performance investigation if users are complaining to individual operations is to search for the solution on LCS "Issue search"(you can search by description or by AOT element name). For example for AX2012R3, there are 120 resolved performance-related fixes to different parts of the system(you can view the full list searching by "slow")
+The best way to start any performance investigation if users are complaining to individual operations is to search for the solution on the LCS "Issue search"(you can search by description or by AOT element name). For example for AX2012R3, there are 120 resolved performance-related fixes to different parts of the system(you can view the full list searching by "slow")
 
 ![LCS Search](SlowLCS.png)
 
-Also is it helpful to install on your project the latest standard version on AX2012 and use it as a reference(if you have such application, hotfixes is much easy to install by extracting them as)
+Also it is helpful to have the latest standard version on AX2012 and use it as a reference(if you have such application you can also extract hotfixes from it as xpo)
 
-With the latest version definition there is a trick - if you google "latest AX version" you probably find this page - [Overview of Microsoft Dynamics AX build numbers](https://cloudblogs.microsoft.com/dynamics365/no-audience/2012/03/29/overview-of-microsoft-dynamics-ax-build-numbers/). The problem with this site that it is no more updated. Current AX2012R3 latest version(both for the Binary and application) is called "August 2019 release". It can be downloaded from *LCS - AX2012 project - Updates -  UPDATE INSTALLER FOR MICROSOFT DYNAMICS AX 2012 R3*
+With the latest version definition there is a trick - if you google "latest AX version" you will probably find this page - [Overview of Microsoft Dynamics AX build numbers](https://cloudblogs.microsoft.com/dynamics365/no-audience/2012/03/29/overview-of-microsoft-dynamics-ax-build-numbers/). The problem with this site that it is not updated anymore. Current AX2012R3 latest version(both for the Binary and application) is called "August 2019 release". It can be downloaded from *LCS - AX2012 project - Updates -  UPDATE INSTALLER FOR MICROSOFT DYNAMICS AX 2012 R3*
 
 ### Application issues
 
@@ -123,11 +123,11 @@ I saw these settings that affected performance:
 
 #### Unused Financial dimension sets
 
-Some customers initially created a lot of “Financial dimension sets” but used only several from this list. For example, the setup below means that when the system creates a one ledger transaction – 16 different dimension set transactions will be created(they are used in Trial balance report)  
+Some customers initially created a lot of “Financial dimension sets” but used only several of them. For example, the setup below means that when the system creates a one ledger transaction – 16 different dimension set transactions will be created(they are used in Trial balance report)  
 
 ![UnusedFinancialSets](UnusedFinancialSets.png)
 
-To get what is used, I created the following query(it displays the number of unprocessed records per dimension set):
+To get what was used, I created the following query(it displays the number of unprocessed records per dimension set):
 
 ```sql
 select count(*) as NumberOfRecords, DimensionHierarchy.NAME from DIMENSIONFOCUSUNPROCESSEDTRANSACTIONS join DimensionHierarchy on DIMENSIONFOCUSUNPROCESSEDTRANSACTIONS.FOCUSDIMENSIONHIERARCHY = DimensionHierarchy.RECID
@@ -138,8 +138,8 @@ The solution was to delete unused sets
 
 #### Pending workflow tasks
 
-If you use workflow, you need to check that the number of tasks in a Pending status will not grow. You can check for such tasks in Workflow history form and if there are some old and unused Pending tasks - delete them
+If you use workflow, you need to check that the number of tasks in a Pending status will not grow. You can check for such tasks in the **Workflow history** form and if there are some old and unused Pending tasks - delete them.
 
 ## Summary
 
-In this post, I tried to provide some examples of what can be found during the performance review. The original post is [here](https://denistrunin.com/performance-audit/), all scripts related to this post are available on my [GitHub](https://github.com/TrudAX/TRUDScripts/blob/master/Performance/AX%20Technical%20Audit.md). If you see that something is missing or what to share some performance-related story, feel free to post a comment.
+In this post, I tried to provide some examples of what can be found during the performance review. The original post that describes the review process is [here](https://denistrunin.com/performance-audit/), all scripts related to it are available on my [GitHub](https://github.com/TrudAX/TRUDScripts/blob/master/Performance/AX%20Technical%20Audit.md). If you see that something is missing or want to share some performance-related stories, feel free to post a comment.
