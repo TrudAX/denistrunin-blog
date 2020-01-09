@@ -214,7 +214,7 @@ At the end of these events, a customer decides that index rebuild or/and statist
 
 Check this article([Index Maintenance Madness](https://www.brentozar.com/archive/2017/12/index-maintenance-madness/) and a great [video](https://www.youtube.com/watch?v=iEa6_QnCFMU) from Brent Ozar that explains the theory and psychology in details.
 
-Recommendations here is that you should not execute these operations in any way they can affect system performance. If you have a free maintenance window, run them once a week using Ola Hallengren‘s [IndexOptimize](https://ola.hallengren.com/sql-server-index-and-statistics-maintenance.html) procedure. It is more efficient than the standard SQL agent tasks as they allow you to execute UPDATE STATISTICS command without "WITH PERCENTAGE" clause and for the index rebuild you can specify fragmentation limits.
+Recommendations here is that you should not execute these operations in any way they can affect system performance. If you have a free maintenance window, run them once a week using Ola Hallengren‘s [IndexOptimize](https://ola.hallengren.com/sql-server-index-and-statistics-maintenance.html) procedure. It is more efficient than the standard SQL agent tasks as they allow you to execute UPDATE STATISTICS command without "WITH PERCENTAGE" clause and for the index rebuild you can specify fragmentation limits. Check this article for the details - [Managing Index Fragmentation](https://www.brentozar.com/archive/2019/08/dba-training-plan-10-managing-index-fragmentation/).
 
 Don't use rebuild index and statistics update jobs to resolve any performance problems.
 
