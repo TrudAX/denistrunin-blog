@@ -45,10 +45,13 @@
     "typography-theme-github": "^0.16.19"
   },
   "devDependencies": {
-    "prettier": "^1.18.2",
-    "core-js": "^2.6.0",
-    "eslint": "^4.19.1",
-    "eslint-plugin-react": "^7.14.2"
+    "prettier": "^1.19.1",
+    "core-js": "^3.6.3",
+    "eslint": "^6.8.0",
+    "typescript": "^3.7.4",
+    "bufferutil": "^4.0.1",
+    "utf-8-validate": "^5.0.2",
+    "eslint-plugin-react": "^7.17.0"
   },
   "homepage": "https://github.com/TrudAX/denistrunin-blog",
   "keywords": [
