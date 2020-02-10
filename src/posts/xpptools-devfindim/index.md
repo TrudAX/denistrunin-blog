@@ -33,7 +33,7 @@ Sometimes you need to reference just one dimension value(for example get or set 
 
 All this can create a real mess, some of these options require a setup, some aren't compatible with cross-references.
 
-### Methods for working with Dimensions
+### Problem: Methods for working with Dimensions
 
 There are a lot of classes to manipulate dimensions, so it is often difficult to find the right one. Moreover, classes related to dimension were renamed in D365FO(comparing to AX2012). As a result, developers sometimes create a duplicate of the existing methods.
 
@@ -47,10 +47,14 @@ For example, if you google "assign a value to default dimension" the first link 
 
 To resolve the described issues I have created [DEVDimensionHelper](https://github.com/TrudAX/XppTools/blob/master/DEVCommon/DEVCommon/AxClass/DEVDimensionHelper.xml) class(you can rename it with your project prefix or use the default DEV). The idea is to collect all the necessary stuff in one place.
 
-In order to reference a dimension, you create a static constant in this class
+In order to reference a dimension, you create a static method in this class with a default value
 
 ```csharp
-static const public Name BusinessUnit   = 'BusinessUnit';
+    static protected Name BusinessUnit   = 'BusinessUnit';
+    static public Name BusinessUnit()  
+    { 
+        return BusinessUnit;  
+    }
 ```
 
 In this case, you don't need to perform any setup and can use "Find All References".
@@ -74,6 +78,20 @@ Currently this class contains the following references:
 As you see, there is no new code, all these it's just references(or small wrappers) to the standard classes. These methods will cover typical project requirements, if you need more, you can add them to this class. 
 
 The idea is to use this class as a starting point for any dimension related question on the project(even before Googling something). You get some dimension related question, you check this class, if there is no answer in it, research how to do this task and update the class with the solution(either in form of new methods or just references to existing objects).
+
+**Update 10/02/2020:**
+
+To avoid always hardcode dimension names, I have made the following adjustment in the solution:
+
+Created a static constructor in **DEVDimensionHelper** class that allows overriding the default dimension names(you need to uncomment this code or add your code)
+
+![Static constructor](StaticConstructor.png)
+
+Created a simple table and a form([DEVDimNamesReference](https://github.com/TrudAX/XppTools/blob/master/DEVTutorial/DEVTutorial/AxForm/DEVDimNamesReference.xml)) where you can setup dimension name references(this can be used for example in situations where you have CostCenter and CostCente dimensions)
+
+![](DimSetupForm.png)
+
+This form usage is optional, and even if it is used it requires zero setup - if the value in this form is not specified the default value from the class will be used. 
 
 ## Summary
 
