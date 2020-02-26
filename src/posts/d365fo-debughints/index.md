@@ -1,5 +1,5 @@
 ---
-title: "Visual Studion extensions to simplify your D365FO debug experience"
+title: "Visual Studio extensions to simplify your D365FO debug experience"
 date: "2020-02-27T20:12:03.284Z"
 tags: ["Debug", "D365FO Hints"]
 path: "/d365fo-debughints"
@@ -11,13 +11,12 @@ Visual Studio Marketplace contains lots of tools, and some of them can be used w
 
 ### Debug Attach Manager
 
-The first one is a free, open-source tool [Debug Attach Manager](https://marketplace.visualstudio.com/items?itemName=ViktarKarpach.DebugAttachManager) by Viktar Karpach. 
-To debug the running D365FO application you need to go to Debug > [Attach to process](https://microsoftdynamix.blogspot.com/2019/01/d365fo-debugging.html) > then select **iisexpress.exe** process and press Attach. 
+The first one is a free, open-source tool [Debug Attach Manager](https://marketplace.visualstudio.com/items?itemName=ViktarKarpach.DebugAttachManager) by Viktar Karpach.
+To debug the running D365FO application you need to go to Debug > [Attach to process](https://microsoftdynamix.blogspot.com/2019/01/d365fo-debugging.html) > then select **iisexpress.exe** process and press Attach.
 
 But with **Debug Attach Manager** it is much simpler - it adds a new button that allows doing this in one click.
 
  ![DebugAttachManager](DebugAttachManager.png)
-
 
 ### Visual Commander
 
@@ -42,10 +41,10 @@ DTE.ItemOperations.OpenFile(absolutePath, null);
 
 These commands will be available in **VCmd** menu
 
-![VCMDCommands](VCMDCommands.PNG) 
+![VCMDCommands](VCMDCommands.PNG)
 
 ## Summary
 
-I hope you may find these tools useful, also feel free to comment if you see something is missing 
+I hope you may find these tools useful, also feel free to comment if you see something is missing
 
 > Note: there is a strange bug when downloading extensions using IE from VS Marketplace site. It autosaves downloaded file as **".zip"**, but to install the extension, you need to rename this file to **".vsix"**
