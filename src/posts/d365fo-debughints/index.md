@@ -14,13 +14,13 @@ Visual Studio Marketplace contains lots of tools, and some of them can be used w
 The first one is a free, open-source tool [Debug Attach Manager](https://marketplace.visualstudio.com/items?itemName=ViktarKarpach.DebugAttachManager) by Viktar Karpach.
 To debug the running D365FO application you need to go to Debug > [Attach to process](https://microsoftdynamix.blogspot.com/2019/01/d365fo-debugging.html) > then select **iisexpress.exe** process and press Attach.
 
-But with **Debug Attach Manager** it is much simpler - it adds a new button that allows doing this in one click.
+But with **Debug Attach Manager** it is much simpler - it adds a new button that allows to do this in one click.
 
  ![DebugAttachManager](DebugAttachManager.png)
 
 ### Visual Commander
 
-[Visual Commander](https://marketplace.visualstudio.com/items?itemName=SergeyVlasov.VisualCommander) is designed to provide lightweight scripting to Visual Studio IDE. It more like macro VBA scripts in Excel, but for Visual Studio. You can use C# to write new commands and a free version allows you to create 10 commands.
+[Visual Commander](https://marketplace.visualstudio.com/items?itemName=SergeyVlasov.VisualCommander) is designed to provide lightweight scripting to Visual Studio IDE. It is more like macro VBA scripts in Excel, but for Visual Studio. You can use C# to write new commands and a free version allows you to create 10 commands.
 
 For example, you can create a command that adds a breakpoint to **Infolog.add()** method
 
