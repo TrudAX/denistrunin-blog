@@ -14,9 +14,11 @@ Visual Studio Marketplace contains lots of tools, and some of them can be used w
 The first one is a free, open-source tool [Debug Attach Manager](https://marketplace.visualstudio.com/items?itemName=ViktarKarpach.DebugAttachManager) by Viktar Karpach.
 To debug the running D365FO application you need to go to Debug > [Attach to process](https://microsoftdynamix.blogspot.com/2019/01/d365fo-debugging.html) > then select **iisexpress.exe** process and press Attach.
 
-But with **Debug Attach Manager** it is much simpler - it adds a new button that allows to do this in one click.
+But with **Debug Attach Manager** it is much simpler - it adds a new button that allows to do this in one click. 
 
  ![DebugAttachManager](DebugAttachManager.png)
+
+Update: the similar functionality exists in [ReAttach](https://marketplace.visualstudio.com/items?itemName=ErlandR.ReAttach). 
 
 ### Visual Commander
 
