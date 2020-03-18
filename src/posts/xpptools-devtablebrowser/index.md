@@ -27,7 +27,7 @@ I created an extension that overrides this behaviour. If a user belongs to the n
 
 ![Allow edit](TableBrowserEdit.png)
 
-As I know the only way to edit data directly in tables for not-development Dynamics 365 Finance and Operation environment is either become the master of [Electronic reporting](https://erconsult.eu/blog/electronic-reporting-in-data-migration/) or create a support request. These options may take some time, so it is good to have an "emergency" tool like this.
+As I know the only way to edit data directly in tables for non-development Dynamics 365 Finance and Operation environment is either become the master of [Electronic reporting](https://erconsult.eu/blog/electronic-reporting-in-data-migration/) or create a support request. These options may take some time, so it is good to have an "emergency" tool like this.
 
 ## Summary
 
