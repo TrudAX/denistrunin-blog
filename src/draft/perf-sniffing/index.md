@@ -1,0 +1,90 @@
+﻿
+
+
+
+Parameters sniffing resolution AX2012 comparing to D365FO
+
+The blog post compares SQL parameters sniffing issue for AX2009/AX2012 and cloud version Dynamics 365 for Finance and Operations
+
+Let's discuss how AX performance problems caused by parameters sniffing may be resolved when you have on-premise version and access to SQL Server 
+
+One of our clients reported a problem that today many users were complaining about slow AX performance. There was not just one operation, the general complain was something like: "System is very slow today - Posting is slow and invoicing is slow". When I logged in to the SQL box, the first metric I see - a high CPU utilization that was above normal for this client.  
+
+After executing a top SQL query, I saw the following result. The first query took more than ten times logical reads than the second one. 
+
+![TopSQL](TOPSql.png)
+
+The query was quite simple - get the last cost price for the item
+
+```sql
+@P1 nvarchar(5),@P2 nvarchar(21),@P3 int,@P4 datetime,@P5 nvarchar(5),@P6 nvarchar(11))SELECT A.ITEMID,A.VERSIONID,A.PRICETYPE,A.INVENTDIMID,A.MARKUP,A.PRICEUNIT,A.PRICE,A.PRICECALCID,A.UNITID,A.PRICEALLOCATEMARKUP,A.PRICEQTY,A.STDCOSTTRANSDATE,A.STDCOSTVOUCHER,A.COSTINGTYPE,A.ACTIVATIONDATE,A.MCSPMFBATCHSIZE,A.CREATEDDATETIME,A.RECVERSION,A.RECID FROM INVENTITEMPRICE A WHERE ((A.DATAAREAID=@P1) AND (((A.ITEMID=@P2) AND (A.PRICETYPE=@P3)) AND (A.ACTIVATIONDATE>@P4))) AND EXISTS (SELECT 'x' FROM INVENTDIM B WHERE ((B.DATAAREAID=@P5) AND ((B.INVENTDIMID=A.INVENTDIMID) AND (B.INVENTSITEID=@P6)))) ORDER BY A.DATAAREAID,A.ACTIVATIONDATE,A.CREATEDDATETIME DESC
+```
+
+But when I clicked on "query_plan" column for this select, I saw the reason why it took so much time – the wrong plan that starts with **InventDim** table. 
+
+![Wrong plan](WrongPlan.png)
+
+Probably recently they created a new location, and this new location was the first parameter for this query and SQL Server based on the current statistics decided to start the plan with **InventDim**(that is probably OK for this new location with no data), the plan was cached and caused performance problem for all others locations
+
+The correct plan should be the following - initially search by **ItemId** and then check **InventDim**(it can be obtained by running **Display Estimated Execution plan** for the query above)
+
+![](GoodPlan.png)
+
+To avoid such situations in the future, I created a custom plan with "force order" hint
+
+```SQL
+EXEC sp_create_plan_guide @name = N'[AX_InventItemPriceDimSite]', @stmt = N'SELECT A.ITEMID,A.VERSIONID,A.PRICETYPE,A.INVENTDIMID,A.MARKUP,A.PRICEUNIT,A.PRICE,A.PRICECALCID,A.UNITID,A.PRICEALLOCATEMARKUP,A.PRICEQTY,A.STDCOSTTRANSDATE,A.STDCOSTVOUCHER,A.COSTINGTYPE,A.ACTIVATIONDATE,A.MCSPMFBATCHSIZE,A.CREATEDDATETIME,A.RECVERSION,A.RECID FROM INVENTITEMPRICE A WHERE ((A.DATAAREAID=@P1) AND (((A.ITEMID=@P2) AND (A.PRICETYPE=@P3)) AND (A.ACTIVATIONDATE>@P4))) AND EXISTS (SELECT ''x'' FROM INVENTDIM B WHERE ((B.DATAAREAID=@P5) AND ((B.INVENTDIMID=A.INVENTDIMID) AND (B.INVENTSITEID=@P6)))) ORDER BY A.DATAAREAID,A.ACTIVATIONDATE,A.CREATEDDATETIME DESC',
+@type = N'SQL',
+@module_or_batch = null,
+@params = N'@P1 nvarchar(5),@P2 nvarchar(21),@P3 int,@P4 datetime,@P5 nvarchar(5),@P6 nvarchar(11)',
+@hints = N'OPTION(force order, loop join)'
+```
+
+After that, the system performance restored to normal, and the CPU load was considerably reduced
+
+![CPU utilization](CPUResults.png)
+
+So the troubleshooting was quite easy to perform, the problem was fixed, and this issue will not happen again. The complexity of these steps is that you need someone who understands Dynamics AX DB structure and have access to the SQL Server.
+
+If you have just an administrator who doesn't know AX Database structure, you can create a simple instruction for such problems:  
+
+- Run a top SQL query and copy results to Excel(you can copy all columns except the last one - "query_plan") 
+- Click on the last column - "query_plan" for the first 3-5 rows
+- Save them to separate files with  **.sqlplan** extension
+- Try to clear the SQL cache with **DBCC FREEPROCCACHE** command
+
+Then this information may be passed to AX developer in order to fix the problem.
+
+The wrong way to resolve such problems is to perform one of these:
+
+- Restart the system, 
+
+- Run reindexing
+
+- Run statistics update
+
+These actions clear the current cache, and there is a high chance that the problem disappear, but it will not be resolved. 
+
+## Dynamics 365 Finance and Operations - a cloud version 
+
+In the above situation, we had access to the SQL box, let's discuss how this can work when we don't have direct access to SQL - in the new cloud D365FO.
+
+Microsoft proposes to use LCS for this. On the Environment monitoring you have "SQL Insights" tab where you can execute the predefined **"List most expensive queries"** command(full documentation is [here](https://docs.microsoft.com/en-us/dynamics365/fin-ops-core/dev-itpro/lifecycle-services/performancetroubleshooting))
+
+![](ExpensiveQueries.png)
+
+And to check the actual plan you need to get a result of this command and paste it **"Get the SQL query plan for a given plan ID"** and this will give you a **.sqlplan** file that you can open in local SQL Management studio.
+
+![](ExpensiveQueries_getPlan.png)
+
+Then there is another command to fix the plan.
+
+So **in theory,** we should have almost the same tools as we have with on-premise version. But the current problem is every action in LCS is very slow. I tested on several production environments and typical response time was about **5-10 minutes**(you just see "Please wait" message). This time is huge, and the whole system is quite unusable due to this. Moreover, you can't run this in different windows, only one request in time is allowed.  From the practical experience queries that work with SQL plan cache are almost instant even for a huge database, so the current problem is somewhere in communication between LCS and Azure SQL. 
+
+## Conclusion
+
+If you use the on-premise system(AX2009, AX2012) and have access to SQL Server, make sure that your administrators know how to diagnose and solve parameters sniffing issue. It may happen even for an old system, for example, a case from this blog happened for seven years old system  
+
+If you are in the cloud - vote for the idea to fix LCS Insights
+
+Any comments are welcome
