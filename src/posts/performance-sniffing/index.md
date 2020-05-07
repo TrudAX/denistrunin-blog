@@ -2,7 +2,7 @@
 title: "Resolving performance issues caused by parameters sniffing in AX2012 and D365FO"
 date: "2020-05-07T22:12:03.284Z"
 tags: ["Performance"]
-path: "/perf-sniffing"
+path: "/performance-sniffing"
 featuredImage: "./logo.png"
 excerpt: "The blog post compares ways how to solve SQL performance problems caused by "parameters sniffing" for AX2009/AX2012 and cloud version Dynamics 365 for Finance and Operations"
 ---
