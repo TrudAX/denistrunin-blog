@@ -51,10 +51,10 @@ So the troubleshooting was quite easy to perform, the problem was fixed, and thi
 
 If you have just a SQL administrator who doesn't know AX Database structure, you can create a simple instruction to deal with such problems:  
 
-- Run a top SQL [query](https://github.com/TrudAX/TRUDScripts/blob/master/Performance/AX%20Technical%20Audit.md#get-top-sql) and copy results to Excel(you can copy all columns except the last one - "query_plan")
-- Click on the last column - "query_plan" for the first 3-5 rows
-- Save them to separate files with  **.sqlplan** extension
-- Try to clear the SQL cache with **DBCC FREEPROCCACHE** command
+1. Run a top SQL [query](https://github.com/TrudAX/TRUDScripts/blob/master/Performance/AX%20Technical%20Audit.md#get-top-sql) and copy results to Excel(you can copy all columns except the last one - "query_plan")
+2. Click on the last column - "query_plan" for the first 3-5 rows
+3. Save them to separate files with  **.sqlplan** extension
+4. Try to clear the SQL cache with **DBCC FREEPROCCACHE** command
 
 Then this information may be passed to AX developer in order to fix the problem.
 
@@ -67,6 +67,8 @@ The wrong way to resolve such problems is to perform one of these actions:
 - Run statistics update
 
 These actions will clear the current cache, and there is a high chance that the problem will disappear, but it will not be resolved.
+
+**A note about Plan Guides:** ideally you should keep number of custom Plan Guides to minimum(as they may become invalid if you, for example, modify the table structure). After you fixed the issue with the plan guide, try to think how this can be avoided by modifying the code(typical solutions - create/update indexes, use **forceliterals** hint in X++, modify the query..) 
 
 ## Dynamics 365 Finance and Operations - cloud version
 
