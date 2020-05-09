@@ -84,6 +84,8 @@ And to check the actual plan you need to get a result of this command and paste 
 
 Then there is another command to fix the plan.
 
+![](PlanGuideAction.png)
+
 So **in theory,** we should have almost the same tools as we have with on-premise system. But the current problem is that every action in LCS is very slow. I tested these functions on several production environments and typical response time was about **5-10 minutes**(you just see "Please wait" message). This time is huge, and the whole system is quite unusable due to this. Moreover, you can't run this in different windows, only one request in time is allowed.
 
 From the practical experience queries that work with SQL plan cache are almost instant even for huge databases, so the current problem is somewhere in communication between LCS and Azure SQL.
