@@ -1,7 +1,7 @@
 ---
 title: "D365FO Table browser extension"
 date: "2020-03-18T20:12:03.284Z"
-tags: ["xpptools"]
+tags: ["XppTools"]
 path: "/xpptools-devtablebrowser"
 featuredImage: "./logo.png" 
 excerpt: "This post describes an extension for the standard D365FO table browser that allows root navigation and editing for non-development environments."

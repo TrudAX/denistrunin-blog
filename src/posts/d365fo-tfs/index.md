@@ -1,7 +1,7 @@
 ---
 title: "Understanding D365FO Version control system why it is different from AX2012"
 date: "2020-05-27T22:12:03.284Z"
-tags: ["D365FO", "ALM"]
+tags: ["D365FO Hints", "ALM"]
 path: "/d365fo-tfs"
 featuredImage: "./logo.png"
 excerpt: "In this post, I describe some scenarios for Team Foundation Version Control usage in Dynamics 365 Finance and Operations and how it is different from AX2012."
