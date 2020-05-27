@@ -105,7 +105,7 @@ Full list of strategies is available here https://docs.microsoft.com/en-us/azure
 
 ![ChangeSetMS](ChangeSetMS.png)
 
-The main issue that **TFVC** doesn't prevent from executing the wrong commands and probably in 95% cases when you run "Merge selected changesets" it will run without any issues as modifications usually don't contain common elements. And this may create a wrong feeling that is will always work.
+The main issue that **TFVC** doesn't prevent from executing the wrong commands and probably in 95% cases when you run "Merge selected changesets" it will run without any issues as modifications usually don't contain common elements. And this may create a wrong feeling that it will always work.
 
 ## Summary
 
