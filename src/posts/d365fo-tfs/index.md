@@ -1,5 +1,5 @@
 ---
-title: "Understanding D365FO Version control system why it is different from AX2012"
+title: "Understanding D365FO Version control system and why it is different from AX2012"
 date: "2020-05-27T22:12:03.284Z"
 tags: ["D365FO Hints", "ALM"]
 path: "/d365fo-tfs"
@@ -7,21 +7,21 @@ featuredImage: "./logo.png"
 excerpt: "In this post, I describe some scenarios for Team Foundation Version Control usage in Dynamics 365 Finance and Operations and how it is different from AX2012."
 ---
 
-If are you developing in Dynamics 365 Finance and Operations, you need to use Team Foundation Version Control(**TFVC**) system. It is not very complex, but its concept is different what we have previously in AX2012.
+If you are developing in Dynamics 365 Finance and Operations, you need to use Team Foundation Version Control(**TFVC**) system. It is not very complex, but its concept is different from what we have in AX2012.
 
-In this post, I describe some scenarios that may produce unexpected results if you don't fully understand it and use it in an "AX2012 way".
+In this post, I describe some scenarios that may produce unexpected results if you don't fully understand **TFVC** and use it in an "old AX2012 way".
 
-On a typical AX2012 project, we usually have a common development application, where we are developing modifications, and when they ready, we use import/export XPO file to transfer them on TEST application. Let's discuss how this may work in D365FO.  
+On a typical AX2012 project, we usually have a common development application, where we are developing modifications, and when they are ready, we use import/export XPO file to transfer them on TEST application. Let's discuss how this may work in D365FO.  
 
 ## Initial setup
 
-Here our project setup, I created two branches one for our internal development and testing(Trunk - **Main**) and one for user testing - **TEST**. **TEST** is mapped to some temporary folder to allow merging.
+Here is our project setup, I created two branches one for our internal development and testing(Trunk - **Main**) and one for user testing - **TEST**. **TEST** is mapped to some temporary folder to allow merging.
 
 ![ Initial TFS Setup](InitialTFSSetup.png)
 
 ## Case 1 - Why my code doesn't compile
 
-let's do our first modification, Add a new EDT **EDT_FieldA** and a new field based on this type to **CustGroup** table
+let's do our first modification. Add a new EDT **EDT_FieldA** and a new field based on this type to **CustGroup** table
 
 ![ Mod A](ModA.png)
 
@@ -33,9 +33,9 @@ Then let's do our second modification - A new field to the same **CustGroup** ta
 
 ![Mod B](ModB.png)
 
-and commit it to our **Main** branch as **ProjectB**
+and then commit it to our **Main** branch as **ProjectB**
 
-These two modifications are logically not linked, so after the testing, we can decide to move **ProjectB** only to the user test environment. It is a typical situation in AX2012, where you just export the project to XPO from DEV and load it into TEST(during the import you compare XPO and transfer only relevant changes)
+These two modifications are logically not linked, so after the testing, we can decide to move only **ProjectB** to the user test environment. It is a typical situation in AX2012, where you just export the project to XPO from DEV and load it into TEST(during the import you compare XPO with the existing code on TEST and transfer only relevant changes)
 
 But the trick is you can't use this approach in Dynamics 365 Finance and Operations.
 
@@ -45,7 +45,7 @@ You run a Merge command and choose **Selected changesets**
 
 ![SelectedChangeSet](SelectedChangeSet.png)
 
-then you select only **ProjectB** assuming that only changes from **ProjectB** will be included
+then you select only **ProjectB** assuming that only changes from **ProjectB** will be included.
 
 ![SelectChangeSet](SelectChangeSet.png)
 
