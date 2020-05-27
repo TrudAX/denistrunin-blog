@@ -65,23 +65,23 @@ Another developer has developed in the same branch a simple modification just to
 
 **Project2** is simple to test and after testing you decided to move to it user testing - TEST branch. Again this is a typical valid scenario in AX2009 or AX2012, we often don't care about other people modifications, we just transfer XPO and compare the code during the import.
 
-You run "selected changesets" transfer and choose **Project2** only
+You run "selected changesets" transfer and choose only **Project2**.
 
 ![MergeSelected2](MergeSelected2.png)
 
-As a result, you will get a file that contains a part or **Project1**.
+As the result, you will get a file that contains a part or **Project1**.
 
 ![Merge2](Merge2.png)
 
-This probably creates an unexpected new validation on TEST branch, and your users may even not be able to create Sales orders due to this validation.
+This will probably create an unexpected new validation on TEST branch, and your users may even not be able to create Sales orders due to this validation.
 
-## Case 3 - Why my code is missed after the merge
+## Case 3 - Why my code is missing after the merge
 
 Let's continue with the example above. Consider that it is your lucky day and you noticed that you added unwanted code from **Project1** to the TEST version before it's being deployed to users.
 
 You open the class and delete the code related to **Project1** from it. It is a typical AX2012 operation, you don't need this code now. 
 
-Then after some time, you decided to finally transfer **Project1** to TEST from Main. You can even run full branch merge for this. 
+Then after some time, you finally decide to transfer **Project1** to TEST from Main. You can even run full branch merge for this. 
 
 ![MergeSelected3](MergeSelected3.png)
 
@@ -101,11 +101,11 @@ To achieve this, you need to work in sprints(for example 1 release per week).
 
 It is a high chance that sometimes you need an emergency fix (that can't wait for a week). In this case, you restore a new temporary branch from the last build, implement a fix in this temporary branch and merge changes back to Main before the next release(so it will be a **Release isolation strategy**).
 
-Full list of strategies available here https://docs.microsoft.com/en-us/azure/devops/repos/tfvc/branching-strategies-with-tfvc?view=azure-devops, but please note that none of the recommended strategies allows "Merge selected changesets", you should always work with a forward-only merge. So merging just changeset2 on this diagram may corrupt your branch
+Full list of strategies is available here https://docs.microsoft.com/en-us/azure/devops/repos/tfvc/branching-strategies-with-tfvc?view=azure-devops, but please note that none of the recommended strategies allows "Merge selected changesets", you should always work with a forward-only merge. So merging just changeset2 on this diagram may corrupt your branch
 
 ![ChangeSetMS](ChangeSetMS.png)
 
-The main issue that **TFVC** doesn't prevent of executing the wrong commands and probably in 95% cases when you run "Merge selected changesets" it will run without any issues as modifications usually don't contain common elements.
+The main issue that **TFVC** doesn't prevent from executing the wrong commands and probably in 95% cases when you run "Merge selected changesets" it will run without any issues as modifications usually don't contain common elements. And this may create a wrong feeling that is will always work.
 
 ## Summary
 
@@ -113,4 +113,4 @@ One of the key features of Team Foundation Version Control(**TFVC**) is that cha
 
 If you use the old AX approach("Merge selected changesets" in random order) with D365FO Team Foundation Version Control(**TFVC**) system, you may face problems. You may get compile errors, transfer unwanted code and lost changes in code.
 
-So choose your branching strategy before the development, agreed on it with a Project manager and follow it. Also If you know any tools that can prevent the described cases feel free to post a comment.
+So choose your branching strategy before the development, agree on it with a Project manager and follow it. Also If you know any tools that can prevent the described cases feel free to post a comment.
