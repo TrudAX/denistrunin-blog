@@ -79,7 +79,7 @@ This will probably create an unexpected new validation on TEST branch, and your 
 
 Let's continue with the example above. Consider that it is your lucky day and you noticed that you added unwanted code from **Project1** to the TEST version before it's being deployed to users.
 
-You open the class and delete the code related to **Project1** from it. It is a typical AX2012 operation, you don't need this code now. 
+You open the class in TEST branch and delete the code related to **Project1** from it. It is a typical AX2012 operation, you don't need this code now. 
 
 Then after some time, you finally decide to transfer **Project1** to TEST from Main. You can even run full branch merge for this. 
 
