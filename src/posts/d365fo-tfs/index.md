@@ -95,7 +95,7 @@ All examples above may happen due to incorrect usage of branching strategy.
 
 The basic advice from Microsoft is the following:
 
-> Start with the main only branching strategy, [branch strategically](https://docs.microsoft.com/en-us/azure/devops/repos/tfvc/branch-strategically?view=azure-devops) and adopt other strategies to evolve into more complex strategies as needed.
+> Start with the main only branching strategy, [branch strategically](https://docs.microsoft.com/en-us/azure/devops/repos/tfvc/branching-strategies-with-tfvc?view=azure-devops) and adopt other strategies to evolve into more complex strategies as needed.
 
 To achieve this, you need to work in sprints(for example 1 release per week).
 
