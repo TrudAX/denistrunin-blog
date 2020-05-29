@@ -37,7 +37,7 @@ and then commit it to our **Main** branch as **ProjectB**
 
 These two modifications are logically not linked, so after the testing, we can decide to move only **ProjectB** to the user test environment. It is a typical situation in AX2012, where you just export the project to XPO from DEV and load it into TEST(during the import you compare XPO with the existing code on TEST and transfer only relevant changes)
 
-But the trick is you can't use this approach in Dynamics 365 Finance and Operations.
+Some people may think that in D365FO the system can transfer only the relevant changes automatically and compare is not needed. 
 
 A typical mistake is to use **Selected changesets** merge to do this. Let see how it works:
 
