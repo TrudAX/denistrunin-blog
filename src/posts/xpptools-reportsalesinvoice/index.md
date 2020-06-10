@@ -1,5 +1,5 @@
 ---
-title: "Create a new design for a Sales Invoice report in D365FO"
+title: "How to create a new design for a Sales Invoice report in D365FO"
 date: "2020-06-10T20:12:03.284Z"
 tags: ["XppDEVTutorial", "SSRS"]
 path: "/xpptools-reportsalesinvoice"
