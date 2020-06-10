@@ -157,7 +157,7 @@ And this Bear in the previous picture is not just a funny picture, it is an offi
 
 ## SSRS reporting issues
 
-If you watch this  "Power BI Paginated reports Day [course"](https://docs.microsoft.com/en-us/power-bi/learning-catalog/paginated-reports-online-course) you may feel that SSRS is cool(presentation is really great). However, this technology is 10 years old and has some issues. Just some of them:
+If you watch this  "Power BI Paginated reports Day [course"](https://docs.microsoft.com/en-us/power-bi/learning-catalog/paginated-reports-online-course) you may feel that SSRS is cool(presentation is really great). However, the last main update for Report Builder was 10 years ago and the current version has some issues. Just some of them:
 
 - **"rdl"** file is a very complex XML format. So in most cases, you will not be able to compare changes in the report - by using text compare you will see a huge number of differences in XML structure even for a small design change.
 - Page splitting is very basic. For example, if you have a data row that consists of multiple lines and you want to avoid page breaks inside this row, you may find that this is not supported and you need to develop your own page grouping solution.
