@@ -168,6 +168,6 @@ So there are a lot of things that can be improved, and I hope Microsoft will inv
 
 ## Summary
 
-Real-life invoice reports can be quite complex and require a lot of efforts to implement. However, as we see, creating a simple **Sales Invoice design** is not a complex task. You can use the project above as a starting point(another option to consider - install modern design [templates](https://docs.microsoft.com/en-us/dynamics365/fin-ops-core/dev-itpro/analytics/install-modern-report-design-templates#apply-the-modern-designs))
+Real-life invoice reports can be quite complex and require a lot of efforts to implement. However, as we see, creating a simple **Sales Invoice design** is not a complex task. You can use the project above as a starting point(another option to consider - install modern design [templates](https://docs.microsoft.com/en-us/dynamics365/fin-ops-core/dev-itpro/analytics/install-modern-report-design-templates#apply-the-modern-designs)). You can download the code from my [GitHub](https://github.com/TrudAX/XppTools/tree/master/DEVTutorial/DEVTutorialReports)
 
 If you have some hints for SSRS report development, don't hesitate to post a comment. The project used in this post can be downloaded by the following link(you can download a model to a temporary folder and add elements from it to your project using "Add - Existing item.." command)
