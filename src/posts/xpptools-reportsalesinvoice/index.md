@@ -103,18 +103,18 @@ Let's also add a totals section. The resulting design should look like this
 
 ### Connect a new report to Print management
 
-A sales invoice can be used in a Print management module. In order to connect our report to this module, we need to subscribe to two events:
+A sales invoice can be used in a Print management module. In order to connect our report to this module, we need to subscribe to two events(create 2 new classes):
 
 ```csharp
 [ExtensionOf(classstr(PrintMgmtReportFormatPopulator))]
-final class PrintMgmtReportFormatPopulatorDEVTutorial_Extension
+final class PrintMgmtReportFormatPopulatorDEVTutorial_Extension // highlight-line
 {   protected void addDocuments()
     {
         this.addStandard(PrintMgmtDocumentType::SalesOrderInvoice);
         next addDocuments();
     } }
 
-final static class PrintMgmtDocTypeDEVTutorial_EventHandler
+final static class PrintMgmtDocTypeDEVTutorial_EventHandler // highlight-line
 {     [SubscribesTo(classstr(PrintMgmtDocType), delegatestr(PrintMgmtDocType, getDefaultReportFormatDelegate))]
     public static void getDefaultReportFormatDelegate(PrintMgmtDocumentType _docType, EventHandlerResult _result)
     {   switch (_docType)
