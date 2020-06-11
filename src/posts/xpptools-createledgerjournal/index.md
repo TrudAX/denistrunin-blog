@@ -222,7 +222,7 @@ There are some differences between the copy speed in my example, but it is cause
 
 ## Choosing the right method and things to avoid
 
-In general, you have 2 options - to create a journal similar to the manual user entry or create it similar to the import procedure(for the second scenario choice between entity and table mostly depends on what input data you have and whether the entity supports all the required fields). So the choice between these two should be made by answering the question: if the user wants to create the same journal manually, does he use manual entry or data import?  
+In general, you have 2 options - to create a journal similar to the manual user entry or create it similar to the import procedure(for the second scenario choice between entity and table mostly depends on what input data you have and whether the entity supports all the required fields). So the choice between these two should be made by answering the question: if the user wants to create the same journal manually, does he use manual entry or data import? Use [createJournalUsingLedgerJournalEngine](https://github.com/TrudAX/XppTools/blob/3d69455f4b8157bc28bfc9560e9f70c8bacd634a/DEVTutorial/DEVTutorial/AxClass/DEVTutorialCreateLedgerJournal.xml#L196) as default, as it is more flexible.  
 
 Probably in D365FO it is better to avoid creation using *JournalTransData* classes or when you simply populate *ledgerJournalTrans* fields and call *insert()*. This initially can work, but later users may complain - e.g. _"Why when I create a journal manually and specify a vendor account the Due date field is calculated, but your procedure doesn't fill it"._
 
