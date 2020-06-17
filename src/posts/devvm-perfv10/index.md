@@ -73,7 +73,7 @@ HDD VM was very slow in this test. You need to wait almost 5 minutes to see your
 
 This test was performed straight after the breakpoint test, but I restarted Visual Studio. In this test I created a new project and added a Runnable class with the following code
 
-```charp
+```csharp
 info("Hello world");  
 ```
 

@@ -75,7 +75,7 @@ Add the following sections
 
 For the header, let's add a logo from Document branding
 
-```vbscript
+```vb
 =First(Fields!Image1.Value, "DocuBrandDetailsDS")
 ```
 
