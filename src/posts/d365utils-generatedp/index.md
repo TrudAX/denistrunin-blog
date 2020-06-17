@@ -1,25 +1,25 @@
 ---
-title: "Automatically generate Data provider and Controller class in X++"
+title: "Addin to generate Data provider and Controller class in X++"
 date: "2020-06-17T22:12:03.284Z"
 tags: ["Addins"]
 path: "/d365utils-generatedp"
 featuredImage: "./logo.png"
-excerpt: "The post describes a utility to automatically generate X++ code template for Data provider and controller classes."
+excerpt: "The post describes a utility that generates X++ code template for Data provider and Controller classes."
 ---
 
-One of the most common applications of X++ SysOperation framework in D365FO is to build reports. In a common scenario, you need three classes: Contract, Data provider and Controller
+One of the most common applications of X++ SysOperation framework in D365FO is to build reports. In a common scenario, you need to create three classes: Contract, Data provider and Controller.
 
 To generate all three classes, I extended my "**TRUDUtils - DataContract class builder**" Add-ins. You run it from the Dynamics 365 - Addins menu.
 
-Lets consider the following example - a contract class **AATestReportContract** with 2 fields
+Let's consider the following example - a contract class **AATestReportContract** with 2 fields
 
 ![Data contract form](DataContractForm.png)
 
 ### Data provider
 
-To generate a template code for data provider class you need to specify "y" for "**Generate report DP(y)**" parameter and specify a data provider table(better to use TempDB table here).
+To generate a template code for a data provider class you need to specify "y" for "**Generate report DP(y)**" parameter and specify a data provider table(better to use TempDB table here).
 
-The following class will be generated with 2 methods -  **getReportDataTmp()** and **processReport()**
+The following class with 2 methods - **getReportDataTmp()** and **processReport()** will be generated 
 
 ```csharp
 [SRSReportParameterAttribute(classStr(AATestReportContract)),
@@ -85,9 +85,9 @@ public class AATestReportController extends SrsReportRunController
 }
 ```
 
-After generation, you need to modify a code according to your needs, Addin allows you to do less typing and focus more on report logic.
+After generation, you need to modify a code according to your needs. Addin allows you to do less typing and focus more on report logic.
 
-If you are new to SSRS reports development, Docentric has a great intro article  [Create a new custom SSRS report in D365FO](https://ax.docentric.com/create-a-new-custom-ssrs-report-in-d365fo/). Also [Microsoft Dynamics AX 2012 White Paper: Report Programming Model](https://www.microsoft.com/en-in/download/details.aspx?id=27725) provides some development examples.
+If you are new to SSRS reports development, Docentric has a great post [Create a new custom SSRS report in D365FO](https://ax.docentric.com/create-a-new-custom-ssrs-report-in-d365fo/). Also [Microsoft Dynamics AX 2012 White Paper: Report Programming Model](https://www.microsoft.com/en-in/download/details.aspx?id=27725) provides some development examples.
 
 ## Summary
 
