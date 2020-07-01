@@ -1,6 +1,6 @@
 ---
 title: "A simple way to implement a parallel batch processing in X++"
-date: "2020-06-17T22:12:03.284Z"
+date: "2020-07-01T22:12:03.284Z"
 tags: ["DEVTutorial", "Performance"]
 path: "/xpptutorial-batchmultithread"
 featuredImage: "./logo.png"
