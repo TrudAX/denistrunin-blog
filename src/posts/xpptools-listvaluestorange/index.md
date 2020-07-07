@@ -1,10 +1,10 @@
 ﻿---
-title: “Tool to convert a list of values to range”
+title: "Tool to convert a list of values to range"
 date: "2020-07-08T22:12:03.284Z"
 tags: ["XppTools"]
 path: "/xpptools-listvaluestorange"
 featuredImage: "./logo.png"
-excerpt: “List of Values to Range tool can help users deal with the list of values in query range and copy-paste values from Excel.”
+excerpt: "List of Values to Range tool can help users deal with the list of values in query range and copy-paste values from Excel."
 ---
 
 This functionality can help users deal with multiple values in a query range. You can:
