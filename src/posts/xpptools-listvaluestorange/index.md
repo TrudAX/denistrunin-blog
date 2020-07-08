@@ -42,6 +42,8 @@ In the bottom part (**Range friendly view**) you can find the resulting query ra
 
 After you have finished editing of the values list, you can review the final range value in the bottom part, and press '**OK**'. Then the query range will be updated with the values. Several new ranges for the same field will be created if the length of the value list doesn't fit in one range.
 
+![FullVid](FullVid.gif)
+
 ## Summary
 
 **List of Values to Range** tool can simplify your work with multiple query ranges. You can download it using the following link - [https://github.com/TrudAX/XppTools#installation](https://github.com/TrudAX/XppTools#installation)
