@@ -1,4 +1,4 @@
-﻿---
+---
 title: "A tool to convert a list of values to a query range"
 date: "2020-07-08T22:12:03.284Z"
 tags: ["XppTools"]
