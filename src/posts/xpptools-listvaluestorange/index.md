@@ -1,10 +1,10 @@
 ﻿---
-title: "Tool to convert a list of values to range"
+title: "A tool to convert a list of values to a query range"
 date: "2020-07-08T22:12:03.284Z"
 tags: ["XppTools"]
 path: "/xpptools-listvaluestorange"
 featuredImage: "./logo.png"
-excerpt: "List of Values to Range tool can help users deal with the list of values in query range and copy-paste values from Excel."
+excerpt: "'List of Values to Range' tool can help users deal with the list of values in query range and copy-paste values from Excel."
 ---
 
 This functionality can help users deal with multiple values in a query range. You can:
@@ -18,7 +18,7 @@ This tool was initially migrated to D365FO by Anton Kazarnovsky. Then it was sli
 
 To use this feature, you need to go to **Options-Page option**s and press **Advanced filter or sort** button(or use Ctrl + Shift + F3 shortcut).
 
-A new button **List of values** was added on this form. You can use it on any line, that can be edited. If you press this button a new form will appear with two parts:
+A new button **List of values** was added on this form. If you press this button a new form will appear with two parts:
 
 - Column view (upper part);
 - Range friendly view (bottom part).
@@ -29,7 +29,7 @@ In the upper part **(Column view)** you can find a user-friendly view of the val
 
 - Edit a list of values (it will be immediately reflected in Range friendly view);
 - Copy and insert a list of values from Excel;
-- Convert the value from **Range friendly view** field to Column view by using **Convert** button.
+- Convert the value from the **Range friendly view** field to Column view by using **Convert** button.
 
 In the bottom part (**Range friendly view**) you can find the resulting query range. Here you can:
 
@@ -37,10 +37,10 @@ In the bottom part (**Range friendly view**) you can find the resulting query ra
 - Apply text conversions:
   - Add 'quotes' (“…”) at the start and at the end of each value;
   - Add 'asterisk' (\*…\*) at the start and at the end of each value;
-  - Replace '\_' and '\.' symbols by question mark ("?") in each value;
-  - Remove space (' ')  from each value.
+  - Replace '\_' and '\.' symbols by the question mark ("?") in each value;
+  - Remove spaces (' ')  from each value.
 
-After you have finished modification of values list, you can review the final range value in the bottom part, and press '**OK**'. Then the query range will be updated with the values. Several new ranges for the same field will be created if the length of a value list won’t fit in one range.
+After you have finished editing of the values list, you can review the final range value in the bottom part, and press '**OK**'. Then the query range will be updated with the values. Several new ranges for the same field will be created if the length of the value list doesn't fit in one range.
 
 ## Summary
 
