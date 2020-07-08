@@ -42,6 +42,8 @@ In the bottom part (**Range friendly view**) you can find the resulting query ra
 
 After you have finished editing of the values list, you can review the final range value in the bottom part, and press '**OK**'. Then the query range will be updated with the values. Several new ranges for the same field will be created if the length of the value list doesn't fit in one range.
 
+The standard system allows you to paste the value list from Excel, but the resulting range is limited to 4K chars. So if you filter more(on average it is 300-400 invoices for example), you will get an error. [Paste lists from Excel into filter fields with the "is one of" operator](https://docs.microsoft.com/en-us/business-applications-release-notes/october18/dynamics365-finance-operations/paste-filter-lists-from-excel)
+
 ![FullVid](FullVid.gif)
 
 ## Summary
