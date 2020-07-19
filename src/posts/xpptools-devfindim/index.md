@@ -63,7 +63,8 @@ Currently this class contains the following references:
 
 - Create a new dimension
 - Query filter by dimension
-- Get Dim value as string from the **DefaultDimension**
+- Get Dimension value as string from the **DefaultDimension**
+- Get Dimension value as string from the **LedgerDimension**
 - Get a **DefaultAccount** from the **LedgerDimension**
 - Get a **DefaultDimension** from the **LedgerDimension**
 - Create a **DefaultAccount** from the **MainAccount**(String)
