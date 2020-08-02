@@ -17,7 +17,7 @@ To use this form, you need to go to Administration-Inquiries-Database, and run *
 
 ![SQL form](DEVSQLQueryExecute.png)
 
-It allows you to enter **SQL text** to execute and outputs the execution results as **HTLM** or as a **File** when you press the **Run** button.
+It allows you to enter **SQL text** to execute and outputs the execution results as **HTML** or as a **File** when you press the **Run** button.
 
 You can limit the number of returned rows. Due to AX string manipulation and text formatting current output is quite slow, it can handle only about 100-1000 rows.
 
