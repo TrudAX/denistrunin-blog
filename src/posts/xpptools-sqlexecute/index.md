@@ -33,7 +33,7 @@ You can execute commands like getting [TOP SQL](https://github.com/TrudAX/TRUDSc
 
 ![Get Top SQL](TopSQL.png)
 
-To return large text or the result of UPDATE statement you may update a **SQLResults** field.  
+To return large text or the result of UPDATE statement you may update a **SQLResults** field(as standard ResultSet has some limits, so large text can't be returned directly).  
 
 For example, you can also download and analyse SQL plan using the following command:
 
