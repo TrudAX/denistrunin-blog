@@ -1,0 +1,29 @@
+delete  InventSum
+where [Closed] = 1
+320k records 15sec
+
+
+static void denis_testDelete(Args _args)
+{
+    InventSum       inventSum;
+    int             t = timenow();
+    int recCount;
+    ;
+    
+    while select forupdate inventSum
+        where inventSum.Closed == 1
+    {
+        inventSum.skipTTSCheck(true);
+        inventSum.doDelete();
+        recCount++;
+    }
+    
+    info(strFmt("Time %1s for %2 records", timenow() - t, recCount));
+  
+}
+350sec  (60K min)
+210sec with tts
+
+500K by 50K = 30sec
+200K by 10K = 40sec
+50K  by 5K  = 50sec
