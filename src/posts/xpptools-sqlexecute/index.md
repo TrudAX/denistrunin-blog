@@ -7,7 +7,7 @@ featuredImage: "./logo.png"
 excerpt: "'Execute direct SQL' form provides a simple interface to execute SQL commands on D365FO database."
 ---
 
-'Execute direct SQL' is a simple form that allows to write and execute direct SQL from the browser on D365FO database. It can save time whien you are debugging and troubleshooting.
+'Execute direct SQL' is a simple form that allows to write and execute direct SQL from the browser on D365FO database. It can save time when you are debugging or troubleshooting.
 
 The original idea was introduced in **AX Paradise** [blog post](https://axparadise.com/sql-access-on-production-in-d365fo/#page-content), I added some improvements and included it to my list of tools.
 
