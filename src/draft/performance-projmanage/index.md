@@ -56,17 +56,24 @@ Such tasks can produce a huge constant load on AOSes and SQL Server and quite co
 
 #### - Only SQL DBA/Infrastructure team is involved
 
-This is a typical situation in the beginning. Users complaining about performance, you ask you DBA check servers find the reason. And often this also doesn't work and ends up with more statistics or indexes updates. A lot of performance problems related to parameter sniffing issues, and it is hard for SQL DBA to fix that, without knowing what is the logical purpose of these tables and what should be the correct plans for this
+This is a typical situation in the beginning. Users complaining about performance, you ask you DBA check servers find the reason. And often this also doesn't work and ends up with more statistics or indexes updates. A lot of performance problems are related to parameter sniffing issues or Dynamics AX settings, and it is hard for SQL DBA to fix that, without knowing what is the logical purpose of these tables and what should be the correct plans for this.
 
 #### - SQL DBA/Infrastructure team is not involved
 
-This is an opposite situation to the previous case.  Very often these problems are related to SQL Server or hardware configuration. If you don't include SQL/Infrastructure team into the project team, there is a high chance they just push back these recommendations. 
+This is an opposite situation to the previous case. Very often these problems are related to SQL Server or hardware configuration. If you don't include SQL/Infrastructure team into the project team, there is a high chance they just push back these recommendations. 
 
-Even for the most obvious performance counters it is quite easy to do, lets take CPU load as an example. Is the load on AOS is 80% and the recommendation is to add more core - can be argued that almost 20% not used and everything is OK, or if CPU is 100% for 10 minutes and then 10minutes 20% - the average will be 60%. Such discussions are very time consuming and not productive, and may be simplified if all participants are within one team.
+Even for the most obvious performance counters it is quite easy to reject recommendations, lets take CPU load as an example. Is the load on AOS is 80% and the recommendation is to add more CPU cores - can be argued that almost 20% not used and everything is OK, or if CPU is 100% for 10 minutes and then 10minutes 20% - the average will be 60%. Such discussions are very time consuming and not productive, and may be simplified if all participants are within one team.
+
+![](SlowHardware.png)
+
+This twit is represent quite common problem. A lot of hardware used for multimillion ERP implementation are less powerful than a typical gaming laptop.
 
 #### - Only AX technical consultant involved
 
-Your Dynamics AX slow and you ask AX technical consultants to check why and give recommendations. This is better than nothing, but may not work in a lot of cases. Examples 
+Your Dynamics AX slow and you ask AX technical consultants to check why and give recommendations. Typical example of this - that a company hires a Microsoft Services consultant, they do a 3 days analysis with [DynamicsPerf](https://github.com/PFEDynamics/DynamicsPerf) tool and at the end give you very nice looking report. This is better than nothing, but may not work in a lot of cases. For example, for the described project one problem was related to slow shipment processing. When we started analysis we have found that a shipment module used cross-companies queries, but the actual company was always defined in the business process, so these cross-companies queries may be removed and it gave quite considerable performance boost. Issues like this involve a lot of communications and may not be resolved just a single person sitting and running some queries.
+
+## Ready to change approach 
+
 
 
 
