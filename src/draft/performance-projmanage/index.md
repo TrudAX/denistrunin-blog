@@ -96,7 +96,7 @@ To quickly trace such issues a database point-in-time backup(like restore the Da
 
 In this project it was a separate one-box environment(that included AOS, SQL and all others components) with 8 CPUs cores, 48GB of memory and 3TB drive(to keep 2 copies of database backup). Also an important tip is to run this environment under a user that doesn't have any production access to avoid situations of sending e-mails to the real customers or to the production integration folders.
 
-## The project flow and communication chanel
+## The project flow and communication channel
 
 
 
