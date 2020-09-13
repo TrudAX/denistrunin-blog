@@ -70,11 +70,39 @@ This twit is represent quite common problem. A lot of hardware used for multimil
 
 #### - Only AX technical consultant involved
 
-Your Dynamics AX slow and you ask AX technical consultants to check why and give recommendations. Typical example of this - that a company hires a Microsoft Services consultant, they do a 3 days analysis with [DynamicsPerf](https://github.com/PFEDynamics/DynamicsPerf) tool and at the end give you very nice looking report. This is better than nothing, but may not work in a lot of cases. For example, for the described project one problem was related to slow shipment processing. When we started analysis we have found that a shipment module used cross-companies queries, but the actual company was always defined in the business process, so these cross-companies queries may be removed and it gave quite considerable performance boost. Issues like this involve a lot of communications and may not be resolved just a single person sitting and running some queries.
+Your Dynamics AX slow and you ask AX technical consultants to check why and give recommendations. Typical example of this - that a company hires a Microsoft Services consultant, they do a 3 days analysis with [DynamicsPerf](https://github.com/PFEDynamics/DynamicsPerf) tool and at the end give you very nice looking report. 
 
-## Ready to change approach 
+This is better than nothing, but may not work in a lot of cases. For example, for the described project one problem was related to slow shipment processing. When we started analysis we have found that a shipment module used cross-companies queries, but the actual company was always defined in the business process, so these cross-companies queries may be removed and it gave quite considerable performance boost. Issues like this involve a lot of communications and may not be resolved just a single person sitting and running some queries.
+
+## Ready to change and forward only approach 
+
+That is what I discuss with a customer in the beginning of the project. The only way to fix performance problems - is to change something. There is no a magic flag in Dynamics AX or SQL Server - "Runs faster". 
+
+These changes can be done in multiple areas, but as with any change, there is always a chance that it can affect the system in negative way. We trying out best to avoid this, but such issues are happening almost on every project. Even a positive change - like you created a new index or cleanup some tables can produce a negative effect due to parameters sniffing.
+
+The only correct way to deal with such issues - is to continue the system monitoring and quickly identify and fix them. Not a correct way - perform a rollback.
+
+Also I developed some rules: 
+
+- Never apply any changes on Production by myself. There was a lot of situations - you create an index and the next day some users can't print documents(totally unlinked events). Then there were usually a lot of e-mails with trying to find the reason and blame someone and the person who did the last change is a perfect candidate for this. Then 
+- Allocate a day to monitor the system after the changes are applied. This is needed to catch and fix a parameters sniffing issues. 
+- For the first round of changes - include as many as possible. The strategy "one change in a time" doesn't work well in the beginning. Often first positive changes create a lot of trust, that makes project flow simpler later
+
+## Prepare a separate LAB version for the project 
+
+Often the most complex problem in performance optimization - is to replicate an issue. There are a lot of cases where the operation(for example Sales orders posting or some batch job) is working without any issues during the day, but becomes slow during a certain hour. The reason may be in other parallel processes that caused blocking or the high system load, but very often this depends on the particular data used in this process. The typical example for this is warehouse operations where for some period you can have zero lines ready for shipment, but an hour later - 10k lines.  
+
+To quickly trace such issues a database point-in-time backup(like restore the Database at 11.32) can provide a valuable information. So organizing a separate environment where such backup can be restored and traced can save a lot of time allowing quickly replicate an issue and test the fix later. 
+
+In this project it was a separate one-box environment(that included AOS, SQL and all others components) with 8 CPUs cores, 48GB of memory and 3TB drive(to keep 2 copies of database backup). Also an important tip is to run this environment under a user that doesn't have any production access to avoid situations of sending e-mails to the real customers or to the production integration folders.
+
+## The project flow and communication chanel
 
 
+
+
+
+## Deal with external integrations 
 
 
 
