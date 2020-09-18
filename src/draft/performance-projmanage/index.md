@@ -13,7 +13,7 @@ You Dynamics AX installation is slow, users complaining about performance and it
 
 We recently finished a quite successful performance optimization project and I will use it as an example for this post. The similar approach described here was used on dozens different projects so it is something  
 
-Project overview 
+## Project overview 
 
 The client was a big retail company running AX2009 for  about 10 years with 80 users and 1TB database size. With the COVID situation they saw increase in their sales and the performance of AX2019 that was average before this became critical.
 
@@ -44,7 +44,7 @@ One person can combine several roles but **all these roles** should be a part of
 
 ### The typical mistakes of organizing a team
 
-Let's discuss what 
+Let's discuss what can happen if we don't configure a team as recommended
 
 #### - No project manager allocated
 
@@ -52,27 +52,46 @@ Initially that seems reasonable, system is critically slow, you need just techni
 
 A lot of performance tasks are complex, have no direct impact on users and in order to resolve require efforts from different people. Probably the most typical example here is a recurring batch job that tries to reserve quantity for open orders and some orders are old, never be reserved and the processing happens again and again. Or some integration task that tries to process wrong messages every time it runs and do not mark them with the error flag. 
 
-Such tasks can produce a huge constant load on AOSes and SQL Server and quite complex to resolve. So you need to contact with business users, understand the reason for such multiple processing, find a solution, develop and text a fix(this can be complex for job that was developed 5 years ago and nobody want to touch it). So good project manager should allocate resources for tasks like this and control the execution 
+Such tasks can produce a huge constant load on AOSes and SQL Server and quite complex to resolve. So you need to contact with business users, understand the reason for such multiple processing, find a solution, develop and text a fix(this can be complex for job that was developed 5 years ago and nobody want to touch it). So a good project manager should allocate resources for tasks like this and control the execution 
 
 #### - Only SQL DBA/Infrastructure team is involved
 
-This is a typical situation in the beginning. Users complaining about performance, you ask you DBA check servers find the reason. And often this also doesn't work and ends up with more statistics or indexes updates. A lot of performance problems are related to parameter sniffing issues or Dynamics AX settings, and it is hard for SQL DBA to fix that, without knowing what is the logical purpose of these tables and what should be the correct plans for this.
+This is a typical situation in the beginning. Users complaining about performance, you ask you DBA check servers find the reason. And often this also doesn't work and ends up with more statistics or indexes updates. A lot of performance problems are related to parameter sniffing issues or Dynamics AX settings/code, and it is hard for SQL DBA to fix that, without knowing what is the logical purpose of these tables and what should be the correct plans for this.
 
 #### - SQL DBA/Infrastructure team is not involved
 
 This is an opposite situation to the previous case. Very often these problems are related to SQL Server or hardware configuration. If you don't include SQL/Infrastructure team into the project team, there is a high chance they just push back these recommendations. 
 
-Even for the most obvious performance counters it is quite easy to reject recommendations, lets take CPU load as an example. Is the load on AOS is 80% and the recommendation is to add more CPU cores - can be argued that almost 20% not used and everything is OK, or if CPU is 100% for 10 minutes and then 10minutes 20% - the average will be 60%. Such discussions are very time consuming and not productive, and may be simplified if all participants are within one team.
+Even for the most obvious performance counters it is quite easy to reject recommendations, lets take a CPU load as an example. Is the load on AOS is 80% and the recommendation is to add more CPU cores - can be argued that almost 20% not used and everything is OK, or if CPU is 100% for 10 minutes and then 10minutes 20% - the average will be 60%. Such discussions are very time consuming and not productive, and may be simplified if all participants are within one team.
 
 ![](SlowHardware.png)
 
-This twit is represent quite common problem. A lot of hardware used for multimillion ERP implementation are less powerful than a typical gaming laptop.
+This twit probably represents quite common problem. A lot of hardware used for multimillion ERP implementation are less powerful than a typical gaming laptop.
 
 #### - Only AX technical consultant involved
 
 Your Dynamics AX slow and you ask AX technical consultants to check why and give recommendations. Typical example of this - that a company hires a Microsoft Services consultant, they do a 3 days analysis with [DynamicsPerf](https://github.com/PFEDynamics/DynamicsPerf) tool and at the end give you very nice looking report. 
 
 This is better than nothing, but may not work in a lot of cases. For example, for the described project one problem was related to slow shipment processing. When we started analysis we have found that a shipment module used cross-companies queries, but the actual company was always defined in the business process, so these cross-companies queries may be removed and it gave quite considerable performance boost. Issues like this involve a lot of communications and may not be resolved just a single person sitting and running some queries.
+
+## The Project flow and tasks
+
+The team should meet on a very regular basis(like once a week) to discuss what **changes** and tasks should be done in the system to make it faster and our progress with that. 
+
+Quite important point here - each task should be testable, tracked and have a status. Don't allow e-mail chains like on these screenshot, where one problem discussed for 2 months with more and more people involved.
+
+<img src="2monthemail.png" alt="2monthemail" style="zoom:80%;" />
+
+The starting point with initial set of tasks usually comes from a Performance audit, here is a "typical" example  
+
+![FirstRecomendations](FirstRecomendations.png)
+
+Other tasks comes from 2 sources:
+
+- Users complains (e.g.. Some operation works slowly)
+- Periodic servers monitoring(Top SQL queries, Blocking, missing indexes, etc..)
+
+For users complains the first question that should be asked - "Can we replicate this issue on Test environment?". If we can do this - the task is quite simple,  we allocate it to a developer for the tracing and investigating. If the answer is No - the team should discuss the plan to proceed. Probably the first thing to do in this case - implement some tracing solution that will allow us to operate some numbers - how often the issue happens, at what time, what are the delays and so on.. 
 
 ## Ready to change and forward only approach 
 
@@ -96,13 +115,23 @@ To quickly trace such issues a database point-in-time backup(like restore the Da
 
 In this project it was a separate one-box environment(that included AOS, SQL and all others components) with 8 CPUs cores, 48GB of memory and 3TB drive(to keep 2 copies of database backup). Also an important tip is to run this environment under a user that doesn't have any production access to avoid situations of sending e-mails to the real customers or to the production integration folders.
 
-## The project flow and communication channel
+## Deployment and communication channel
 
+This process of fixing  is iterative - we fix first issues, then continue to monitor, provide a new set of actions and so on..
 
+## 
 
 
 
 ## Deal with external integrations 
+
+Bad designed integration 
+
+https://docs.microsoft.com/en-us/dynamics365/fin-ops-core/dev-itpro/data-entities/priority-based-throttling
+
+In AX2009/AX2012 you can provide a SQL access to view or to the stored procedure for the 3-party application(that is logically the same as OData in D365). The common problem that these applications can easily stop the whole system by calling these SPs or views in an uncontrolled manner. The latest examples – Getting customer information without using DataAreaId in joins – that leads to full table scan for each call, or frequently calling procedure for the onhand data for the whole store. The main problem here – that you can’t control or change these 3party applications, they often belong to a different team and don’t care about ERP problems. So throttling can help in this case(at least start the dialogue about optimization)
+
+What I see missing part in this functionality – you showed a report in LCS that display requests that are being throttled. But this doesn’t provide an answer to the question – what application caused this. For example, you have 20 external applications, 1 of them creates 90% of the workload, and 19 rest – only 10%. So to identify and fix the throttling we need some report that will help to identify this application(that creates a top workload). In this case, a client can put some efforts to optimizing just this one application.
 
 
 
@@ -112,5 +141,7 @@ In this project it was a separate one-box environment(that included AOS, SQL and
 If you use the on-premise system(AX2009, AX2012) and have access to SQL Server, make sure that your administrators know how to diagnose and solve parameters sniffing issues. It may happen even for an old system, for example, a case from this blog happened to a seven year old system.
 
 If you are in the cloud - vote for the [idea](https://experience.dynamics.com/ideas/idea/?ideaid=2a4ab902-5690-ea11-99e5-0003ff68aebe) to fix LCS Insights response time
+
+I hope you find it useful, and as always, any problem, suggestion or  improvement, do not hesitate to contact me, I will be happy to discuss  it.
 
 Any comments are welcome
