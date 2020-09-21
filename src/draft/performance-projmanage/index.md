@@ -50,9 +50,11 @@ Let's discuss what can happen if we don't configure a team as recommended
 
 Initially that seems reasonable, system is critically slow, you need just technical people who tell you what to do and not managers. But this become an important factor after that. 
 
-A lot of performance tasks are complex, have no direct impact on users and in order to resolve require efforts from different people. Probably the most typical example here is a recurring batch job that tries to reserve quantity for open orders and some orders are old, never be reserved and the processing happens again and again. Or some integration task that tries to process wrong messages every time it runs and do not mark them with the error flag. 
+A lot of performance tasks are complex, have no direct impact on users and in order to resolve require efforts from different people. 
 
-Such tasks can produce a huge constant load on AOSes and SQL Server and quite complex to resolve. So you need to contact with business users, understand the reason for such multiple processing, find a solution, develop and text a fix(this can be complex for job that was developed 5 years ago and nobody want to touch it). So a good project manager should allocate resources for tasks like this and control the execution 
+> Probably the most typical example here is a recurring batch job that tries to reserve quantity for open orders and some orders are old, never be reserved and the processing happens again and again. Or some integration task that tries to process wrong messages every time it runs and do not mark them with the error flag. 
+
+Such tasks can produce a huge constant load on AOSes and SQL Server and quite complex to resolve. You need to contact with business users, understand the reason for such multiple processing, find a solution, develop and text a fix(this can be complex for a procedure that was developed 5 years ago and nobody want to touch it). So a good project manager should allocate resources for tasks like this and control the execution.
 
 #### - Only SQL DBA/Infrastructure team is involved
 
@@ -60,7 +62,7 @@ This is a typical situation in the beginning. Users complaining about performanc
 
 #### - SQL DBA/Infrastructure team is not involved
 
-This is an opposite situation to the previous case. Very often these problems are related to SQL Server or hardware configuration. If you don't include SQL/Infrastructure team into the project team, there is a high chance they just push back these recommendations. 
+This is an opposite situation to the previous case. Very often these problems are related to SQL Server or hardware configuration. If you don't include SQL/Infrastructure team into the project team, there is a high chance they just push back any recommendations. 
 
 Even for the most obvious performance counters it is quite easy to reject recommendations, lets take a CPU load as an example. Is the load on AOS is 80% and the recommendation is to add more CPU cores - can be argued that almost 20% not used and everything is OK, or if CPU is 100% for 10 minutes and then 10minutes 20% - the average will be 60%. Such discussions are very time consuming and not productive, and may be simplified if all participants are within one team.
 
@@ -72,7 +74,11 @@ This twit probably represents quite common problem. A lot of hardware used for m
 
 Your Dynamics AX slow and you ask AX technical consultants to check why and give recommendations. Typical example of this - that a company hires a Microsoft Services consultant, they do a 3 days analysis with [DynamicsPerf](https://github.com/PFEDynamics/DynamicsPerf) tool and at the end give you very nice looking report. 
 
-This is better than nothing, but may not work in a lot of cases. For example, for the described project one problem was related to slow shipment processing. When we started analysis we have found that a shipment module used cross-companies queries, but the actual company was always defined in the business process, so these cross-companies queries may be removed and it gave quite considerable performance boost. Issues like this involve a lot of communications and may not be resolved just a single person sitting and running some queries.
+This is better than nothing, but may not work in a lot of cases. 
+
+> For example, for the described project one problem was related to slow shipment processing. When we started analysis we have found that a shipment module used cross-companies queries, but the actual company was always defined in the business process, so these cross-companies queries may be removed and it gave quite considerable performance boost. 
+
+Issues like this involve a lot of communications and may not be resolved just a single person sitting and running some queries.
 
 ## The Project flow and tasks
 
@@ -86,12 +92,14 @@ The starting point with initial set of tasks usually comes from a Performance au
 
 ![FirstRecomendations](FirstRecomendations.png)
 
-Other tasks comes from 2 sources:
+Other tasks come from 2 sources:
 
 - Users complains (e.g.. Some operation works slowly)
 - Periodic servers monitoring(Top SQL queries, Blocking, missing indexes, etc..)
 
 For users complains the first question that should be asked - "Can we replicate this issue on Test environment?". If we can do this - the task is quite simple,  we allocate it to a developer for the tracing and investigating. If the answer is No - the team should discuss the plan to proceed. Probably the first thing to do in this case - implement some tracing solution that will allow us to operate some numbers - how often the issue happens, at what time, what are the delays and so on.. 
+
+
 
 ## Ready to change and forward only approach 
 
@@ -109,39 +117,41 @@ Also I developed some rules:
 
 ## Prepare a separate LAB version for the project 
 
-Often the most complex problem in performance optimization - is to replicate an issue. There are a lot of cases where the operation(for example Sales orders posting or some batch job) is working without any issues during the day, but becomes slow during a certain hour. The reason may be in other parallel processes that caused blocking or the high system load, but very often this depends on the particular data used in this process. The typical example for this is warehouse operations where for some period you can have zero lines ready for shipment, but an hour later - 10k lines.  
+Often the most complex problem in performance optimization - is to replicate an issue. There are a lot of cases where the operation(for example Sales orders posting or some batch job) is working without any issues during the day, but becomes slow during a certain hour. The reason may be in other parallel processes that caused blocking or the high system load, but very often this depends on the particular data used in this process. 
 
-To quickly trace such issues a database point-in-time backup(like restore the Database at 11.32) can provide a valuable information. So organizing a separate environment where such backup can be restored and traced can save a lot of time allowing quickly replicate an issue and test the fix later. 
+> The typical example for this is warehouse operations where for some period you can have zero lines ready for shipment, but an hour later - 10k lines.  
+
+To quickly trace such issues a database point-in-time backup(like restore the Database at 11.32am) can provide a valuable information. So organizing a separate environment where such backup can be restored and traced can save a lot of time allowing quickly replicate an issue and test the fix later. 
 
 In this project it was a separate one-box environment(that included AOS, SQL and all others components) with 8 CPUs cores, 48GB of memory and 3TB drive(to keep 2 copies of database backup). Also an important tip is to run this environment under a user that doesn't have any production access to avoid situations of sending e-mails to the real customers or to the production integration folders.
 
 ## Deployment and communication channel
 
-This process of fixing  is iterative - we fix first issues, then continue to monitor, provide a new set of actions and so on..
+This process of Dynamics AX performance optimization is iterative - we fix first top current issues, then continue to monitoring, provide a new set of actions and so on.. It is quite important to minimize the time that is needed to deploy the changes to Production. For some customers it is not a problem, but may be challenging for others. 
 
-## 
+Before the project I suggest to review the deployment process and try to simplify it if possible. Ideally we should be able to do deployments every day if needed. 
 
-
+Also a great role in the project plays a good communication channel(other than e-mail). Separate group in  Teams probably the best solution for this, however sometimes is tricky to create due to different users domain.
 
 ## Deal with external integrations 
 
-Bad designed integration 
+Some integration types can often cause performance problems. In AX2009/AX2012 such "dangerous" types are:
 
-https://docs.microsoft.com/en-us/dynamics365/fin-ops-core/dev-itpro/data-entities/priority-based-throttling
+- SQL access to Dynamics AX database for the 3-party application.
+- AIF or service endpoint to query some information
 
-In AX2009/AX2012 you can provide a SQL access to view or to the stored procedure for the 3-party application(that is logically the same as OData in D365). The common problem that these applications can easily stop the whole system by calling these SPs or views in an uncontrolled manner. The latest examples – Getting customer information without using DataAreaId in joins – that leads to full table scan for each call, or frequently calling procedure for the onhand data for the whole store. The main problem here – that you can’t control or change these 3party applications, they often belong to a different team and don’t care about ERP problems. So throttling can help in this case(at least start the dialogue about optimization)
+The common problem that these 3-party applications can easily stop the whole system by calling these services or SQL in an uncontrolled manner. The main problem here – that you can’t control or change these 3party applications, they often belong to a different team and don’t care about ERP problems. 
 
-What I see missing part in this functionality – you showed a report in LCS that display requests that are being throttled. But this doesn’t provide an answer to the question – what application caused this. For example, you have 20 external applications, 1 of them creates 90% of the workload, and 19 rest – only 10%. So to identify and fix the throttling we need some report that will help to identify this application(that creates a top workload). In this case, a client can put some efforts to optimizing just this one application.
+In cloud D365FO Microsoft expected exactly the same problems(OData replaces SQL for the cloud) and the solution they proposed is a [Priority based throttling](https://docs.microsoft.com/en-us/dynamics365/fin-ops-core/dev-itpro/data-entities/priority-based-throttling). That means when the system is highly loaded such queries will get an exception. There were some negative comment about this feature on Yammer, but when you see that the whole Dynamics AX performance affected by the incorrect written query, your opinion may be changed.
 
+> Examples that we had – SQL query to get customer  information(Address, Contact info) with some missing DataAreaId field in joins – that leads to full table scan for each call, or frequently calling AX service that returns OnHand data for the whole store. 
+>
 
+So throttling can help in this case(at least start the dialogue about optimization)
 
 
 ## Conclusion
 
-If you use the on-premise system(AX2009, AX2012) and have access to SQL Server, make sure that your administrators know how to diagnose and solve parameters sniffing issues. It may happen even for an old system, for example, a case from this blog happened to a seven year old system.
-
-If you are in the cloud - vote for the [idea](https://experience.dynamics.com/ideas/idea/?ideaid=2a4ab902-5690-ea11-99e5-0003ff68aebe) to fix LCS Insights response time
-
-I hope you find it useful, and as always, any problem, suggestion or  improvement, do not hesitate to contact me, I will be happy to discuss  it.
+I hope you find this information useful and will use it in case any AX2009, AX2012 performance troubleshooting. As always, any problem, suggestion or  improvement, do not hesitate to contact me, I will be happy to discuss it.
 
 Any comments are welcome
