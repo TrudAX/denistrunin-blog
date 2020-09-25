@@ -82,7 +82,7 @@ Issues like this involve a lot of communications and may not be resolved just a 
 
 ## The Project flow and tasks
 
-The team should meet on a very regular basis(like once a week) to discuss what **changes** and tasks should be done in the system to make it faster and our progress with that. 
+The team should meet on a very regular basis(like once a week) to discuss what **changes** and tasks should be done in the system to make it faster and the progress with that. 
 
 Quite important point here - each task should be testable, tracked and have a status. Don't allow e-mail chains like on these screenshot, where one problem discussed for 2 months with more and more people involved.
 
@@ -97,7 +97,7 @@ Other tasks come from 2 sources:
 - Users complains (e.g.. Some operation works slowly)
 - Periodic servers monitoring(Top SQL queries, Blocking, missing indexes, etc..)
 
-For users complains the first question that should be asked - "Can we replicate this issue on Test environment?". If we can do this - the task is quite simple,  we allocate it to a developer for the tracing and investigating. If the answer is No - the team should discuss the plan to proceed. Probably the first thing to do in this case - implement some tracing solution that will allow us to operate some numbers - how often the issue happens, at what time, what are the delays and so on.. 
+For user complains the first question that should be asked - "Can we replicate this issue on Test environment?". If we can do this - the task is quite simple,  we allocate it to a developer for the tracing and investigating. If the answer is No - the team should discuss the plan to proceed. Probably the first thing to do in this case - implement some tracing solution that will allow us to operate some numbers - how often the issue happens, at what time, what are the delays and so on.. 
 
 
 
