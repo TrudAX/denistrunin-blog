@@ -1,35 +1,35 @@
 ---
-title: "Organising Dynamics AX performance optimization project"
-date: "2020-09-27T22:12:03.284Z"
+title: "How to manage a Dynamics AX performance optimization project"
+date: "2020-09-30T22:12:03.284Z"
 tags: ["Performance"]
 path: "/performance-projmanage"
 featuredImage: "./logo.png"
-excerpt: "The blog post describes how to organize Dynamics AX performance optimization project, who should be involved, and how the process should be organized "
+excerpt: "The blog post describes how to organize a Dynamics AX performance optimization project, who should be involved, and how the process should be organized "
 ---
 
-Your Dynamics AX installation(AX2009/AX2012 or Dynamics 365 for Finance and Operations) is slow, users complaining about performance and it is not clear what to do to fix that. The solution is to start a performance optimization project. How to organize this project, who should be involved, and how the process should be organized is explained in this blog post.
+Your Dynamics AX system(AX2009/AX2012 or Dynamics 365 for Finance and Operations) is slow, the users are complaining about performance and it is not clear what to do to fix that. The solution is to start a performance optimization project. How to organize this project, who should be involved, and how the process should be managed is explained in this blog post.
 
-We recently finished a quite successful performance optimization project and I will use it as an example for this post. The similar approach described here was used on dozens different AX2009/AX2012 projects and I also also try to describe common mistakes to avoid.
+We recently finished quite a successful performance optimization project and I will use it as an example for this post. The similar approach described here was used on dozens different AX2009/AX2012 projects. I also describe common mistakes to avoid.
 
 ## Project overview
 
-The client was a big retail company running AX2009 for  about 10 years with 80 users and 1TB database size. With the COVID situation they saw an increase in their sales and the performance of Dynamics AX, that was average before this, became critical.
+The client was a big retail company running AX2009 for about 10 years with 80 users and 1TB database size. With the COVID-19 situation they saw an increase in their sales and the performance of Dynamics AX, that had been average before this, became critical.
 
-As a final result they saw a great improvements
+As a final result they saw great improvement of AX performance.
 
-System stability was greatly improved, some measurable results:
+System stability was greatly improved, here are some measurable results:
 
 ![PerfResults](PerfResults.png)
 
 In total we did 43 different performance tasks and the project length was 3 months. So these results were quite amazing.
 
-From my side as a technical consultant the project flow and organization was great and contained all typical interaction types that exist in similar projects. The project size due to system complexity was above average(for example Technical consultant time was 45 days, that is more than average).
+As an AX technical consultant I can say that the project flow and organization were great and contained all typical interaction types that exist in similar projects. The project size due to system complexity was above average(for example Technical consultant time was 45 days, that is more than usual).
 
 I want to describe the pieces of successful factors and common mistakes that I saw on other projects like this.
 
 ## Performance project team
 
-The main factor to success is the proper project team. The typical project team should have the following people:
+The main factor to success is the proper project team. A typical project team should have the following people:
 
 - IT manager
 - Functional consultant
@@ -40,35 +40,35 @@ The main factor to success is the proper project team. The typical project team 
 
 One person can combine several roles but **all these roles** should be a part of the project.
 
-### The typical mistakes of organizing a team
+### Typical mistakes of organizing a team
 
 Let's discuss what can happen if we don't configure a team as recommended:
 
 #### - No project manager allocated
 
-Initially that seems reasonable, the system is critically slow, you need just technical people who tell you what to do and not managers. But this became an important factor after that.
+Initially that seems reasonable: the system is critically slow, you need just technical people who tell you what to do and not managers. But this became an important factor later.
 
-A lot of performance tasks are complex, have no direct impact on users and in order to resolve require efforts from different people.
+A lot of performance tasks are complex, have no direct impact on users and require efforts from different people in order to be solved.
 
-> Probably the most typical example here is a recurring batch job that tries to reserve quantity for open orders, but some orders are old, will never be reserved and the process happens again and again. Or some integration task that tries to process wrong messages every time it runs and does not mark them with the error flag.
+> Probably the most typical example here is a recurring batch job that tries to reserve quantity for open orders, but some orders are old, will never be reserved and the process happens again and again. Or an integration task that tries to process wrong messages every time it runs and does not mark them with an error flag.
 
-Such tasks can produce a huge constant load on AOSes and SQL Server and are quite complex to resolve. You need to contact business users, understand the reason for such multiple processing, find a solution, develop and test a fix(this can be complex for a procedure that was developed 5 years ago and nobody wants to touch it). So a good project manager should allocate resources for tasks like this and control the execution.
+Such jobs can produce a huge constant load on AOSes and SQL Server and are quite complex to resolve. You need to contact business users, understand the reason for such multiple processing, find a solution, develop and test a fix(this can be complex for a procedure that was developed 5 years ago and nobody wants to touch it). So a good project manager should allocate resources for tasks like this and control the execution.
 
 #### - Only SQL DBA/Infrastructure team is involved
 
-This is a typical situation in the beginning. Users complaining about performance, you ask you DBA check servers to find the reason. Often this doesn't work and ends up with more statistics or index updates. A lot of performance problems are related to parameter sniffing issues or Dynamics AX settings/code, and it is hard for SQL DBA to fix that, without knowing what is the logical purpose of these tables and what should be the correct plans for this.
+This is a typical situation in the beginning. Users complaining about performance, you ask you DBA to check servers and find the reason. Often this doesn't work and ends up with more statistics or index updates. A lot of performance problems are related to parameter sniffing issues or Dynamics AX settings/code, and it is hard for SQL DBA to fix that, without knowing what is the logical purpose of these tables and what should be the correct SQL plans for long queries.
 
 #### - SQL DBA/Infrastructure team is not involved
 
-This is an opposite situation to the previous case. Very often these problems are related to SQL Server or hardware configuration.
+This is the opposite situation to the previous case. Sometimes performance problems are related to SQL Server or hardware configuration.
 
-This twit probably represents a common problem. A lot of hardware used for multimillion ERP implementations are less powerful than a typical gaming laptop.
+This tweet probably represents a common problem. Hardware used for multimillion ERP implementations is less powerful than a typical gaming laptop.
 
 ![Slow Hardware](SlowHardware.png)
 
 If you don't include SQL/Infrastructure team into the project team, there is a high chance they just push back any recommendations.
 
-Even for the most obvious performance counters it is quite easy to reject recommendations, let's take a CPU load as an example. If the load on AOS is 80% and the recommendation is to add more CPU cores - can be argued that almost 20% not used and everything is OK, or if CPU is 100% for 10 minutes and then 10minutes 20% - the average will be 60%. Such discussions are very time consuming and not productive, and may be simplified if all participants are within one team.
+Even for the most obvious performance counters it is quite easy to reject recommendations, let's take a CPU load as an example. If the load on AOS is 80%(that is really big) and the recommendation is to add more CPU cores, it can be argued that almost 20% are not used and everything is OK. Or if CPU load is 100% for 10 minutes and then 20% for 10minutes - the average will be 60%. Such discussions are very time consuming and not productive, and may be simplified if all participants are within one team.
 
 #### - Only AX technical consultant involved
 
