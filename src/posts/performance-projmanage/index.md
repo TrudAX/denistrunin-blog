@@ -133,7 +133,7 @@ This process of Dynamics AX performance optimization is iterative - we fix first
 
 Before the project I suggest reviewing the deployment process and try to simplify it if possible. Ideally we should be able to do deployments every day if needed.
 
-Also a great role in the project success plays a good communication channel(other than e-mail). A group in Microsoft Teams probably the best solution for this, however sometimes is tricky to create due to different users' domains.
+Also a great role in the project success plays a good communication channel(other than e-mail). A group in Microsoft Teams probably the best solution for this, however sometimes is tricky to create due to different users' domains(check this [trick](https://github.com/Zerg00s/MultipleTeamsInstances) if you want to run multiple Teams on one computer).
 
 ## Deal with external integrations
 
