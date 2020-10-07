@@ -72,36 +72,36 @@ Even for the most obvious performance counters it is quite easy to reject recomm
 
 #### - Only AX technical consultant involved
 
-Your Dynamics AX slow and you ask AX technical consultants to check why and give recommendations. Typical example of this - that a company hires a Microsoft Services consultant, they do a 3 days analysis with [DynamicsPerf](https://github.com/PFEDynamics/DynamicsPerf) tool and at the end give you a very nice looking report.
+Your Dynamics AX is slow and you ask AX technical consultant to check why and give their recommendations. Typical example of this: a company hires a Microsoft Services consultant, they do a 3 days analysis with [DynamicsPerf](https://github.com/PFEDynamics/DynamicsPerf) tool and at the end give you a very nice looking report.
 
-This is better than nothing, but may not work in a lot of cases.
+This may solve simple issues, but may not work in some difficult cases.
 
-> For example, for the described project one problem was related to slow shipment processing. When we started analysis we have found that a shipment module used a lot of cross-companies queries, but the actual company was always defined in the business process, so these cross-companies queries may be removed and it gave quite considerable performance boost.
+> For example, for this project one of the problems was related to slow shipment processing. When we started analysis we have found that a shipment module was using a lot of cross-companies queries, but the actual company was always defined in the business process, so these cross-companies queries were removed and it gave quite a considerable performance boost.
 
-Finding and fixing issues like this involve a lot of communications and may not be resolved just a single person sitting and running some queries.
+Finding and fixing issues like this involve a lot of communications and may not be resolved just by a single person sitting and running some queries.
 
 ## The Project flow and tasks
 
-The team should meet on a very regular basis(like once a week) to discuss what **changes** and tasks should be done in the system to make it faster and the progress with that.
+The team should meet on a very regular basis(like once a week) to discuss what **changes** and tasks should be done in the system to make it faster.
 
-Quite important point here - each task should be testable, tracked and have a status. Don't allow email chains like on this screenshot, where one problem discussed for 2 months with more and more people involved.
+Quite an important point here is that each task should be testable, tracked and have a status. Don't allow email chains like in this screenshot, where one problem was being discussed for 2 months with more and more people getting involved.
 
 ![2month email](2monthemail.png)
 
-The starting point with initial set of tasks usually comes from a [Performance audit](https://denistrunin.com/performance-audit), here is a "typical" example  
+The initial set of tasks usually comes from a [Performance audit](https://denistrunin.com/performance-audit), here is a "typical" example:
 
 ![FirstRecomendations](FirstRecomendations.png)
 
 Other tasks come from 2 sources:
 
-- Users complains (e.g. Some operation works slowly)
+- User complaints (e.g. an operation works slowly)
 - Periodic servers monitoring(Top SQL queries, Blocking, missing indexes, etc..)
 
-For user complains the first question that should be asked - "Can we replicate this issue on Test environment?". If we can do this - the task is quite simple, we allocate it to a developer for the tracing and investigating. If the answer is No - the team should discuss the plan to proceed. Probably the first thing to do in this case - implement some tracing solution that will allow us to operate some numbers rather than just general "the system is slow" - how often the issue happens, at what time, what are the delays and so on..
+For user complaints the first question that should be asked is "Can we replicate this issue in a Test environment?". If we can do this it means that the task is quite simple, we allocate it to a developer for the tracing and investigating. If the answer is "No" then the team should discuss the plan to proceed. Probably the first thing to do in this case is to implement a tracing solution that will allow us to operate some numbers(e.g. how often the issue happens, at what time, what are the delays and so on) rather than just general "the system is slow".
 
-Also, before discussing any optimizations it is worth discussing what business task users are trying to resolve, maybe there is another more efficient way to do it.
+Also, before discussing any optimizations it is worth finding what business task users are trying to resolve, maybe there is another more efficient way to do it.
 
-> The classic example here is a case where the whole accounting department complained about slow Dynamics AX2012 performance. Client already upgraded SQL hardware, installed a new AOS, but nothing helped. When we discussed the issue we have found that a part of users daily work was updating clients information. In order to do this they opened "All customers" list page, filtered by the required customer, double clicked on it to open CustTable form, edited the information, then closed CustTable form, filtered again the next customer in "All customers" list page and so on... CustTable is a very heavy form that takes about 5 seconds to load and such delay is very annoying if you need to update 20-50 customers. The solution was quite simple - we just showed them that they don't need to close CustTable form to switch the active customer, there is a Grid view in this form where you can almost instantly search for it. Users were very happy.
+> The classic example here is a case where the whole accounting department complained about slow Dynamics AX2012 performance. The Client had already upgraded SQL hardware, installed a new AOS, but nothing helped. When we discussed the issue we found that a part of users daily work was to update clients information. In order to do this they opened "All customers" list page, filtered it by the required customer, double clicked on it to open "CustTable" form, edited the information, then closed CustTable form, filtered "All customers" list page again by the next customer and so on... "CustTable" is a very heavy form that takes about 5 seconds to load and such delay was very annoying if you need to update 20-50 customers. The solution was quite simple: we just showed them that they don't need to close "CustTable" form to switch the active customer, there is a Grid view in this form where you can almost instantly search for it. The users were very happy.
 
 ## Ready to change and forward only approach
 
