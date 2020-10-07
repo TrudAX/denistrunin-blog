@@ -105,35 +105,35 @@ Also, before discussing any optimizations it is worth finding what business task
 
 ## Ready to change and forward only approach
 
-That is what I suggest to discuss with a customer in the beginning of the project. The only way to fix performance problems - is to **change** something. There is no magic flag in Dynamics AX or SQL Server - "Run faster".
+That is what I suggest to discuss with a customer in the beginning of the project. The only way to fix performance problems is to **change** something. There is no magic flag "Run faster" in Dynamics AX or SQL Server.
 
-These changes can be done in multiple areas, but as with any change, there is always a chance that it can affect the system in a negative way. We try our best to avoid this, but such issues are happening on almost  every project. Even a positive change - you created a new index or clean-up some tables can produce a negative effect due to parameters sniffing.
+These changes can be done in multiple areas, but as with any change, there is always a chance that it can affect the system in a negative way. We try our best to avoid this, but such issues are happening on almost  every project. Even a positive change(you created a new index or cleaned up some tables) can produce a negative effect due to parameters sniffing.
 
-The only correct way to deal with such issues - is to continue the system monitoring, quickly identify and fix them. Not a correct way - perform a rollback.
+The only correct way to deal with such issues is to continue the system monitoring, identify and fix them quickly. Not a correct way is to perform a rollback.
 
 Some practical recommendations:
 
-- Have someone from the customer team to apply any changes on Production. There were a lot of situations - you create an index and the next day some users can't print documents(totally unlinked events). Then there were usually a lot of emails trying to find the reason and blame someone and the person who did the last change is a perfect candidate for this.  
-- Allocate a day to monitor the system after changes are applied. This is needed to [catch and fix](https://denistrunin.com/performance-sniffing) parameters sniffing issues.
-- For the first round of changes - include as many as possible. The strategy "one change in a time" doesn't work well in the beginning. Often the first positive feedback from users creates a lot of trust, that makes project flow simpler later.
+- Have someone from the customer team to apply any changes to Production. There were a lot of situations like this: you created an index and the next day some users can't print documents(totally unlinked events). Then there were usually a lot of emails trying to find the reason and blame someone and the person who did the last change is a perfect candidate for this.
+- Allocate a day to monitor the system after the changes were applied. This is needed to [catch and fix](https://denistrunin.com/performance-sniffing) parameters sniffing issues.
+- For the first round of changes include as many as possible. The strategy "one change in a time" doesn't work well in the beginning. Often the first positive feedback from users creates a lot of trust, that makes the project flow simpler later.
 
 ## Prepare a separate LAB version for the project
 
-Often the most complex problem in performance optimization - is to replicate an issue. There are a lot of cases where the operation(for example Sales orders posting or some batch job) is working without any issues during the day, but becomes slow during a certain hour. The reason may be in other parallel processes that caused blocking or the high system load, but very often this depends on the particular data used in this process.
+Often the most complex problem in performance optimization is to replicate an issue. There are a lot of cases where the operation(for example Sales orders posting or some batch job) is working without any issues during the day, but becomes slow during a certain hour. The reason may be in other parallel processes that caused blocking or the high system load, but very often this depends on the particular data used in this process.
 
-> The typical example - warehouse operations where for some period you can have zero lines ready for shipment, but an hour later - 10k lines.  
+> Typical example: warehouse operations where for some period you can have zero lines ready for shipment, but an hour later there are 10k lines.  
 
-To quickly trace such issues a database point-in-time restore(like restoring the Database at 11.32am) can provide valuable information. So organizing a separate environment where such backup can be restored and traced can save a lot of time allowing to quickly replicate an issue and test the fix later.
+To trace such issues quickly, a database point-in-time restore(like restoring the Database at 11.32am) can provide valuable information. So organizing a separate environment where such backups can be restored and traced can save a lot of time allowing to quickly replicate an issue and test the fix later.
 
-You don't need to replicate a full Production hardware for this. In this project we used a separate one-box environment(that included AOS, SQL and all other components) with 8 CPUs cores, 48GB of memory and 3TB drive(to keep 2 copies of database backup). Also an important tip is to run this environment under a user that doesn't have any production access to avoid situations of sending e-mails to the real customers or to the production integration folders.
+You don't need to replicate a full Production hardware for this. In this project we used a separate one-box environment(that included AOS, SQL and all other components) with 8 CPUs cores, 48GB of memory and 3TB drive(to keep 2 copies of database backup). Also an important tip is to run this environment under a user that doesn't have any Production access to avoid situations of sending e-mails to the real customers or to the production integration folders.
 
 ## Deployment and communication channel
 
-This process of Dynamics AX performance optimization is iterative - we fix first top current issues, then continue monitoring, provide a new set of actions and so on.. It is quite important to minimize the time that is needed to deploy the changes to Production. For some customers it is not a problem, but may be challenging for others.
+This process of Dynamics AX performance optimization is iterative: we fix first top current issues, then continue monitoring, provide a new set of actions and so on.. It is quite important to minimize the time that is needed to deploy the changes to Production. For some customers it is not a problem, but may be challenging for others.
 
-Before the project I suggest reviewing the deployment process and try to simplify it if possible. Ideally we should be able to do deployments every day if needed.
+I suggest reviewing the deployment process and try to simplify it if possible. Ideally we should be able to do deployments every day if needed.
 
-Also a great role in the project success plays a good communication channel(other than e-mail). A group in Microsoft Teams probably the best solution for this, however sometimes is tricky to create due to different users' domains(check this [trick](https://github.com/Zerg00s/MultipleTeamsInstances) if you want to run multiple Teams on one computer).
+Also a great role in the project success plays a good communication channel(other than e-mail). A group in Microsoft Teams is probably the best solution for this, however sometimes it is tricky to create it due to different users' domains(check this [trick](https://github.com/Zerg00s/MultipleTeamsInstances) if you want to run multiple Teams on one computer).
 
 ## Deal with external integrations
 
@@ -142,15 +142,15 @@ Some integration types can often cause performance problems. In AX2009/AX2012 su
 - SQL access to Dynamics AX database for the 3-party application.
 - AIF or Service endpoint to query some information
 
-The common problem is that these 3-party applications can easily stop the whole system by calling these services or running SQL in an uncontrolled manner. The main problem here – that you can’t control or change these 3party applications, they often belong to a different team and don’t care about ERP problems.
+The common problem is that these 3-party applications can easily stop the whole system by calling these services or running SQL in an uncontrolled manner. The main problem here is that you can’t control or change these 3-party applications, they often belong to a different team that doesn’t care about ERP problems.
 
-> Examples that we had – SQL query to get customer  information(Address, Contact info) with some missing DataAreaId field in joins – that leads to full table scan for each call, or frequently calling AX service that returns On-hand data for the whole store.
+> Examples that we had: SQL query to get customer information(Address, Contact info) with some missing DataAreaId field in joins, that leads to full table scan for each call, or frequently calling AX service that returns On-hand data for the whole store.
 
-In cloud D365FO Microsoft expected exactly the same problems(OData replaces SQL access for the cloud) and the solution they proposed is a [Priority based throttling](https://docs.microsoft.com/en-us/dynamics365/fin-ops-core/dev-itpro/data-entities/priority-based-throttling). That means when the system is highly loaded such queries will get an exception. There were some negative comments about this feature on Yammer, but when you see how the whole Dynamics AX performance is affected by one incorrect written query, your opinion may be changed. So throttling can help in this case(at least start the dialog about optimization).
+In cloud D365FO version, Microsoft faced exactly the same problems(OData replaces SQL access for the cloud) and the solution they proposed is a [Priority based throttling](https://docs.microsoft.com/en-us/dynamics365/fin-ops-core/dev-itpro/data-entities/priority-based-throttling). That means when the system is highly loaded such queries will get an exception. There were some negative comments about this feature on Yammer, but when you see how the whole Dynamics AX performance is affected just by one incorrectly written query, your opinion may be changed. So throttling can help in this case(at least start the dialog about optimization).
 
 The best solution is probably not using such integration types if you can't control the external system. If you need to provide some information to the 3-party system, just unload it to the separate database(like BYOD in Dynamics 365FO).
 
-But it is very hard to change the integration process that is already implemented, so a typical approach is optimizing X++ code related to the service, and discussing call frequency with the external system(that is where you need an "IT manager" person).
+But it is very hard to change the integration process that is already implemented, so a typical approach is optimizing X++ code related to the service, and discussing call frequency with the external team(that is where you need an "IT manager" person).
 
 ## Conclusion
 
@@ -163,4 +163,4 @@ So to deal with Dynamics AX performance problems you need the following:
 
 This allows you to quickly resolve and fix any problem.
 
-I hope you find this information useful and will use it in case of any AX2009, AX2012, Dynamics 365FO performance troubleshooting. As always, in case any problem, suggestion or  improvement, do not hesitate to contact me, I will be happy to discuss it.
+I hope you find this information useful and will use it in case of any AX2009, AX2012, Dynamics 365FO performance troubleshooting. As always, in case of any problem, suggestion or  improvement, do not hesitate to contact me, I will be happy to discuss it.
