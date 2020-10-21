@@ -1,6 +1,6 @@
 ---
 title: "Comparing D365FO development VMs performance(VS2017)"
-date: "2020-10-22T20:12:03.284Z"
+date: "2020-10-21T20:12:03.284Z"
 tags: ["Development", "Performance"]
 path: "/devvm-perfv13"
 featuredImage: "./logo.png"
