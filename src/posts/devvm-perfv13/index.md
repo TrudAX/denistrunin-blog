@@ -120,6 +120,6 @@ Let's summarize the current recommendations based on these tests for Visual Stud
 
 - Standard Development Environment from LCS(with the default of 3 HHD disks) is the slowest and constantly hangs. If you can control the Environment creation - never use it and always change the number of disks(15 32GB HDD are cheaper and faster).
 
-- HDD15 VM is the best choice in term of price/performance. It is a little bit slower than SSD based VM, but the storage price(that should be paid even if VM is deallocated) is almost 10 times cheaper(24 vs 220 USD)
+- HDD15 VM is the best choice in terms of price/performance. It is a little bit slower than SSD based VM, but the storage price(that should be paid even if VM is deallocated) is almost 10 times cheaper(24 vs 220 USD)
 
 I also will try to repeat the same tests after the next D365FO release, it will be interesting to compare the progress in this area.
