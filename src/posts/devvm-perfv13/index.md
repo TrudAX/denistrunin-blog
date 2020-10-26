@@ -60,7 +60,7 @@ For the compile task I got the following results:
 
 ![Full compile time](FullCompileTime.png)
 
-The compile times are longer than in previous VS2015.
+The compile times are longer than in previous test with VS2015 and 10.0 version.
 
 Next test is a database synchronize:
 
