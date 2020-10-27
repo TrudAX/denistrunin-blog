@@ -240,7 +240,9 @@ The advice here is to install and setup it before the actual problem happens. In
 
 ## Summary
 
-Using these basic steps you can resolve your Dynamics AX performance problems and make your users happy. All scripts related to this post are available on my [GitHub](https://github.com/TrudAX/TRUDScripts/blob/master/Performance/AX%20Technical%20Audit.md). I also described some performance-related issues that were resolved using the provided approach - [Examples of AX2012/ AX2009 performance problems]( https://denistrunin.com/performance-examplesAx2012/).
+Using these basic steps you can resolve your Dynamics AX performance problems and make your users happy. All scripts related to this post are available on my [GitHub](https://github.com/TrudAX/TRUDScripts/blob/master/Performance/AX%20Technical%20Audit.md). I also described some performance-related issues that were resolved using the provided approach - [Examples of AX2012/ AX2009 performance problems]( https://denistrunin.com/performance-examplesAx2012/). 
+
+**Update 10/10/2020** - If you want to know how to organize a performance optimization project, [check this post](https://denistrunin.com/performance-projmanage/).
 
 If you see that some useful staff is missing, feel free to post a comment.
 
