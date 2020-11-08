@@ -161,6 +161,8 @@ So to deal with Dynamics AX performance problems you need the following:
 - Prepare a test version
 - Do a good integration design
 
-This allows you to quickly resolve and fix any problem.
+This allows you to quickly resolve and fix any problem. 
 
 I hope you find this information useful and will use it in case of any AX2009, AX2012, Dynamics 365FO performance troubleshooting. As always, in case of any problem, suggestion or improvement, do not hesitate to contact me, I will be happy to discuss it.
+
+**Update 08/11/2020** - check this article from Glen Turnbull about D365FO specific tasks [Managing General Performance Issues in Microsoft Dynamics 365 Finance and SCM](https://community.dynamics.com/365/financeandoperations/b/performancetipsandtricks/posts/managing-general-performance-issues-in-microsoft-dynamics-365-finance-and-scm)
