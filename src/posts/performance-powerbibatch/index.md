@@ -1,17 +1,21 @@
 ﻿---
-title: "Analyse Dynamics AX/Dynamics 365 Fin Ops batch performance using PowerBI"
+title: "Analyse Dynamics AX/Dynamics 365 Fin Ops batch performance using Power BI"
 date: "2020-11-19T22:12:03.284Z"
 tags: ["Performance", "PowerBI"]
 path: "/performance-powerbibatch"
 featuredImage: "./logo.png"
-excerpt: "The blog post describes how to analyse batch tasks execution in PowerBI Desktop"
+excerpt: "The blog post describes how to analyse batch tasks execution in Power BI Desktop"
 ---
 
-Batch 
+Batch task processing is playing important role during Dynamics AX / Dynamics 365 Fin Ops performance analysis.  Batch tasks executed on a separate server but may affect system performance producing a load to SQL Server database. In this post show how to use Power BI to analyse batch performance. 
 
 ## Getting the data
 
-In a lot of clients you can't install additional software on SQL server. So the easiest way to get the required data is to execute the SQL query in SQL Management Studio and copy/paste its result into the local Excel file. Then this file can be used as a source for our PowerBI report. 
+The source data for our report is a **Batch execution history** table(BATCHHISTORY) where the system logs all batch runs(you need to check that **"Save job to history"** flag is enabled for a batch job).
+
+ ![](BatchHistory.png)
+
+In a lot of clients you can't install additional software on SQL server to query this data directly. So the easiest way to get the required data is to execute a query in SQL Management Studio and copy/paste its result into the local Excel file. Then this file can be used as a source data for our Power BI report. 
 
 See below the sample query that I use for AX2012
 
@@ -47,13 +51,15 @@ DATEADD(minute, @m, [BATCHJOBHISTORY].[STARTDATETIME]) > CONVERT(datetime, '2019
 
 ```
 
-You need to play with Date filtering, limiting the number of rows to 100-200k(start with one previous week for example). For D365 FinOps you can also create a data entity for it or just run it for a PROD database copy.
+You need to adjust STARTDATETIME filtering, limiting the number of rows to 100-200k(start with one previous week for example). For D365 Fin Ops you can also create a data entity for it or just run this query for a PROD database copy.
+
+## Batch analysis reports 
 
 Lets consider what kind of report we can build from this dataset
 
-### Total duration
+### - Total duration
 
-The first report we can build is total duration per task from different measures 
+The first report we can build analysing **Total duration of  batch tasks** from different measures 
 
 ![Duration report](Report1.png)
 
@@ -61,17 +67,17 @@ The first visual here displays **Total duration by task name**, where we can fin
 
 The second visual displays how busy were our batch servers(**Duration by ServerID**). On the example above we can see that the amount of work executed on AOS01 is a way less than on AOS02, so maybe a good idea to move some tasks to it.  
 
-And the visual that display number of batch tasks and their duration by company
+And the third visual display number of batch tasks and their duration by company, so we can define our top companies.
 
-### Delayed batch tasks
+### - Delayed batch tasks
 
-One of the main part of configuring a batch server is to specify a "Maximum batch threads" that is can handle 
+There can be a situation where a batch task is scheduled for particular time but was not executed on this time because there were not free threads available. We can calculate the delay as the differences between **StartDateTime** and **OrigStartDateTime** columns.
+
+One of the main part of configuring a batch server is to specify a "Maximum batch threads" that it can handle  and the situation where you have delayed tasks is not normal, on a properly configured this should never happen.  
 
 ![Batch config](BatchConfig.png)
 
-If you set this number to low there can be a situation where a batch task is scheduled for particular time but was executed with some delay because there were not free threads available. We can calculate the delay as the differences between **StartDateTime** and **OrigStartDateTime** columns.
-
-The situation where you have delayed tasks is not normal, on a properly configured this should never happen. The second report displays such delayed tasks. 
+The second report displays such delayed tasks. If you set this number to low 
 
 ![](Report2.png)
 
