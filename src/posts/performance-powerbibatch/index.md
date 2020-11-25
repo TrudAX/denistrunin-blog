@@ -1,5 +1,5 @@
 ﻿---
-title: "Analyse Dynamics AX/Dynamics 365 Fin Ops batch performance using Power BI"
+title: "Analysing Dynamics AX / Dynamics 365FO batch performance using Power BI"
 date: "2020-11-19T22:12:03.284Z"
 tags: ["Performance", "PowerBI"]
 path: "/performance-powerbibatch"
@@ -7,7 +7,7 @@ featuredImage: "./logo.png"
 excerpt: "The blog post describes how to analyse batch tasks execution in Power BI Desktop"
 ---
 
-Batch task processing is playing important role during Dynamics AX / Dynamics 365 Fin Ops performance analysis.  Batch tasks executed on a separate server but may affect system performance producing a load to SQL Server database. In this post show how to use Power BI to analyse batch performance. 
+Batch task processing is playing an important role during Dynamics AX / Dynamics 365FO performance analysis.  Batch tasks executed on a separate server but may affect system performance producing a load to SQL Server database. In this post, I show how to use Power BI to analyse batch performance. 
 
 ## Getting the data
 
@@ -15,7 +15,7 @@ The source data for our report is a **Batch execution history** table(BATCHHISTO
 
  ![](BatchHistory.png)
 
-In a lot of clients you can't install additional software on SQL server to query this data directly. So the easiest way to get the required data is to execute a query in SQL Management Studio and copy/paste its result into the local Excel file. Then this file can be used as a source data for our Power BI report. 
+In a lot of clients, you can't install additional software on SQL server to query this data directly. So the easiest way to get the required data is to execute a query in SQL Management Studio and copy/paste its result into the local Excel file. Then this file can be used as a source data for our Power BI report. 
 
 See below the sample query that I use for AX2012
 
@@ -55,46 +55,48 @@ You need to adjust STARTDATETIME filtering, limiting the number of rows to 100-2
 
 ## Batch analysis reports 
 
-Lets consider what kind of report we can build from this dataset
+Let's see what kind of report we can build from this dataset:
 
 ### - Total duration
 
-The first report we can build analysing **Total duration of  batch tasks** from different measures 
+The first report we can build analysing **Total duration of  batch tasks** from the different measures 
 
 ![Duration report](Report1.png)
 
-The first visual here displays **Total duration by task name**, where we can find what is our longest tasks and then invest our time into optimizing top tasks from this list.
+The first visual here displays **Total duration by task name**, where we can find what are our longest tasks and then invest our time into optimizing top tasks from this list.
 
-The second visual displays how busy were our batch servers(**Duration by ServerID**). On the example above we can see that the amount of work executed on AOS01 is a way less than on AOS02, so maybe a good idea to move some tasks to it.  
+The second visual displays how busy were our batch servers(**Duration by ServerID**). In the example above we can see that the amount of work executed on AOS01 is way less than on AOS02, so maybe a good idea to relocate some tasks to it.  
 
-And the third visual display number of batch tasks and their duration by company, so we can define our top companies.
+And the third visual displays the number of batch tasks and their duration by company, so we can define our top companies.
 
 ### - Delayed batch tasks
 
-There can be a situation where a batch task is scheduled for particular time but was not executed on this time because there were not free threads available. We can calculate the delay as the differences between **StartDateTime** and **OrigStartDateTime** columns.
+There can be a situation where a batch task is scheduled for a particular time but was not executed on this time because there won't be free threads available. We can calculate the delay as the differences between **StartDateTime** and **OrigStartDateTime** columns.
 
-One of the main part of configuring a batch server is to specify a "Maximum batch threads" that it can handle  and the situation where you have delayed tasks is not normal, on a properly configured this should never happen.  
+One of the main parts of configuring a batch server is to specify a "Maximum batch threads" that it can handle and the situation where you have delayed tasks is not normal, on a properly configured system this should never happen.  
+
+> From the practical experience: don't set this value to low. A modern 8 core server can handle 50-200 batch threads, so start with this interval.  
 
 ![Batch config](BatchConfig.png)
 
-The second report displays such delayed tasks. If you set this number to low 
+The second report displays such delayed tasks.
 
-![](Report2.png)
+![Delayed tasks report](Report2.png)
 
-It allows to identify which tasks were delayed, on what server and at what time. In the example above we see that there are a lot of tasks were delayed around 9pm every day. Then we have found that customer ageing report was incorrectly configured that overloaded batch server with multiple tasks.
+It allows identifying which tasks were delayed, on what server and at what time. In the example above we see that there are a lot of tasks were delayed around 9 pm every day. It was a project case when we have found that "Customer ageing report" was incorrectly configured that overloaded batch server with multiple tasks.
 
 ### Batch tasks schedule
 
-Another important part of AX performance analysis is analysing the way how batch tasks were scheduled during the day. Usually it is not a problem if large task executed at night, but if it runs during the day it may affect users work.
+Another important part of AX performance analysis is analysing how batch tasks are scheduled during the day. Usually, it is not a problem if a large task is executed at night, but if it runs during the day it may affect users' work.
 
-The third report displays how top batch jobs executed during the day. 
+The third report displays how the top batch jobs executed during the day. 
 
 ![BatchSchedule](Report3.png)
 
-We see that there are 2 big tasks executed after 7pm and one big task executed around 1pm. Then is worth do discuss to we need it in the middle of the day and how we can optimize it.
+We see that there are 2 big tasks executed after 7 pm and one big task executed around 1 pm. Then it is worth discussing whether we need it in the middle of the day and how we can optimize it.
 
 ## Conclusion
 
-Power BI can help  
+With the help of Power BI you can analyse 3 main points of Dynamics AX/ D365FO batch tasks performance: Longest tasks, Delayed tasks and Schedule during the day. I upload files used for this post to the following [folder](https://github.com/TrudAX/TRUDScripts/tree/master/Performance/Jobs/PowerBI) 
 
-I hope you find this information useful and will use it in case of any AX2009, AX2012, Dynamics 365FO performance troubleshooting. As always, in case of any problem, suggestion or improvement, do not hesitate to contact me.
+I hope you find this information useful. As always, if you see any improvements or suggestions, don't hesitate to contact me.
