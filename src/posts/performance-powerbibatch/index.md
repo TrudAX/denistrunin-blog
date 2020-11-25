@@ -7,45 +7,45 @@ featuredImage: "./logo.png"
 excerpt: "The blog post describes how to analyse batch tasks execution in Power BI Desktop"
 ---
 
-Batch task processing is playing an important role during Dynamics AX / Dynamics 365FO performance analysis.  Batch tasks executed on a separate server but may affect system performance producing a load to SQL Server database. In this post, I show how to use Power BI to analyse batch performance. 
+Batch task processing is playing an important role during Dynamics AX / Dynamics 365FO performance analysis.  Batch tasks executed on a separate server but may affect system performance producing a load to SQL Server database. In this post, I show how to use Power BI to analyse batch performance.
 
 ## Getting the data
 
 The source data for our report is a **Batch execution history** table(BATCHHISTORY) where the system logs all batch runs(you need to check that **"Save job to history"** flag is enabled for a batch job).
 
- ![](BatchHistory.png)
+ ![Batch History](BatchHistory.png)
 
-In a lot of clients, you can't install additional software on SQL server to query this data directly. So the easiest way to get the required data is to execute a query in SQL Management Studio and copy/paste its result into the local Excel file. Then this file can be used as a source data for our Power BI report. 
+In a lot of clients, you can't install additional software on SQL server to query this data directly. So the easiest way to get the required data is to execute a query in SQL Management Studio and copy/paste its result into the local Excel file. Then this file can be used as a source data for our Power BI report.
 
 See below the sample query that I use for AX2012
 
 ```sql
 DECLARE  @m int
 set @m = DATEDIFF(mi,SYSUTCDATETIME(), SYSDATETIME())
-SELECT 
-	CASE
-		WHEN [BATCHHISTORY].[STATUS] = 3 THEN N'Error'
-		WHEN [BATCHHISTORY].[STATUS] = 4 THEN N'Finished'
-		WHEN [BATCHHISTORY].[STATUS] = 8 THEN N'Canceled'
-		ELSE CONVERT(nvarchar, [BATCHHISTORY].[STATUS])
-	END as [STATUS]
+SELECT
+CASE
+  WHEN [BATCHHISTORY].[STATUS] = 3 THEN N'Error'
+  WHEN [BATCHHISTORY].[STATUS] = 4 THEN N'Finished'
+  WHEN [BATCHHISTORY].[STATUS] = 8 THEN N'Canceled'
+  ELSE CONVERT(nvarchar, [BATCHHISTORY].[STATUS])
+END as [STATUS]
       ,[BATCHJOBHISTORY].[CAPTION] as [BatchCaption]
       ,[BATCHHISTORY].[CAPTION]    as [TaskCaption]
       ,[BATCHHISTORY].[BATCHJOBID]
-	  ,[BATCHHISTORY].SERVERID
-	  ,(SELECT TOP 1 [Name] FROM [DynamicsAXProd_model].[dbo].[ModelElement] where axid = [BATCHHISTORY].CLASSNUMBER and ElementType = 45) as ClassName
-	  ,[BATCHHISTORY].CLASSNUMBER
-	  ,DATEADD(minute, @m, ORIGSTARTDATETIME) as [ORIGSTARTDATETIME]
-      ,DATEADD(minute, @m, [BATCHHISTORY].[STARTDATETIME]) as [STARTDATETIME]	  
+      ,[BATCHHISTORY].SERVERID
+      ,(SELECT TOP 1 [Name] FROM [DynamicsAXProd_model].[dbo].[ModelElement] where axid = [BATCHHISTORY].CLASSNUMBER and ElementType = 45) as ClassName
+      ,[BATCHHISTORY].CLASSNUMBER
+      ,DATEADD(minute, @m, ORIGSTARTDATETIME) as [ORIGSTARTDATETIME]
+      ,DATEADD(minute, @m, [BATCHHISTORY].[STARTDATETIME]) as [STARTDATETIME]
       ,DATEADD(minute, @m, [BATCHHISTORY].[ENDDATETIME]) as [ENDDATETIME]
-	  ,DATEDIFF(ss, [BATCHHISTORY].STARTDATETIME, [BATCHHISTORY].enddatetime) as [DurationSec]
+      ,DATEDIFF(ss, [BATCHHISTORY].STARTDATETIME, [BATCHHISTORY].enddatetime) as [DurationSec]
       ,[BATCHHISTORY].[COMPANY]
       ,[ALERTSPROCESSED]
       ,[BATCHCREATEDBY]
       ,[CANCELEDBY]
-	  ,DATEDIFF(mi, [BATCHJOBHISTORY].ORIGSTARTDATETIME, [BATCHJOBHISTORY].STARTDATETIME) as [StartDelayMin]
+      ,DATEDIFF(mi, [BATCHJOBHISTORY].ORIGSTARTDATETIME, [BATCHJOBHISTORY].STARTDATETIME) as [StartDelayMin]
   FROM [dbo].[BATCHJOBHISTORY], [dbo].[BATCHHISTORY]
-where 
+where
 [BATCHHISTORY].BATCHJOBHISTORYID = [BATCHJOBHISTORY].RECID and
 DATEADD(minute, @m, [BATCHJOBHISTORY].[STARTDATETIME]) > CONVERT(datetime, '2019-08-12', 120)
 
@@ -53,13 +53,13 @@ DATEADD(minute, @m, [BATCHJOBHISTORY].[STARTDATETIME]) > CONVERT(datetime, '2019
 
 You need to adjust STARTDATETIME filtering, limiting the number of rows to 100-200k(start with one previous week for example). For D365 Fin Ops you can also create a data entity for it or just run this query for a PROD database copy.
 
-## Batch analysis reports 
+## Batch analysis reports
 
 Let's see what kind of report we can build from this dataset:
 
 ### - Total duration
 
-The first report we can build analysing **Total duration of  batch tasks** from the different measures 
+The first report we can build analysing **Total duration of  batch tasks** from the different measures
 
 ![Duration report](Report1.png)
 
@@ -89,7 +89,7 @@ It allows identifying which tasks were delayed, on what server and at what time.
 
 Another important part of AX performance analysis is analysing how batch tasks are scheduled during the day. Usually, it is not a problem if a large task is executed at night, but if it runs during the day it may affect users' work.
 
-The third report displays how the top batch jobs executed during the day. 
+The third report displays how the top batch jobs executed during the day.
 
 ![BatchSchedule](Report3.png)
 
@@ -97,6 +97,6 @@ We see that there are 2 big tasks executed after 7 pm and one big task executed 
 
 ## Conclusion
 
-With the help of Power BI you can analyse 3 main points of Dynamics AX/ D365FO batch tasks performance: Longest tasks, Delayed tasks and Schedule during the day. I upload files used for this post to the following [folder](https://github.com/TrudAX/TRUDScripts/tree/master/Performance/Jobs/PowerBI) 
+With the help of Power BI you can analyse 3 main points of Dynamics AX/ D365FO batch tasks performance: Longest tasks, Delayed tasks and Schedule during the day. I upload files used for this post to the following [folder](https://github.com/TrudAX/TRUDScripts/tree/master/Performance/Jobs/PowerBI)
 
 I hope you find this information useful. As always, if you see any improvements or suggestions, don't hesitate to contact me.
