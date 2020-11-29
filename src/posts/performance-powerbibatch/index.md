@@ -75,7 +75,7 @@ There can be a situation where a batch task is scheduled for a particular time b
 
 One of the main parts of configuring a batch server is to specify a "Maximum batch threads" that it can handle. The situation where you have delayed tasks is not normal, on a properly configured system this should never happen.  
 
-> From practical experience: don't set this value too low. A modern 8-core server can handle 50-200 batch threads, so start with this interval.  
+> From practical experience: don't set this value too low. A modern 8-core server can handle 50-200 batch threads, so start with this interval.  There can be some specific batch jobs that mostly use AOS resources and no SQL work, only in this case it may be set lower. Check for % of AOS CPU usage. 
 
 ![Batch config](BatchConfig.png)
 
