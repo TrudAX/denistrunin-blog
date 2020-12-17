@@ -4,7 +4,7 @@ date: "2020-12-17T22:12:03.284Z"
 tags: ["XppDEVTutorial", "Integration"]
 path: "/xpptools-fileintegledger"
 featuredImage: "./logo.png"
-excerpt: "The blog post describes a sample approach to implement file-based integration in D365FO using X++"
+excerpt: "The blog post describes a sample approach to implement recurring file-based integration in D365FO using X++"
 ---
 
 There are many ways to implement integration with Dynamics 365 for Finance and Operations. One of the comprehensive descriptions of possible options can be found in this great post by Tayfun Sertan Yaman: [How to integrate with Dynamics 365 for Finance and Operations](https://devblog.sertanyaman.com/2020/08/21/how-to-integrate-with-d365-for-finance-and-operations/).
