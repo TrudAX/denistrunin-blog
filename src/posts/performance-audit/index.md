@@ -244,7 +244,7 @@ Using these basic steps you can resolve your Dynamics AX performance problems an
 
 **Update 10/10/2020** - If you want to know how to organize a performance optimization project, [check this post](https://denistrunin.com/performance-projmanage/).
 
-If you see that some useful staff is missing, feel free to post a comment.
+If you need help you can contact me. Or if you see that some useful staff is missing, feel free to post a comment.
 
 There are some Microsoft blog posts about performance: [Managing general performance issues in Microsoft Dynamics AX](https://cloudblogs.microsoft.com/dynamics365/no-audience/2014/09/11/managing-general-performance-issues-in-microsoft-dynamics-ax/?source=axsupport), [Analysis scripts for Performance Analyzer v2.0](https://cloudblogs.microsoft.com/dynamics365/no-audience/2016/09/08/analysis-scripts-for-performance-analyzer-v2-0/?source=axsupport).
 
