@@ -60,7 +60,7 @@ To store connection details I created a simple form in D365FO
 
 Notes:
 
-1. Another alternative to Azure file storage can be an SFTP site. Check this article that describes this in details: [Read File’s from SFTP Server and Write data in AX365](https://dynamicsax4u.wordpress.com/2020/08/18/read-files-from-sftp-server-and-write-data-in-ax365-part-1/)
+1. Another alternative to Azure file storage can be an SFTP site. Check this article that describes this in details: [Read File’s from SFTP Server and Write data in AX365](https://dynamicsax4u.wordpress.com/2020/08/18/read-files-from-sftp-server-and-write-data-in-ax365-part-1/). **Update:** (thanks to Tommy Skaue and Volker Deuss): SFTP connection doesn't recommended for new deployments: https://docs.microsoft.com/en-us/dynamics365/fin-ops-core/dev-itpro/deployment/known-issues-new-deployment-experience#ftp.
 2. Instead of storing Connection details in a D365FO table,a more secure solution is to create an **Azure Key Vault** and put all secrets into it(for example like [this](https://jatomas.com/en/2020/06/02/azure-key-vault-msdyn365fo-setup-certificates-passwords/)) and store a reference to this Key Vault in our new Connection table.
 
 ### Inbound message types form
