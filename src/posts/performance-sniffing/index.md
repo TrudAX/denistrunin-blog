@@ -68,7 +68,19 @@ The wrong way to resolve such problems is to perform one of these actions:
 
 These actions will clear the current cache, and there is a high chance that the problem will disappear, but it will not be resolved.
 
-**A note about Plan Guides:** ideally you should keep number of custom Plan Guides to minimum(as they may become invalid if you, for example, modify the table structure). After you fixed the issue with the plan guide, try to think how this can be avoided by modifying the code(typical solutions - create/update indexes, use **forceliterals** hint in X++, modify the query..) 
+**A note about Plan Guides:** ideally you should keep number of custom Plan Guides to minimum(as they may become invalid if you, for example, modify the table structure). After you fixed the issue with the plan guide, try to think how this can be avoided by modifying the code(typical solutions - create/update indexes, use **forceliterals** hint in X++, modify the query..)
+
+####  Some troubleshooting tips(update 18/02/2021) 
+
+1.You can view existing plans with their hints in **Plan Guides** section
+
+![Plan guides](PlanGuidesInDB.png)
+
+2.In order to check what plan hint is applied for the query, press **Show execution Plan XML..** in the plan view, and check the last value for "**StmtCursor**" tag.
+
+![Is plan applied](IsPlanApplied.png)
+
+3.You can use a handy tool [MSSQLPlanToSpExecuteSql](https://github.com/denissukhotin/MSSQLPlanToSpExecuteSql) by Denis Sukhotin to convert the plan XLM to a normal SQL with the actual values instead of @P1. Then you can execute this query from SSMS with different parameter values and try to understand why the wrong plan was used
 
 ## Dynamics 365 Finance and Operations - cloud version
 
