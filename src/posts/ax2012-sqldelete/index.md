@@ -9,7 +9,7 @@ excerpt: "Describes a custom framework for performing a periodic database cleanu
 
 One of the tasks in Dynamics AX 2009/2012 system performance maintenance is performing a periodic database cleanup. In this blog post, I describe a new framework for implementing such tasks and provide some examples.
 
-First, let's discuss why do we need some custom code and the pitfalls of the standard cleanup methods.
+First, let's discuss why we need some custom code and the pitfalls of the standard cleanup methods.
 
 ## A standard way to delete from a large table
 
@@ -41,7 +41,7 @@ This statement is fast, but the command **delete_from** can [block](https://deni
 
 Both these methods work only per one company, so you need to run a separate cleanup job for each company, which creates a setup overhead.
 
-In a lot of performance audit projects, I asked people why they didn't run standard cleanup procedures and the typical answer was: "We tried to run it a year ago, then it hangs, users started complained about system performance, and we cancelled it".
+In a lot of performance audit projects, I asked people why they didn't run standard cleanup procedures and the typical answer was: "We tried to run it a year ago, then it hangs, users started complaining about system performance, and we cancelled it".
 
 ## Improved version of "delete" from a large table operation
 
@@ -92,15 +92,15 @@ Such approach gives the following advantages:
 - You can stop it in any time without loosing the progress
 - It works for all companies
 
-In my tests the speed of such approach was only 40% slower than a  standard **DELETE FROM** command and it can be executed without blocking users even for a highly used WMS tables in the middle of the day.
+In my tests the speed of such approach was only 40% slower than a  standard **DELETE FROM** command and it can be executed without blocking users even for highly used WMS tables in the middle of the day.
 
-The overall performance depends from many factors(number of indexes/hardware/etc..) but on average it may be 30-40 seconds per 100K records.
+The overall performance depends on many factors(number of indexes/hardware/etc..) but on average it may be 30-40 seconds per 100K records.
 
 ## User interface to control a cleanup procedure
 
 Let's discuss the typical requirements for a cleanup procedure.
 
-Cleanup consist of several tasks, and we need to specify a cleanup period for each task. Also it is nice to have some statistics about the last run duration and the number of deleted records.
+Cleanup consists of several tasks, and we need to specify a cleanup period for each task. Also it is nice to have some statistics about the last run duration and the number of deleted records.
 
 To control all this I created a "Cleanup settings" form.  
 
@@ -130,7 +130,7 @@ Example for X++ cleanup(running a standard On-hand cleanup for multiple companie
 
 ![Xpp delete](XppSelectDelete.png)
 
-To run these tasks a standard batch job created. You can select one or all tasks using a standard query filter and run them periodically(e.g. weekly). So the whole cleanup process can be implemented with just one batch job, without doing a complex setup of various jobs in different companies.  
+To run these tasks I created a new batch job. You can select one or all tasks using a standard query filter and run them periodically(e.g. weekly).  So the whole cleanup process can be implemented with just one batch job, without doing a complex setup of various jobs in different companies.  
 
 ![Cleanup execute](CleanupRun.png)
 
@@ -142,12 +142,12 @@ Also, what is very important, you can view last execution statistics for all tas
 
 ## Summary
 
-In this post, I described a custom cleanup framework. If set up in the correct way it provides the following advantages:
+In this post, I described a custom cleanup framework. If set up in a correct way it provides the following advantages:
 
 - Fast deletes that don't overload SQL Server don't block users
 - Easy to maintain procedure with just one cleanup job
-- Easy to set up and troubleshot solution with all settings, statistics and actions in one form
+- Easy to set up and troubleshoot solution with all settings, statistics and actions in one form
 
-A sample code for AX2009 and AX2012 can be found on [here](https://github.com/TrudAX/TRUDScripts/tree/master/Performance/Jobs/DataCleanup), but please note that is not ready to install and use solution, all queries should be validated and tested for your environment.
+A sample code for AX2009 and AX2012 can be found on [here](https://github.com/TrudAX/TRUDScripts/tree/master/Performance/Jobs/DataCleanup), but please note, that it is not “ready to install and use” solution, all queries should be validated and tested for your environment.
 
 I hope you find this information useful. As always, if you see any improvements, suggestions or have some questions about this work don't hesitate to contact me.
