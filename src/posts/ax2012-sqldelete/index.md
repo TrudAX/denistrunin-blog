@@ -9,7 +9,7 @@ excerpt: "Describes a custom framework for performing a periodic database cleanu
 
 One of the tasks in Dynamics AX 2009/2012 system performance maintenance is performing a periodic database cleanup. In this blog post, I describe a new framework for implementing such tasks and provide some examples.
 
-First, let's discuss why we need some custom code and the pitfalls of the standard cleanup methods.
+First, let's discuss why we need a custom code and what are the pitfalls of standard cleanup methods.
 
 ## A standard way to delete from a large table
 
@@ -17,7 +17,7 @@ There are a lot of standard cleanup procedures already implemented in the system
 
 In these procedures you will usually see the following code to perform a "delete from table" operation:
 
-A "**while select**" loop
+A "**while select**" loop:
 
 ```csharp
 while select MyBigTable
@@ -25,7 +25,7 @@ while select MyBigTable
 {
     MyBigTable.delete();
 }    
-//need to add ttscontrol here, for example, a commit on every 100th record
+//you need to add ttscontrol here, for example, a commit on every 100th record
 ```
 
 This approach can work for small tables, but if we need to delete a lot of records, it takes a lot of time, producing a load to the SQL server.
@@ -37,11 +37,11 @@ delete_from MyBigTable
     where MyBigTable.CreatedDateTime < cleanupDate;
 ```
 
-This statement is fast, but the command **delete_from** can [block](https://denistrunin.com/understanding-sql-blocking) the table while running, so you need to run it only during system downtime.
+This statement is fast, but the command **delete_from** can [block](https://denistrunin.com/understanding-sql-blocking) the table while running, so you need to run it only during a system downtime.
 
-Both these methods work only per one company, so you need to run a separate cleanup job for each company, which creates a setup overhead.
+Both these methods work only per one company, so you need to run a separate cleanup job for each company and that creates a setup overhead.
 
-In a lot of performance audit projects, I asked people why they didn't run standard cleanup procedures and the typical answer was: "We tried to run it a year ago, then it hangs, users started complaining about system performance, and we cancelled it".
+In a lot of performance audit projects, I asked people why they didn't run standard cleanup procedures and the typical answer was: "We tried to run it a year ago, then it hung, users started complaining about system performance, and we cancelled it".
 
 ## Improved version of "delete" from a large table operation
 
@@ -65,7 +65,7 @@ BEGIN
     CREATE NONCLUSTERED INDEX [##_RECID] ON #recordsToDelete (RECID ASC)
 
     set @step= 0
-    WHILE (@step < 100)
+    WHILE (@step < 20)
     BEGIN
         SET @step = @step + 1
         TRUNCATE TABLE #temp_hash
@@ -82,17 +82,17 @@ END
 DROP TABLE #temp_hash;
 ```
 
-It performs delete in 2 steps. First, it selects a large number of table clustered keys(100K) into a temporary table. Often it is a set of RecIds. Then split it into smaller sets(5K records) and perform the main table delete using a clustered key condition.
+It performs "delete" in 2 steps. First, it selects a large number of table clustered keys(100K) into a temporary table. Often these Keys are a set of RecIds. Then splits them into smaller sets(5K records) and performs the main table "delete" using a clustered key condition.
 
-Such approach gives the following advantages:
+This approach gives the following advantages:
 
-- Delete command is not blocking other processes(as we using clustered key condition and perform delete for a small number of records)
+- Delete command is not blocking other processes(as we are using clustered key condition and performing "delete" for a small number of records)
 - It is much faster than a one by one record delete
 - It doesn't require additional indexes (by CreatedDateTime) as the number of "large" selects is low
-- You can stop it in any time without loosing the progress
+- You can stop it in any time without losing the progress
 - It works for all companies
 
-In my tests the speed of such approach was only 40% slower than a  standard **DELETE FROM** command and it can be executed without blocking users even for highly used WMS tables in the middle of the day.
+In my tests the speed of this method was only 40% slower than a  standard **DELETE FROM** command and it can be executed without blocking users even for highly used WMS tables in the middle of the day.
 
 The overall performance depends on many factors(number of indexes/hardware/etc..) but on average it may be 30-40 seconds per 100K records.
 
@@ -100,7 +100,7 @@ The overall performance depends on many factors(number of indexes/hardware/etc..
 
 Let's discuss the typical requirements for a cleanup procedure.
 
-Cleanup consists of several tasks, and we need to specify a cleanup period for each task. Also it is nice to have some statistics about the last run duration and the number of deleted records.
+Cleanup consists of several tasks, and we need to specify a cleanup period for each task. Also, it is nice to have some statistics about the last run duration and the number of deleted records.
 
 To control all this I created a "Cleanup settings" form.  
 
@@ -108,11 +108,11 @@ To control all this I created a "Cleanup settings" form.
 
  ![Cleanup settings2](CleanupSettings2.png)
 
-Every cleanup task can register in this form(providing some default values for the settings).
+Every cleanup task is visible in this form(providing some default values for the settings).
 
-A cleanup task is a class that extends a base class and needs to implement 3 actions:
+A cleanup task is a class that extends a base class and may implement 3 actions:
 
-- **Estimate** - calculate the number of deleted records
+- **Estimate** - calculation of the number of records to be deleted
 - **Display SQL** - instead of executing SQL, display it into infolog(used for debugging and validation)
 - **Execute** - execute a delete operation
 
