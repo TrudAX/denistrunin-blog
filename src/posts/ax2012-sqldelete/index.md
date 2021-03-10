@@ -112,21 +112,21 @@ Every cleanup task is visible in this form(providing some default values for the
 
 A cleanup task is a class that extends a base class and may implement 3 actions:
 
-- **Estimate** - calculation of the number of records to be deleted
-- **Display SQL** - instead of executing SQL, display it into infolog(used for debugging and validation)
-- **Execute** - execute a delete operation
+- **Estimate** - calculating the number of records to be deleted
+- **Display SQL** - instead of executing SQL, displaying it into infolog(used for debugging and validation)
+- **Execute** - executing a delete operation
 
-In class hierarchy it looks like this:
+In a class hierarchy it looks like this:
 
 ![Class structure](ClassStructure.png)
 
-A cleanup class may implement a "delete from a large table" logic described above or can just run a standard class for all companies for complex operations.
+A cleanup class may implement a "delete from a large table" logic described above or can just run a standard cleanup class for all companies for complex operations.
 
 Example of SQL based cleanup:
 
 ![SQL delete](SQLSelectDelete.png)
 
-Example for X++ cleanup(running a standard On-hand cleanup for multiple companies):
+Example for X++ cleanup(running a standard **On-hand cleanup** for multiple companies):
 
 ![Xpp delete](XppSelectDelete.png)
 
@@ -136,18 +136,18 @@ To run these tasks I created a new batch job. You can select one or all tasks us
 
 ### Progress indicator
 
-Every cleanup task has access to a related record in the Cleanup form and this makes it very simple to implement an execution progress indicator. For SQL based tasks this is done in the base class, for every main loop "Deleted records" field is updated and you can estimate how many records deleted and how many are left.
+Every cleanup task has access to a related record in the Cleanup form and this makes it very simple to implement an execution progress indicator. For SQL based tasks this is done in the base class, for every main loop "Deleted records" field is updated and you can estimate how many records are deleted and how many are left.
 
-Also, what is very important, you can view last execution statistics for all tasks in one form and this allows you very quickly to identify problems with a particular task.
+Also, and it is very important, you can view last execution statistics for all tasks in one form and this allows you to quickly identify problems with a particular task.
 
 ## Summary
 
-In this post, I described a custom cleanup framework. If set up in a correct way it provides the following advantages:
+In this post, I described a custom cleanup framework. If you set up it in a correct way it provides the following advantages:
 
-- Fast deletes that don't overload SQL Server don't block users
-- Easy to maintain procedure with just one cleanup job
-- Easy to set up and troubleshoot solution with all settings, statistics and actions in one form
+- Fast deletes that don't overload SQL Server and don't block users
+- Easy to maintain procedure with just one cleanup batch job
+- Easy to set up and troubleshoot with all settings, statistics and actions in one form
 
-A sample code for AX2009 and AX2012 can be found on [here](https://github.com/TrudAX/TRUDScripts/tree/master/Performance/Jobs/DataCleanup), but please note, that it is not “ready to install and use” solution, all queries should be validated and tested for your environment.
+A sample code for AX2009 and AX2012 can be found [here](https://github.com/TrudAX/TRUDScripts/tree/master/Performance/Jobs/DataCleanup), but please note, that it is not a “ready to install and use” solution, all queries should be validated and tested for your environment.
 
 I hope you find this information useful. As always, if you see any improvements, suggestions or have some questions about this work don't hesitate to contact me.
