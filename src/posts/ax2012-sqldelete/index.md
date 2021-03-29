@@ -13,7 +13,7 @@ First, let's discuss why we need a custom code and what are the pitfalls of stan
 
 ## A standard way to delete from a large table
 
-There are a lot of standard cleanup procedures already implemented in the system. A good overview for the latest D365FO version can be found here [Reviewing Large Tables and Database Growth](https://community.dynamics.com/ax/b/axinthefield/posts/f-o-data-management-reviewing-large-tables-and-database-growth)
+There are a lot of standard cleanup procedures already implemented in the system. A good overview for the latest D365FO version can be found here [Reviewing Large Tables and Database Growth](https://community.dynamics.com/ax/b/axinthefield/posts/f-o-data-management-reviewing-large-tables-and-database-growth) and [Cleanup routines in Dynamics 365 for Finance and Operations](https://docs.microsoft.com/en-us/archive/blogs/axsa/cleanup-routines-in-dynamics-365-for-finance-and-operations)
 
 In these procedures you will usually see the following code to perform a "delete from table" operation:
 
