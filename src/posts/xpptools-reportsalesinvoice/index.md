@@ -32,7 +32,7 @@ protected void populateSalesInvoiceTmp(CustInvoiceJour _custInvoiceJour,
 //populate additional fields in salesInvoiceTmp here
 //salesInvoiceTmp.MyField = '';
 //this method is called for main lines and also for all linked tables
-}
+//please note, that it will not be called if there are already some data exist in salesInvoiceTmp table for the selected Sales order, you need to delete existing records   }
 
 protected void populateSalesInvoiceHeaderFooterTmp(CustInvoiceJour _custInvoiceJour, CompanyInfo _companyInfo)
 {
