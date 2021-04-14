@@ -11,11 +11,11 @@ excerpt: "Describes a sample approach of improving Dynamics AX 2009/2012 perform
 
 ![InventDimStructure](InventDimStructure.png)
 
-A typical system request is to get on-hand data for an item with some dimensions, for example, the quantities of Item AA1 stored on warehouse WW1. And depending on the selectivity of these values, the system may use different execution plans. Very often executing such queries can lead to parameters sniffing and not optimal plans.
+A typical system request is to get on-hand data for an item with some dimensions, for example, the quantities of Item AA1 stored on warehouse WW1. And depending on the selectivity of these values, the system may use different execution plans. Very often executing such queries can lead to parameters [sniffing](https://denistrunin.com/performance-sniffing) and not optimal plans.
 
-A typical resolution is to use literals in the query(the query will be slower and you need to maintain statistics) or to provide a plan hint, but these actions require time and constant monitoring from DBA
+A typical resolution is to use literals in the query(the query will be slower and you need to maintain statistics) or to provide a plan hint, but these actions require time and constant monitoring from DBA.
 
-## THe solution from the cloud
+## The solution from the cloud
 
 In D365FO Microsoft finally decided to resolve this problem and added all dimension fields into the **InventSum** table.
 
@@ -51,7 +51,7 @@ I tried to test the performance change on the standard AX2012 DEMO VM with the f
 
 ![TestPerfJob](TestPerfJob.png)
 
-The VM doesn't have much data and in order to compare the difference I measured the number of logical reads to perform the original(with **InventDim** exists join) or improved version(just **InventSum** table) statements
+The VM doesn't have much data and in order to compare the difference I measured the number of [logical reads](https://github.com/TrudAX/TRUDScripts/blob/master/Performance/AX%20Technical%20Audit.md#get-top-sql) to perform the original(with **InventDim** exists join) or improved version(just **InventSum** table) statements
 
 ![TestPerfResultSQL](TestPerfResultSQL.png)
 
@@ -63,12 +63,12 @@ On the DEMO VM **InventSum** and **InventDim** tables have similar size, and eve
 
 As for drawbacks, you need to create several new indexes on **InventSum** table. But these indexes will be updated only when a new dimension is created and not during regular quantities updates.
 
-So I don't see any major drawbacks, except the one, that this modification is not a part of the standard AX2012 application(that could have saved thousands of hours spent on various performance tasks)
+So I don't see any major drawbacks, except the one, that this modification is not a part of the standard AX2012 application(that could have saved thousands of hours spent on various performance tasks by developers, DBA and managers)
 
 ## Summary
 
-Adding fields to **InventSum** table may improve AX2009/AX2012 performance and resolve some parameter sniffing issues. It is not a simple, first-priority modification and probably takes a week to implement, but may be considered if you plan to continue to use AX2009/AX2012 application. Also it is quite important that it uses a solution from D365FO, so it will not cause any problems during the upgrade.
+Adding fields to **InventSum** table may improve AX2009/AX2012 performance and resolve some parameter sniffing issues. It is not a simple, first-priority modification and probably takes a week to implement, but may be considered if you plan to continue to use AX2009/AX2012 application(after the main [perfromance audit](https://denistrunin.com/performance-audit)). Also it is quite important that it uses a solution from D365FO, so it will not cause any problems during the upgrade.
 
-A sample code for AX2012 used in this post can be found [here](https://github.com/TrudAX/TRUDScripts/tree/master/Performance/Jobs/DataCleanup), it may be used as an initial template for a similar modification.
+A sample code for AX2012 used in this post can be found [here](https://github.com/TrudAX/TRUDScripts/tree/master/Performance/Jobs/InventSumFields), it may be used as an initial template for a similar modification.
 
 I hope you find this information useful. As always, if you see any improvements, suggestions or have some questions about this work don't hesitate to contact me.
