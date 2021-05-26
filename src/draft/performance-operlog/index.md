@@ -43,15 +43,15 @@ And you need to write a code that actually creates log data(using a helper class
 
 Creating the log is quite a simple task, the main difficulty is how to analyse this data to get some valuable insights. And for this purpose Power BI is a great tool, that allows you to view the data from different angles. Let's check some practical examples:
 
-The first one is the case where users complained about slow production journal posting, we implemented a log for this and then analysed average posting time. There was some slowness around 1am and it happens almost every day:
+The first one is the case where users complained about slow production journal posting. To examine this problem we implemented a log and then analysed average posting time. There was some slowness around 1am and it happened almost every day:
 
 ![Posting journals](DailyPosting.png)
 
-Further analysis showed that during this time some complex SQL Agent SSAS cube update job was [executed](https://github.com/TrudAX/TRUDScripts/blob/master/Performance/AX%20Technical%20Audit.md#sql-agent-jobs) and this slowed down journal posting. 
+Further analysis showed that during this time a complex SQL Agent SSAS cube update job was [executed](https://github.com/TrudAX/TRUDScripts/blob/master/Performance/AX%20Technical%20Audit.md#sql-agent-jobs) and this slowed down journal posting. 
 
 ![SQL Agent job](AgentJobTimes.png)
 
-Another interesting analysis was the case when users complained about slow Dynamics AX Sales order posting. This can't be replicated on Test system and we implemented a log for 2 main processes that happens when the user press a **Post** button. It was the actual posting and a printing report to a printer. Analysis showed that most of the time system was busy by printing document and this time increased during some hours (like 9am on the graph below) 
+Another interesting case was when users complained about slow Dynamics AX Sales order posting. This can't be replicated on Test system and we implemented a log for 2 main processes that happens when the user press a **Post** button. It was the actual posting and a printing report to a printer. Analysis showed that most of the time system was busy by printing document and this time increased during some hours (like 9am on the graph below) 
 
 ![Print time log](PrintTime.png)
 
