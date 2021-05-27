@@ -1,6 +1,6 @@
 ---
 title: "Implementing of Dynamics AX business operations performance monitoring"
-date: "2021-05-26T22:12:03.284Z"
+date: "2021-05-27T22:12:03.284Z"
 tags: ["Performance", "PowerBI"]
 path: "/performance-operlog"
 featuredImage: "./logo.png"
