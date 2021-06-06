@@ -1,26 +1,22 @@
 ---
 title: "Monitoring number one performance problem in Dynamics AX - parameters sniffing"
-date: "2021-06-27T22:12:03.284Z"
+date: "2021-06-09T22:12:03.284Z"
 tags: ["Performance", "SQL"]
 path: "/performance-snifmonitor"
 featuredImage: "./logo.png"
-excerpt: "The blog post describes a sample implementation for Dynamics AX business operations performance monitoring and performance analysis"
+excerpt: "The blog post describes a monitoring solution for SQL Server parameters sniffing issues"
 ---
 
-Business operations monitoring is used when you have some important processes in your Dynamics AX system and you want to control/measure the performance of them. It is an activity that may be done after the main Dynamics AX [performance optimization project](https://denistrunin.com/performance-audit) and usually it happens when some processes show unstable behaviour. Usually, the reasons for this are the following:
+One of the complex and probably most common problem in Dynamics AX performance tuning is a SQL parametest sniffing. I recently posted about how to [fix it](https://denistrunin.com/performance-sniffing), but in this
+blog post I want to focus on a sample approach of how to implement a monitoring solution for such types of problems.
 
-- Parameters sniffing 
-- Some external processes that overload hardware
+## Parameters sniffing example 
 
-
-
-## Performance log implementation detail
-
-Let's consider the example from the recent project. One the critical system processes was a Production journal time posting. After optimization it worked within acceptable levels(around 5 seconds) but then on Friday 3pm suddenly started considerable slower (like 30-50 seconds to post the journal, that was affected a lot of users)
+Let's consider the example from the recent project. One the critical system processes was a Production journal time posting. After the optimization it worked within acceptable levels(around 5 seconds) but then on Friday 3pm it suddenly started considerable slower (like 30-50 seconds to post the journal, that was affected a lot of users)
 
 ![Posting](PostingTimePanic.png)
 
-TOP SQL for the server looked like this(one TOP1 statement with a considerable large logical reads)
+[TOP SQL](https://github.com/TrudAX/TRUDScripts/blob/master/Performance/AX%20Technical%20Audit.md#get-top-sql) for the server looked like this(one TOP1 statement with a considerable large logical reads)
 
 ![Top SQL](TOPSQL.png)
 
@@ -41,15 +37,20 @@ EXEC sp_create_plan_guide @name = N'[AX_InventSumLoc]', @stmt = N'SELECT SUM(T1.
 
 ```
 
-The correct plan after this this become the following:
+The correct plan after this become the following:
 
+![Good plan](GoodPlan.png)
 
+After the hint creation the posting time returned to normal. 
 
-After the hint creation the posting time returned to normal. And as I wrote in the index post sometimes such issues can leads to Index maintenance madness or continuous statistics update, that 
+As I wrote in my [previous](https://denistrunin.com/performance-sniffing) post the insidiousness of such cases is that sometimes people start using reindexing or statistics updates to resolve them, that slow down the whole system without actually fixing the root of this problem. Such maintenance tasks can leads to [Index Maintenance Madness]( https://www.brentozar.com/archive/2017/12/index-maintenance-madness/) and even Microsoft recently published some notes [about this](
+https://docs.microsoft.com/en-us/sql/relational-databases/indexes/reorganize-and-rebuild-indexes?view=sql-server-ver15#index-maintenance-strategy )
 
-## Monitoring solution implementation
+Let's discuss of how we can monitor such issues
 
-Such problems are quite easy to fix, the main complexity is that it can hit your system unexpectedly. But the pattern is always very similar: some new TOP statement that uses non optimal plan. Also you can't monitor it using for example CPU load on SQL Server, in most cases it may not hit critical levels. 
+## TOP Queries monitoring solution implementation
+
+Such problems are quite easy to fix, the main complexity is that it can hit your system unexpectedly. But the pattern is always very similar: some new TOP SQL statement that uses non optimal plan. Also you can't monitor it using for example CPU load on SQL Server, in most cases it may not hit critical levels. 
 
 I tried to google some monitoring open source solution that can handle such situations, but found nothing. So in order to be notified on such events I created the following Dynamics AX query performance monitoring procedure:
 
@@ -57,49 +58,43 @@ I tried to google some monitoring open source solution that can handle such situ
 msdb.dbo.[AXTopQueryLogMonitor] @MinPlanTimeMin = 30, @MaxRowToSave = 3, @SendEmailOperator = 'axoperator', @DaysKeepHistory = 62
 ```
 
-The idea is very simple. This procedure every 30 minutes obtains 3(@MaxRowToSave) TOP records from the current SQL Server TOP SQL view and if they exists in this log for more than 30 minutes(@MinPlanTimeMin) saves them to a table. If any of these 3 statements are new, it send e-mail about this to a specified operator(@SendEmailOperator). To prevent this log grows it deletes records older than 62 days(@DaysKeepHistory)
+The idea is very simple. This procedure every 30 minutes obtains 3(**@MaxRowToSave**) TOP records from the current SQL Server TOP SQL view and if they exist in this log for more than 30 minutes(**@MinPlanTimeMin**) saves them to a table. If any of these 3 statements are new, it send e-mail about this to a specified operator(**@SendEmailOperator**). To prevent this log grows it deletes records older than 62 days(**@DaysKeepHistory**)
 
 To compare with previous statements both SQL plan and SQL text is used, so if one query executed with different plans it appears twice. 
 
-As the result if you have a new TOP statement that you have not seen before AX DBA should get an e-mail like this 
+As the result if you have a new TOP statement that you have not seen before, Dynamics AX DBA should get an e-mail like this 
 
 ![E-mail](Email.png)
 
-If you get this, you need to connect to SQL Server and try to analyse 
+Then after you get this e-mail you can connect to SQL Server and try to analyse/optimize this statement
 
---PIC
+![Top line analysis](TopLineAnalysis.png)
 
+If the statement can not be optimized, for example **Execution count** is aligned with used business logic and **Execution plan** is optimal you can mark this query as approved   
 
+```sql
+Exec [AXTopQueryMarkAsApproved]  111, 'Query is good, used in planning process'
+```
 
-Some numbers
+## Usage statistics from real-life projects
 
-How many quires need to be analysed: I used it for several projects and it was within 100-200 queries. Basically if you ready to support Dynamics AX performance you need to be ready to analyse your system most heaviest 200 queries.
+I run this monitoring on several project where all Dynamics AX performance tuning was made during the previous [audit](https://denistrunin.com/performance-audit) and got the following results:
 
-Duration of initial analysis - it was about 2 calendar weeks, more than I expected
+- **Number of quires need to be analysed** was within 100-200 queries. Basically if you ready to support Dynamics AX performance you need to be ready to analyse your system most heaviest 200 queries.
+- **Duration of initial analysis** - it was about 2-3 calendar weeks, more than I expected. In this period I got several new e-mails per day
+- **Number of fixed queries** - for one project it was 8. 4 queries had incorrect plan and 4 required new indexes creation. These numbers may not seem high, but keep in mind than previously this project was fixed by the performance audit
 
-Number of fixed queries - for one project it was 8. 4 queries had incorrect plan and 4 required new indexes creation. 
-
-But keep in mind that previously this project was fixed by the performance audit
-
-
-
-
-
-
+What is really great about this solution that it gives a certan level of confidence during the Dynamics AX performance optimization project, if a new SQL query appears in the top you will be notified about this.  
 
 ## Some thoughts about D365FO
 
-If you have an on-premise version the monitoring will be the same. For the cloud version you don't have an access to a Production SQL. Production database has a Query store enabled and basically this information(TOP queries for the given time )
+If you have an on-premise version the monitoring will be the same. For the Cloud version you don't have a direct access to a Production SQL Server. But production database has a Query store enabled and information like "TOP queries for the given time" can be obtained using the SAT restore with a readonly flag. The process is described in the following post [Using Query Store for Performance Tuning with D365 F&O](https://community.dynamics.com/ax/b/axinthefield/posts/using-query-store-for-performance-tuning-with-d365-f-o), but it looks quite complex from a practical point of view(SAT often used to some other tasks and this restore will take some time)
 
-
-The official way is using SAT restore with readonly flag, but it looks quite unusable from a practical point of view(SAT often used to some other tasks)
-
-[Using Query Store for Performance Tuning with D365 F&O](https://community.dynamics.com/ax/b/axinthefield/posts/using-query-store-for-performance-tuning-with-d365-f-o)
-
+Probably another option is to implement the monitoring logic in X++ and run it as a periodic batch job. 
 
 ## Conclusion
 
-In this blog post I provided some samples on how to implement performance monitoring in Dynamics AX and analyse performance of Dynamics AX operations with Power BI. Sample files(xpo that contains log table, form and a helper class) can be found in the following [folder](https://github.com/TrudAX/TRUDScripts/tree/master/Performance/Jobs/TimeLogTable).
+Using the described solution you can monitor your Dynamics AX SQL performance and get a notification when some new workload appear in a TOP SQL list. Used code can be found in the following [folder](https://github.com/TrudAX/TRUDScripts/tree/master/Performance/Jobs/SQLTopQueryMonitor).
 
-I hope you find this information useful. Don't hesitate to contact me in case of any questions or if you want to share your Dynamics AX/D365FO operations monitoring approach. 
+I hope you find this information useful. Don't hesitate to contact me in case of any questions or if you want to share your Dynamics AX/D365FO SQL monitoring approach. 
 
