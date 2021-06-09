@@ -57,15 +57,15 @@ I tried to google a monitoring open-source solution that could handle such situa
 msdb.dbo.[AXTopQueryLogMonitor] @MinPlanTimeMin = 30, @MaxRowToSave = 3, @SendEmailOperator = 'axoperator', @DaysKeepHistory = 62
 ```
 
-The idea is very simple. This procedure every 30 minutes obtains 3(**@MaxRowToSave**) TOP records from the current SQL Server TOP SQL view and if they exist in this log for more than 30 minutes(**@MinPlanTimeMin**) saves them to a table. If any of these 3 statements are new, it sends an e-mail about this to a specified operator(**@SendEmailOperator**). To prevent this log grows it deletes records older than 62 days(**@DaysKeepHistory**)
+The idea is very simple. Every 30 minutes this procedure obtains 3(**@MaxRowToSave**) TOP records from the current SQL Server TOP SQL view and if they exist in this log for more than 30 minutes(**@MinPlanTimeMin**) saves them to a table. If any of these 3 statements is new, it sends an e-mail about this to a specified operator(**@SendEmailOperator**). To prevent this log from growing it deletes records older than 62 days(**@DaysKeepHistory**)
 
-To compare with previous statements both SQL plan and SQL text is used, so if one query is executed with different plans it appears twice in this log. 
+To compare with previous statements both SQL plan and SQL text are used, so if one query is executed with different plans it appears twice in this log. 
 
-As the result, if you have a new TOP statement that you have not seen before, Dynamics AX DBA should get an email like this 
+As the result, if you have a new TOP statement that you have not seen before, Dynamics AX Administrators should get an email like this 
 
 ![E-mail](Email.png)
 
-Then after you get this e-mail you can connect to SQL Server and try to analyse/optimize this statement
+Then they can connect to SQL Server and try to analyse/optimize this statement
 
 ![Top line analysis](TopLineAnalysis.png)
 
@@ -75,25 +75,25 @@ If the statement can not be optimized, for example, **Execution count** is align
 Exec [AXTopQueryMarkAsApproved]  111, 'Query is good, used in planning process'
 ```
 
-## Usage statistics from real-life projects
+## Examples from real-life projects
 
-I run this monitoring on several projects where all Dynamics AX performance tuning was made during the previous [audit](https://denistrunin.com/performance-audit) and got the following results:
+I ran this monitoring on several projects where all Dynamics AX performance tuning was made during the previous [audit](https://denistrunin.com/performance-audit) and got the following results:
 
-- **Number of queries that need to be analysed** was within 100-200 queries. Basically, if you are ready to support Dynamics AX performance you need to be ready to analyse your system’s top heaviest 200 queries.
-- **Duration of initial analysis** - it was about 2-3 calendar weeks, more than I expected. In this period I got several new emails per day
+- **Number of queries that need to be analysed** was within 100-200 queries. Basically, if you want to support Dynamics AX performance you need to be ready to analyse your system’s top heaviest 200 queries.
+- **Duration of initial analysis** - it was about 2-3 calendar weeks, more than I had expected. In this period I was getting several new emails per day
 - **Number of fixed queries** - for one project it was 8. 4 queries had an incorrect plan and 4 required new indexes creation. These numbers may not seem high, but keep in mind that previously most performance issues on this project were fixed by the performance [audit]( https://denistrunin.com/performance-audit).
 
-What is really great about this solution is that it gives a certain level of confidence during the Dynamics AX performance optimization project, if a new SQL query appears at the TOP log you will be notified about this.  
+What is really great about this solution is that it gives a certain level of confidence during the Dynamics AX performance optimization project. If a new SQL query appears at the TOP log you will be notified about this.  
 
 ## Some thoughts about D365FO
 
-If you have an on-premise version the monitoring will be the same. For the Cloud version, you don't have direct access to a Production SQL Server. But the production database has a **Query store** enabled and information like "TOP queries for the given time" can be obtained using the SAT restore with a read-only flag. The process is described in the following post [Using Query Store for Performance Tuning with D365 F&O](https://community.dynamics.com/ax/b/axinthefield/posts/using-query-store-for-performance-tuning-with-d365-f-o), but it looks quite complex from a practical point of view(SAT often used to some other tasks and this restore will take some time)
+If you have an on-premise version the monitoring will be the same. For the Cloud version, you don't have a direct access to a Production SQL Server. But the production database has a **Query store** enabled and information like "TOP queries for the given time" can be obtained using the SAT restore with a read-only flag. The process is described in the following post [Using Query Store for Performance Tuning with D365 F&O](https://community.dynamics.com/ax/b/axinthefield/posts/using-query-store-for-performance-tuning-with-d365-f-o), but it looks quite complex from a practical point of view(SAT often is used for some other tasks and this restore will take some time)
 
 Probably another option is to implement the same monitoring logic in X++ and run it as a periodic batch job. 
 
 ## Conclusion
 
-Using the described solution you can monitor your Dynamics AX SQL performance and get a notification when some new workload appears in a TOP SQL list. Used code can be found in the following [folder](https://github.com/TrudAX/TRUDScripts/tree/master/Performance/Jobs/SQLTopQueryMonitor).
+Using the described solution you can monitor your Dynamics AX SQL performance and get a notification when some new workload appears in a TOP SQL list. The code for this can be found in the following [folder](https://github.com/TrudAX/TRUDScripts/tree/master/Performance/Jobs/SQLTopQueryMonitor).
 
 I hope you find this information useful. Don't hesitate to contact me in case of any questions or if you want to share your Dynamics AX/D365FO SQL monitoring approach. 
 
