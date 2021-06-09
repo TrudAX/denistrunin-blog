@@ -1,7 +1,7 @@
 ---
 title: "Implementing of Dynamics AX business operations performance monitoring"
 date: "2021-05-27T22:12:03.284Z"
-tags: ["Performance", "PowerBI"]
+tags: ["Performance", "PowerBI", "Performance audit"]
 path: "/performance-operlog"
 featuredImage: "./logo.png"
 excerpt: "The blog post describes a sample implementation for Dynamics AX business operations performance monitoring and performance analysis"

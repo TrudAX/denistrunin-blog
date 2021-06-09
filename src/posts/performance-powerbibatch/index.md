@@ -1,7 +1,7 @@
 ---
 title: "Analysing Dynamics AX / Dynamics 365FO batch performance using Power BI"
 date: "2020-11-25T22:12:03.284Z"
-tags: ["Performance", "PowerBI"]
+tags: ["Performance", "PowerBI", "Performance audit"]
 path: "/performance-powerbibatch"
 featuredImage: "./logo.png"
 excerpt: "The blog post describes how to analyse execution of batch jobs in Power BI Desktop"

@@ -1,4 +1,4 @@
----
+﻿---
 title: "Monitoring the most problematic performance problem in Dynamics AX - parameters sniffing"
 date: "2021-06-09T22:12:03.284Z"
 tags: ["Performance", "SQL", "Performance audit"]
@@ -11,7 +11,7 @@ One of the complex and probably most common problems in Dynamics AX performance 
 
 ## Parameters sniffing example 
 
-Let's consider an example from the recent project. One of the critical system processes was a Production journal time posting. After the general optimization, it worked within acceptable time(around 5 seconds) but then on Friday at 3pm it suddenly slowed down (like 30-50 seconds to post the journal, that affected a lot of users)
+Let's consider an example from the recent project. One of the critical system processes was a Production journal time posting. After the general optimization, it worked within acceptable time(around 5 seconds) but then on Friday at 3 pm it suddenly slowed down (like 30-50 seconds to post the journal, which affected a lot of users)
 
 ![Posting](PostingTimePanic.png)
 
@@ -93,7 +93,9 @@ Probably another option is to implement the same monitoring logic in X++ and run
 
 ## Conclusion
 
-Using the described solution you can monitor your Dynamics AX SQL performance and get a notification when some new workload appears in a TOP SQL list. The code for this can be found in the following [folder](https://github.com/TrudAX/TRUDScripts/tree/master/Performance/Jobs/SQLTopQueryMonitor).
+Using the described solution you can monitor your Dynamics AX SQL performance and get a notification when some new workload appears in a TOP SQL list. This is extremely useful for the cases when you have random performance problems that can't be replicated on a Test version. You can find and fix exact queries that causing problems instead of wasting time by running reindexing/statistics update. 
+
+The code for this can be found in the following [folder](https://github.com/TrudAX/TRUDScripts/tree/master/Performance/Jobs/SQLTopQueryMonitor).
 
 I hope you find this information useful. Don't hesitate to contact me in case of any questions or if you want to share your Dynamics AX/D365FO SQL monitoring approach. 
 

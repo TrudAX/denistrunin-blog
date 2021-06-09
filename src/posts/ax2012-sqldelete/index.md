@@ -1,7 +1,7 @@
 ---
 title: "Implementing Dynamics AX 2009/2012 database cleanup"
 date: "2021-03-11T22:12:03.284Z"
-tags: ["Performance","AX2012"]
+tags: ["Performance","AX2012", "Performance audit"]
 path: "/ax2012-sqldelete"
 featuredImage: "./logo.png"
 excerpt: "Describes a custom framework for performing a periodic database cleanup"
@@ -120,7 +120,11 @@ In a class hierarchy it looks like this:
 
 ![Class structure](ClassStructure.png)
 
-A cleanup class may implement a "delete from a large table" logic described above or can just run a standard cleanup class for all companies for complex operations.
+A cleanup class may implement the following logic: 
+
+- A "delete from a large table" logic described above 
+- Run a standard cleanup class for all companies for complex operations.
+- Can run X++ code do delete records in order to execute **delete()** methods and standard delete actions
 
 Example of SQL based cleanup:
 

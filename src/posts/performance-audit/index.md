@@ -1,7 +1,7 @@
 ---
 title: "Dynamics AX performance audit"
 date: "2019-06-05T20:12:03.284Z"
-tags: ["SQL", "Performance"]
+tags: ["SQL", "Performance", "Performance audit"]
 path: "/performance-audit"
 featuredImage: "./logo.png"
 excerpt: "How to perform Dynamics AX performance audit to resolve performance problems"

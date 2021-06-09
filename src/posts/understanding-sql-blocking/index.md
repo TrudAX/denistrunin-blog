@@ -1,7 +1,7 @@
 ---
 title: "Blocking in D365FO(and why you shouldn't always follow MS recommendations)"
 date: "2019-01-30T20:12:03.284Z"
-tags: ["SQL", "Performance"]
+tags: ["SQL", "Performance", "Performance audit"]
 path: "/understanding-sql-blocking"
 featuredImage: "./logo.png"
 excerpt: "Understanding blocking is a key component of resolving performance issues. You can have fast CPU, a lot of memory, but if you face SQL blocking problem all these will not be fully utilized"

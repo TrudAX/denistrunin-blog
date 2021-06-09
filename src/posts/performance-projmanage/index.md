@@ -1,7 +1,7 @@
 ﻿---
 title: "How to manage a Dynamics AX performance optimization project"
 date: "2020-10-07T22:12:03.284Z"
-tags: ["Performance"]
+tags: ["Performance", "Performance audit"]
 path: "/performance-projmanage"
 featuredImage: "./logo.png"
 excerpt: "The blog post describes how to organize a Dynamics AX performance optimization project, who should be involved, and how the process should be organized"
