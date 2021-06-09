@@ -1,5 +1,5 @@
 ---
-title: "Monitoring number one performance problem in Dynamics AX - parameters sniffing"
+title: "Monitoring the most problematic performance problem in Dynamics AX - parameters sniffing"
 date: "2021-06-09T22:12:03.284Z"
 tags: ["Performance", "SQL", "Performance audit"]
 path: "/performance-snifmonitor"
@@ -7,25 +7,25 @@ featuredImage: "./logo.png"
 excerpt: "The blog post describes a monitoring solution for SQL Server parameters sniffing issues"
 ---
 
-One of the complex and probably most common problems in Dynamics AX performance tuning is SQL parameters sniffing. I recently posted about how to [fix it](https://denistrunin.com/performance-sniffing), but in this post, I want to focus on a sample approach of how to implement a monitoring solution for such types of problems.
+One of the complex and probably most common problems in Dynamics AX performance tuning is SQL parameters sniffing. I recently wrote how to [fix it](https://denistrunin.com/performance-sniffing), but in this post, I want to focus on a sample approach of how to implement a monitoring solution for such types of problems.
 
 ## Parameters sniffing example 
 
-Let's consider the example from the recent project. One of the critical system processes was a Production journal time posting. After the general optimization, it worked within acceptable levels(around 5 seconds) but then on Friday 3pm it suddenly started considerable slower (like 30-50 seconds to post the journal, that was affected a lot of users)
+Let's consider an example from the recent project. One of the critical system processes was a Production journal time posting. After the general optimization, it worked within acceptable time(around 5 seconds) but then on Friday at 3pm it suddenly slowed down (like 30-50 seconds to post the journal, that affected a lot of users)
 
 ![Posting](PostingTimePanic.png)
 
-[TOP SQL](https://github.com/TrudAX/TRUDScripts/blob/master/Performance/AX%20Technical%20Audit.md#get-top-sql) for the server looked like this(one TOP1 statement with considerable large logical reads)
+[TOP SQL](https://github.com/TrudAX/TRUDScripts/blob/master/Performance/AX%20Technical%20Audit.md#get-top-sql) for the server looked like this(one TOP1 statement with considerably larger logical reads)
 
 ![Top SQL](TOPSQL.png)
 
-When I checked the plan for this TOP1 statement is was the following
+When I checked the plan for this TOP1 statement it was the following
 
 ![bad plan](BadPlan.png)
 
 This is a "classic" example of wrong InventSum-InventDim join, where InventDim is used as a leading table.
 
-The solution was quite simple, a custom plan was created with the OPTIMIZE FOR UNKNOWN, that ensures that SQL Server will not use first passed location/site values to build a plan  
+The solution was quite simple, a custom plan was created with the OPTIMIZE FOR UNKNOWN hint, that ensured that SQL Server would not use first passed location/site values to build a plan  
 
 ```SQL
 EXEC sp_create_plan_guide @name = N'[AX_InventSumLoc]', @stmt = N'SELECT SUM(T1.POSTEDQTY),SUM(T1.POSTEDVALUE),SUM(T1.PHYSICALVALUE),SUM(T1.DEDUCTED),SUM(T1.RECEIVED),SUM(T1.RESERVPHYSICAL),SUM(T1.RESERVORDERED),SUM(T1.REGISTERED),SUM(T1.PICKED),SUM(T1.ONORDER),SUM(T1.ORDERED),SUM(T1.ARRIVED),SUM(T1.QUOTATIONRECEIPT),SUM(T1.QUOTATIONISSUE),SUM(T1.AVAILPHYSICAL),SUM(T1.AVAILORDERED),SUM(T1.PHYSICALINVENT),SUM(T1.POSTEDVALUESECCUR_RU),SUM(T1.PHYSICALVALUESECCUR_RU) FROM INVENTSUM T1 WHERE (((T1.PARTITION=5637144576) AND (T1.DATAAREAID=N''dsg'')) AND ((T1.ITEMID=@P1) AND (T1.CLOSED=@P2))) AND EXISTS (SELECT ''x'' FROM INVENTDIM T2 WHERE (((T2.PARTITION=5637144576) AND (T2.DATAAREAID=N''dsg'')) AND (((T2.INVENTDIMID=T1.INVENTDIMID) AND (T2.INVENTSITEID=@P3)) AND (T2.INVENTLOCATIONID=@P4))))',
@@ -36,22 +36,22 @@ EXEC sp_create_plan_guide @name = N'[AX_InventSumLoc]', @stmt = N'SELECT SUM(T1.
 
 ```
 
-The correct plan after this becomes the following:
+The correct plan after this became the following:
 
 ![Good plan](GoodPlan.png)
 
 After the hint creation, the posting time returned to normal. 
 
-As I wrote in my [previous](https://denistrunin.com/performance-sniffing) post the insidiousness of such cases is that sometimes people start using reindexing or statistics updates to resolve them, that slow down the whole system without actually fixing the root of this problem. Such maintenance tasks can lead to [Index Maintenance Madness]( https://www.brentozar.com/archive/2017/12/index-maintenance-madness/) and even Microsoft recently published some notes [about this](
+As I wrote in my [previous](https://denistrunin.com/performance-sniffing) post the insidiousness of such cases is that sometimes people start using reindexing or statistics updates to resolve them, and its slow down the whole system without actually fixing the root of this problem. Such maintenance tasks can lead to [Index Maintenance Madness]( https://www.brentozar.com/archive/2017/12/index-maintenance-madness/) and even Microsoft recently published some notes [about this](
 https://docs.microsoft.com/en-us/sql/relational-databases/indexes/reorganize-and-rebuild-indexes?view=sql-server-ver15#index-maintenance-strategy )
 
 Let's discuss how we can monitor such issues
 
 ## TOP Queries monitoring solution implementation
 
-Such problems are quite easy to fix, the main complexity is that they can hit your system unexpectedly. But the pattern is always very similar: some new TOP SQL statement that uses a non-optimal execution plan. Also, you can't monitor it using standard performance counters(for example CPU load) on SQL Server, as in most cases they may not hit critical levels(it for example changed from 20% to 50%). 
+Such problems are quite easy to fix, the main complexity is that they can hit your system unexpectedly. But the pattern is always very similar: a new TOP SQL statement that uses a non-optimal execution plan. Also, you can't monitor it using standard performance counters(for example CPU load) on SQL Server, as in most cases they may not hit critical levels(for example it may change from 20% to 50%). 
 
-I tried to google a monitoring open-source solution that can handle such situations but could not find anything. So to be notified on such events I created the following Dynamics AX query performance monitoring [procedure]( https://github.com/TrudAX/TRUDScripts/blob/master/Performance/Jobs/SQLTopQueryMonitor/dbo.AXTopQueryLogMonitor.StoredProcedure.sql):
+I tried to google a monitoring open-source solution that could handle such situations but could not find anything. So to be notified on such events I created the following Dynamics AX query performance monitoring [procedure]( https://github.com/TrudAX/TRUDScripts/blob/master/Performance/Jobs/SQLTopQueryMonitor/dbo.AXTopQueryLogMonitor.StoredProcedure.sql):
 
 ```sql
 msdb.dbo.[AXTopQueryLogMonitor] @MinPlanTimeMin = 30, @MaxRowToSave = 3, @SendEmailOperator = 'axoperator', @DaysKeepHistory = 62
@@ -79,7 +79,7 @@ Exec [AXTopQueryMarkAsApproved]  111, 'Query is good, used in planning process'
 
 I run this monitoring on several projects where all Dynamics AX performance tuning was made during the previous [audit](https://denistrunin.com/performance-audit) and got the following results:
 
-- **Number of queries that need to be analysed** was within 100-200 queries. Basically, if you are ready to support Dynamics AX performance you need to be ready to analyse your system’s top heaviest 200 queries.
+- **Number of queries that need to be analysed** was within 100-200 queries. Basically, if you are ready to support Dynamics AX performance you need to be ready to analyse your systemâ€™s top heaviest 200 queries.
 - **Duration of initial analysis** - it was about 2-3 calendar weeks, more than I expected. In this period I got several new emails per day
 - **Number of fixed queries** - for one project it was 8. 4 queries had an incorrect plan and 4 required new indexes creation. These numbers may not seem high, but keep in mind that previously most performance issues on this project were fixed by the performance [audit]( https://denistrunin.com/performance-audit).
 
