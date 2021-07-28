@@ -15,7 +15,7 @@ In this blog post I will show how DMF can be used in the same framework in order
 
 ## Solution description
 
-We have an incoming folder in Azure file share contains a set of files that can be read by DMF and we need to import them. In this example I will use Customer group entity in CSV format. Also let's implement a multi-company import, a company will be specified for a file as a first characters before "_"  
+We have an incoming folder in **Azure file share** that contains a set of files and we need to import them via DMF. In this example I will use Customer group entity in CSV format. Also let's implement a multi-company import, a company code will be specified for a file as a first characters before "_"  
 
 We need to import these files and view the import status per file 
 
@@ -31,43 +31,9 @@ This form is used to define a connection to a cloud file share. In this example 
 
 ### Inbound message types form
 
-In this form we need to create a new class that processes our files. The logic for this will be quite simple: load a file, change the company, pass the file to a DMF framework. The DMF call will be a synchronous, so we can get the status from DMF processing and update our message table.
+In this form we need to create a new class that processes our files. The logic for this will be quite simple: load a file, change the company, pass the file to a DMF framework. The DMF call will be a **synchronous**, so we can get the status from DMF after the processing and update our message table.
 
-In order to specify 
-
-
-
-Next form to describe our integration will be **Inbound message types** form
-
-![Message type](MessageTypesForm.png)
-
-This form contains 3 main sections:
-
-**1 - Details tab**
-
-- Defines **Incoming** and **Archive** folders in our File share.  There will be no **Error** folder: if an inbound file fails validation then the error details will be found in the message table.
-
-- Contains link to the Class that will do processing from this folder. The class should extend a base class **DEVIntegProcessMessageBase** and implement the following method:
-
-```c#
-abstract void  processMessage(DEVIntegMessageTable  _messageTable, DEVIntegMessageProcessResult _messageProcessResult)
-{
-...
-}
-```
-
-This method will be called by the integration engine outside of a transaction, so all transaction control can be implemented per Message type. There can be different options here: one transaction per message, multiple transactions(for example if a file contains several independent journals) or a single transaction per line. The result of processing and the current stage should be written to **_messageProcessResult** variable, so in case of an unhandled exception, this information can be saved for review. Also, this class will be created one time per full import session, so it can implement different caching options.
-
-**2 - Operation parameters tab**
-
-Contains parameters that are individual for the current operation. In our case it will be: 
-- **Ledger journal name** reference for journal creation
-- Post the journal(No/Yes) and 
-- A file type(Excel or CSV)
-
-**3 - Advanced settings tab**
-
-Contains some common parameters: If we should use Parallel processing for our incoming files and how to move files to an Archive folder(with the same name or append DateTime to the file name). Parallel processing is based on this post: [A simple way to implement a parallel batch processing in X++](https://denistrunin.com/xpptutorial-batchmultithread/), so for example if we set it to 10 and have 1000 incoming messages, 10 batch threads with 100 messages each will be created.
+On this form we can also specify for which entity we need to run our import. Basically it links the Incoming directory with a DFM project/entity
 
 Also, this form contains two servicing operations:
 
@@ -80,14 +46,6 @@ This table will store the details on each inbound file.
 
 ![Messages form](MessagesForm.png)
 
-Every message has a status field that can contain the following values:
-
-- **Ready** – a file was read to D365FO and successfully moved to the Archive folder.
-- **Hold** – The user has decided not to process the file. This is an alternative to a delete option
-- **In process** – system-generated status, a message is processing now
-- **Error** – failed validation
-- **Processed** – completed successfully
-
 In this form it is also possible to do the following operations:
 
 - View incoming file context
@@ -96,7 +54,7 @@ In this form it is also possible to do the following operations:
 - Change the status to process the message again
 - View file processing statistics (processing duration, time, number of lines)
 
-### Load incoming file operation
+### Load and process incoming files
 
 It is a periodic batch job that we can run for one or multiple message types.
 
@@ -104,61 +62,20 @@ It is a periodic batch job that we can run for one or multiple message types.
 
 It connects to the shared folder, reads files, creates a record in **Incoming messages** table with **Ready** status, attaches a file content to this message and moves the file to an Archive directory. If **Run processing** is selected, after the load system will execute processing of the loaded messages.
 
-### Process incoming messages
-
-Message processing may be executed as a separate operation - **Process incoming messages** that selects all not processed messages and calls the processing class for them.
-
-The logic of how to process the file is different per message type/class. For the simple scenario, the class can just read the file content and create some data in one transaction. For this blog post, I implemented two step processing. See the sample diagram below:
-
-![Process diagram](ProcessDiagram.png)
-
-
-
-During the first step, the class reads the file and writes data into a staging table. A sample code for this:
+Internally the processing takes our file and run the same function that the user may run for a manual import
 
 ```c#
-    while (fileReader.readNextRow())
-    {
-        linesStaging.clear();
-        lineNum++;
-        linesStaging.LineNumber     = lineNum;
-        linesStaging.HeaderRefRecId = tutorialLedgerJourHeaderStaging.RecId;
-        linesStaging.MainAccount  = fileReader.getStringByName('MainAccount');
-        linesStaging.BusinessUnit = fileReader.getStringByName('BusinessUnit');
-        linesStaging.Department   = fileReader.getStringByName('Department');
-        linesStaging.CostCenter   = fileReader.getStringByName('CostCenter');
-        linesStaging.Amount       = fileReader.getRealByName('Amount');
-        DEV::validateWriteRecordCheck(tutorialLedgerJourLinesStaging);
-        tutorialLedgerJourLinesStaging.insert();
-    }
+abstract void  processMessage(DEVIntegMessageTable  _messageTable, DEVIntegMessageProcessResult _messageProcessResult)
+{
+...
+}
 ```
 
-Then based on this staging data values, a new journal is created. As I wrote in this [post](https://denistrunin.com/xpptools-createledgerjournal/) there are two options to create a ledger journal: either using **LedgerJournalEngine** class or using a data entity. The choice between these two should be made by answering the question: if the user wants to create the same journal manually, does he use manual entry or data import?. In this case, I want the result to be similar to manual entry, so **LedgerJournalEngine** class is used.
-
-```c#
-ledgerJournalTrans.AccountType          =   LedgerJournalACType::Ledger;
-ledgerJournalTrans.modifiedField(fieldNum(LedgerJournalTrans, AccountType));
-
-DimensionDefault  dim;
-dim = DEVDimensionHelper::setValueToDefaultDimensionCon(dim,
-  [DEVDimensionHelper::BusinessUnit(), tutorialLedgerJourLinesStaging.BusinessUnit,
-   DEVDimensionHelper::Department(),   tutorialLedgerJourLinesStaging.Department,
-   DEVDimensionHelper::CostCenter(),   tutorialLedgerJourLinesStaging.CostCenter ] );
-
-ledgerJournalTrans.LedgerDimension = LedgerDimensionFacade::serviceCreateLedgerDimension(
-  LedgerDefaultAccountHelper::getDefaultAccountFromMainAccountId(tutorialLedgerJourLinesStaging.MainAccount), dim);
-
-ledgerJournalTrans.modifiedField(fieldNum(LedgerJournalTrans, LedgerDimension));
-ledgerJournalEngine.accountModified(LedgerJournalTrans);
-....
-ledgerJournalTrans.insert();
-```
-
-After the journal creation, this class runs journal posting.
+ As the process is synchronous, we can check the status of the import and implement some logic for the file processing. In the current example in case of any error
 
 ## Error types and how to handle them
 
-It is not a big task to create a journal based on a file. The complexity of integration is often related to exception processing and error monitoring. Let's discuss typical errors and how users can deal with them.
+Let's discuss typical errors and how users can deal with them, also I can compare them with a custom made import 
 
 ### File share connection errors
 
@@ -199,13 +116,13 @@ Users can view this error, display a Staging data to check the values from the F
 
 In some implementations(EDI), we can even allow staging data editing.
 
-### Posting errors
+### Posting documents
 
-A similar type of error is a posting error. For example, in a current implementation if the journal is not balanced the error will be generated and the message gets the **Error** status:
+We don't have a posting code in this example, but it can be implemented my the modifying the processing class after the succesfull file load 
 
-![Posting error](WrongDataPosting.png)
+This archicture used on a lot of projects in some way, DMF is used to load the data in staging tables, that don't contain any business logic and the chance of error is minimum.
 
-A possible variation to this approach is to create a document(journal in our case), try to post it, and even if posting fails, still set the message Status to **Processed** and leave the journal unposted, allowing accountants to decide what to do with it. As we don't process in transaction this will be a simple modification for our process class.
+Then in order to process these staging records(create business documents) some custom code is executed. In this case you rely on DMF only for reading the file. In some cases it may be a valid choice, but as we saw file parcing is not a big advantage of DMF and in some cases implementing your own reader can produce better results.
 
 ### Wrong result errors
 
