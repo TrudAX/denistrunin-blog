@@ -65,6 +65,14 @@ As the result, if you have a new TOP statement that you have not seen before, Dy
 
 ![E-mail](Email.png)
 
+**UPDATE 30/07/2021**
+
+Sometimes in a “TOP query log” there were some queries that are not heavy at all, but they exist in the TOP log because the overall server load is low(for example less than 5%). To view this, I added a new section in the alerting e-mail that displays **CPU Utilization**
+
+![CPUUsage](CPUUsage.png)
+
+
+
 Then they can connect to SQL Server and try to analyse/optimize this statement
 
 ![Top line analysis](TopLineAnalysis.png)
