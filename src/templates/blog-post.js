@@ -1,7 +1,7 @@
 import React from "react";
 import Helmet from "react-helmet";
 import get from "lodash/get";
-import { Disqus } from 'gatsby-plugin-disqus';
+import Disqus from "disqus-react";
 import Bio from "../components/Bio";
 import { rhythm, scale } from "../utils/typography";
 import Tags from "../components/Tags";
