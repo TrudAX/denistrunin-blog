@@ -1,25 +1,23 @@
 ﻿---
 title: "Multicompany DMF integration in Dynamics 365 FinOps using X++"
-date: "2020-12-17T22:12:03.284Z"
+date: "2021-08-11T22:12:03.284Z"
 tags: ["XppDEVTutorial", "Integration"]
 path: "/xpptools-fileintegdmf"
 featuredImage: "./logo.png"
-excerpt: "The blog post describes a sample approach to implement recurring file-based integration in D365FO using X++"
+excerpt: "The blog post describes a sample approach to implement recurring file-based integration in D365FO using X++ and DMF"
 ---
 
-On one of my latest post I described a sample aproach for a periodic file-based integration using pure X++. So the external system created files on the Azure file share, then D365FO pulls these files, parse and processes them. One of the comments was why DMF is not used for such task
+In one of my last posts I described a sample approach for a [periodic file-based integration using X++](https://denistrunin.com/xpptools-fileintegledger) custom code. The external system creates files on the Azure file share, then D365FO pulls these files, parses and processes them. One of the comments on this post was why DMF is not used for such tasks.
 
-That is a perfectly valid comment, given to the fact that if you want to develop import from the scratch you need to do a lot of programming, like cate staging tables and forms, implement a file parsing and create the final document via X++ code. 
+That is a perfectly valid comment, given to the fact that if you want to develop a custom import you need to do a lot of programming, like create staging tables and forms, implement a file parsing and create the final document via X++ code.
 
-In this blog post I will show how DMF can be used in the same framework in order to implement periodic files import
+In this blog post I will show how DMF can be used in the same framework in order to implement periodic files import.
 
-## Solution description
+## Task description
 
-We have an incoming folder in **Azure file share** that contains a set of files and we need to import them via DMF. In this example I will use Customer group entity in CSV format. Also let's implement a multi-company import, a company code will be specified for a file as a first characters before "_"  
+We have an incoming folder in **Azure file share** that contains a set of files and we need to import them via DMF. In this example I will use “Customer group” entity in Excel format. Also let's implement a multi-company import, a company code will be specified for a file as a first characters before "_" 
 
-We need to import these files and view the import status per file 
-
-
+We need to import these files in D365FO and view the import status per file.
 
 ## Proposed solution
 
@@ -27,22 +25,26 @@ In the following section, I provide some code samples that can be used as a star
 
 ### File share connections form
 
-This form is used to define a connection to a cloud file share. In this example we will use a Azure file share link
+This form is used to define a connection to a cloud file share. In this example we will use a **Azure file share** link
+
+![Connection type](ConnectionTypesForm.png)
 
 ### Inbound message types form
 
-In this form we need to create a new class that processes our files. The logic for this will be quite simple: load a file, change the company, pass the file to a DMF framework. The DMF call will be a **synchronous**, so we can get the status from DMF after the processing and update our message table.
+In this form we need to create a new class that processes our files. The logic for this will be quite simple: load a file, change the company, pass the file to a DMF framework. The DMF call will be **synchronous**, so we can get the status from DMF after the processing and update our message table.
 
-On this form we can also specify for which entity we need to run our import. Basically it links the Incoming directory with a DFM project/entity
+On this form we can also specify for which entity we need to run our import. Basically it links the Incoming directory with a DFM project/entity. The same processing class can be used for different entities.
+
+![Message type form](InboundMessageType.png)
 
 Also, this form contains two servicing operations:
 
 - **Check connection** button that tries to connect to the specified directory
-- **Import file** button that can be used in testing scenarios to manually import a file from a user computer without connecting to network file share
+- **Import file** button that can be used in testing scenarios to manually import a file from a user computer without connecting to a network
 
 ### Incoming messages form
 
-This table will store the details on each inbound file.
+This table will store the details on each inbound file. It displays the original incoming file name and it's status
 
 ![Messages form](MessagesForm.png)
 
@@ -62,12 +64,28 @@ It is a periodic batch job that we can run for one or multiple message types.
 
 It connects to the shared folder, reads files, creates a record in **Incoming messages** table with **Ready** status, attaches a file content to this message and moves the file to an Archive directory. If **Run processing** is selected, after the load system will execute processing of the loaded messages.
 
-Internally the processing takes our file and run the same function that the user may run for a manual import
+Internally the processing takes a file and run the same function that the user may run for a manual import in the Data management module
+
+![](ImportNowFunction.png)
+
+The sample code for this below. You can find the same samples in several places in the system
 
 ```c#
-abstract void  processMessage(DEVIntegMessageTable  _messageTable, DEVIntegMessageProcessResult _messageProcessResult)
-{
-...
+//read a file..
+//change the company from the file name...
+//find a linked DMF definition import and path the file into it..
+    
+DMFExecutionId executionId = DMFUtil::setupNewExecution(definitionGroupEntity.DefinitionGroup);
+//...
+    DMFStagingWriter::execute(
+        executionId, //_executionId
+        0, //_batchId
+        true, //_runOnService
+        false, //_calledFrom
+        DateTimeUtil::getUserPreferredTimeZone(), //_timeZone
+        false //_compareData
+    );
+//...
 }
 ```
 
@@ -75,7 +93,7 @@ abstract void  processMessage(DEVIntegMessageTable  _messageTable, DEVIntegMessa
 
 ## Error types and how to handle them
 
-Let's discuss typical errors and how users can deal with them, also I can compare them with a custom made import 
+Let's discuss typical errors and how users can deal with them, also I can compare them with a custom made import
 
 ### File share connection errors
 
@@ -91,14 +109,13 @@ To test this case I renamed one of the columns
 
 ![Wrong column](WrongColumn.png)
 
-After the import users will see this file with the Error status. Notification can be done using standard filtering by the **Status** column.
+Such file is causing a 1 minute delay for DMF and then an internal error
 
 ![Wrong column error](WrongColumnError.png)
 
-Users can view the error log, then download the file and check the reason for this error. There may be two reasons:
+DMF is using a data integration component that connects to an Excel file and that is probably why the error is not verbose.
 
-- Our code that reads the file is wrong. In this case, we can send this file example to a developer to fix the logic. After fixing the problem we can run the Processing again.
-- External system sent a file in the wrong format. In this case, the user can send this file back to the external party, then change the message status to **Hold**.
+This message is stored in the Messages table, users can view the error log, then download the file and check the reason for this error.
 
 ### Data errors
 
@@ -110,38 +127,28 @@ In this case, a Status of our Message will be **Error** and an Error log will be
 
 ![Wrong Data Error](WrongDataError.png)
 
-Users can view this error, display a Staging data to check the values from the File and take some actions(e.g. create missing values in the related tables if they are valid). After that, they can Process this message again.
+Users can view the error detail using the standard DMF Execute history form, that displays invalid lines
 
 ![Staging error](WrongDataErrorStaging.png)
 
-In some implementations(EDI), we can even allow staging data editing.
+The main difference from the custom import is that you can't implement "all or nothing" principle as DMF doesn't support transactions, lines from this file that passed validation were processed successfully.
+
+![DMFImportStatus](DMFImportStatus.png)
 
 ### Posting documents
 
-We don't have a posting code in this example, but it can be implemented my the modifying the processing class after the succesfull file load 
+We don't have a posting code in this example, but it can be implemented by modifying the processing class after the successful file load.
 
-This archicture used on a lot of projects in some way, DMF is used to load the data in staging tables, that don't contain any business logic and the chance of error is minimum.
+This architecture is used on a lot of projects in some way, where DMF is used only to load the data in staging tables that don't contain any business logic and the chance of error is minimal.
 
-Then in order to process these staging records(create business documents) some custom code is executed. In this case you rely on DMF only for reading the file. In some cases it may be a valid choice, but as we saw file parcing is not a big advantage of DMF and in some cases implementing your own reader can produce better results.
+Then in order to process these staging records(create business documents) some custom code is executed. In this case you rely on DMF only for reading the file and implementing posting via a custom code(with a proper transaction handling).
 
-### Wrong result errors
-
-That is probably the worst scenario. The file was processed successfully, but the resulting journal contains some wrong transactions.
-
-To analyse the result, users can view the staging data and check that they are correct
-
-![Staging data](StagingData.png)
-
-Another useful option to troubleshoot this scenario is a parameter in the **Message types table** for our operation: **Post journal(No/Yes)**. We can switch it off, manually load a test file and check the created journal without posting it. And that may give an idea of what is wrong.
+In some cases it may be a valid choice, but as we saw file parsing is not a big advantage of DMF and in some cases implementing your own reader can produce better results.
 
 ## Summary
 
-I provided a sample implementation for a File-based integration for D365FO. The main concept of it is to create a basic framework to simplify troubleshooting(most typical errors and all related data can be viewed in one form - Incoming messages) and provide some additional logging.
-
-This may or may not be appropriate in your case(there are different options how to implement this). Anyway I recommend to use the following checklist while designing the integration: [Integration solution specification](https://github.com/TrudAX/TRUDScripts/blob/master/Documents/Integration/Integration%20Data%20Flow%20Requirements.md)
+In this post I provided a sample implementation for a File-based integration for D365FO via DFM. In some ways it is very similar to "Recurring integrations scheduler" but based on X++. It is not complex: the main [class](https://github.com/TrudAX/XppTools/blob/master/DEVTutorial/DEVTutorialIntegration/AxClass/DEVIntegProcessDMF.xml) that takes the file and passes it to DMF contains about 100 lines of code. Also an advantage of this solution that it can be used as a starting point(for example for prototyping) and then can be easily converted to a custom X++ import when the requirements become more complex
 
 I uploaded files used for this post to the following [folder](https://github.com/TrudAX/XppTools#devtutorialintegration-submodel)
-
-Another important question when you implement a solution like this: is how fast will be your integration. I wrote about sample steps for performance testing in the following post: [D365FO Performance. Periodic import of one million ledger journal lines](https://denistrunin.com/xpptools-fileintegledgerperf/) 
 
 I hope you find this information useful. As always, if you see any improvements, suggestions or have some questions about this work don't hesitate to contact me.
