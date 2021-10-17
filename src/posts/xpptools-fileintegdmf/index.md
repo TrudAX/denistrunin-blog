@@ -147,7 +147,7 @@ In some cases it may be a valid choice, but as we saw file parsing is not a big 
 
 ## Summary
 
-In this post I provided a sample implementation for a File-based integration for D365FO via DMF. In some ways it is very similar to "Recurring integrations scheduler" but based on X++. It is not complex: the main [class](https://github.com/TrudAX/XppTools/blob/master/DEVTutorial/DEVTutorialIntegration/AxClass/DEVIntegProcessDMF.xml) that takes a file and passes it to DMF contains about 100 lines of code. Also an advantage of this solution that it can be used as a starting point(for example for prototyping) and then can be easily converted to a custom X++ import when the requirements become more complex
+In this post I provided a sample implementation for a File-based integration for D365FO via DMF. In some ways it is very similar to "Recurring integrations scheduler" but based on X++. It is not complex: the main [class](https://github.com/TrudAX/XppTools/blob/master/DEVTutorial/DEVExternalIntegration/AxClass/DEVIntegProcessDMF.xml) that takes a file and passes it to DMF contains about 100 lines of code. Also an advantage of this solution that it can be used as a starting point(for example for prototyping) and then can be easily converted to a custom X++ import when the requirements become more complex
 
 I uploaded files used for this post to the following [folder](https://github.com/TrudAX/XppTools#devtutorialintegration-submodel)
 
