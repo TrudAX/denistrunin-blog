@@ -23,51 +23,57 @@ The pricing for Service Bus starts from 10USD per month for 12M operations.
 
 ![Service Bus Price](ServiceBusPrice.png)
 
-Setting up Azure service bus
+### Setting up Azure service bus
 
 In order to setup a new service bus create a new Service Bus resource is Azure portal and setup a new Queue for incoming messages.
 
-![](ServiceBusQueue.png)
+![Service Bus Queue](ServiceBusQueue.png)
 
 Then go to the Shared access policies menu and create a new access key for the service bus. Copy Primary Connection String for this key.
 
----
-Then you may install and run  ServiceBusExplorer, a very usefull utility to manage Service Bus from a local computer
+Then you may install and run  **ServiceBusExplorer**, a very usefull utility to manage Service Bus from a local computer
  https://github.com/paolosalvatori/ServiceBusExplorer/releases
 
-![](ServiceBusExplorer.png)
+![Service Bus Explorer](ServiceBusExplorer.png)
 
 
-
-In this blog post, I try to describe another possible solution(with "Consuming external web services" [type](https://devblog.sertanyaman.com/2020/08/21/how-to-integrate-with-d365-for-finance-and-operations/#Consuming_external_web_services)) for the File integration using X++ that is resolving these issues.
 
 ## Solution description
 
-I am looking to do a Proof of Concept for a D365 Custom Service that will talk to the Integration Platform:
-1.	Process bulk Sales Orders 
-2.	Avoid issues that OData has with bulk Sales Orders import like throttling .
+In this blog post, I try to describe a sample solution(with "Consuming external web services" [type](https://devblog.sertanyaman.com/2020/08/21/how-to-integrate-with-d365-for-finance-and-operations/#Consuming_external_web_services)) for a D365FO Custom Service that will talk to the Integration Platform:
+1.	Process sales orders for different companies
+2.	Avoid issues that OData has with bulk sales orders import like throttling .
 3.	Avoid issues that DMF has with monitoring of failed batch imports and rollback of partial failures.
-4.	Read our intermediate JSON data format that will be in the Sales Queue as messages (sourced from our eCommerce platform).
-5.	Provide a Rest Response / Call Back to with Success / Failure of the Sales Import (so we can easily Log and Monitor the failures).
-6.	Perform some small transformations within D365 as part of the import:
-   a.	Shipping Method
-   b.	Map Warehouse
-   c.	Miscellaneous Charge
+4.	Read a custom data format that will be in the sales Queue as messages (sourced from external program).
+5.	Provide a solution to easily Log and Monitor the failures.
+6.	Perform custom transformations within D365FO as part of the import
 
+The first step for building such integration is to create a mapping document. I put a sample version here - [Field Mapping sample](https://github.com/TrudAX/TRUDScripts/tree/master/Documents/Integration). For the purpose of this blog the format for Sales order will be a simple custom JSON document that describes sales order header and lines
 
+```
+{    "CompanyId": "USMF",
+    "customerId": "US-002",
+    "externalOrderNumber": "ABCDEFG",
+    "lines": [
+        {
+            "lineQuantity": 1,
+            "linePrice": 11,
+            "lineItemBarcode": "M0001"
+        },
+        {
+            "lineQuantity": 2,
+            "linePrice": 22,
+            "lineItemBarcode": "M0004"
+        },
+        {
+            "lineQuantity": 3,
+            "linePrice": 33,
+            "lineItemBarcode": "M0007"
+        }
+    ] }
+```
 
-
-Let's consider that we need to implement a periodic import of files and create ledger journals in D365FO based on these files. They have the following structure:
-
-![Excel files task](ExcelFilesTask.png)
-
-A company where ledger journals should be created is defined in a file name(text before "_") and one file represents one journal.
-
-As the result we should get a posted journal in that company:
-
-![Posted journal](PostedJournal.png)
-
-The integration will be based on two of my previous posts: [How to read CSV/Excel files](https://denistrunin.com/xpptools-readexcelfile/) and [How to create ledger journals in X++](https://denistrunin.com/xpptools-createledgerjournal/).
+Our integration should read messages from the Service Bus and create Sales orders in D365FO
 
 ## Proposed solution
 
@@ -93,7 +99,7 @@ This form contains 3 main sections:
 
 **1 - Details tab**
 
-- Defines **Incoming** and **Archive** folders in our File share.  There will be no **Error** folder: if an inbound file fails validation then the error details will be found in the message table.
+- Defines Service Bus link and Queue name to .
 
 - Contains link to the Class that will do processing from this folder. The class should extend a base class **DEVIntegProcessMessageBase** and implement the following method:
 
@@ -108,19 +114,20 @@ This method will be called by the integration engine outside of a transaction, s
 
 **2 - Operation parameters tab**
 
-Contains parameters that are individual for the current operation. In our case it will be: 
-- **Ledger journal name** reference for journal creation
-- Post the journal(No/Yes) and 
-- A file type(Excel or CSV)
+Contains parameters that are individual for the current operation. In our case we don't have any parameters 
 
 **3 - Advanced settings tab**
 
-Contains some common parameters: If we should use Parallel processing for our incoming files and how to move files to an Archive folder(with the same name or append DateTime to the file name). Parallel processing is based on this post: [A simple way to implement a parallel batch processing in X++](https://denistrunin.com/xpptutorial-batchmultithread/), so for example if we set it to 10 and have 1000 incoming messages, 10 batch threads with 100 messages each will be created.
+Contains some common parameters: 
+
+- If we should use Parallel processing for processing incoming messages. 
+
+- Read limits from the queue(e.g. read only first 3 messages, this is for testing purposes)
 
 Also, this form contains two servicing operations:
 
-- **Check connection** button that tries to connect to the specified directory
-- **Import file** button that can be used in testing scenarios to manually import a file from a user computer without connecting to network file share
+- **Check connection** button that tries to connect to the specified queue and read(with Peak only) first 3 messages 
+- **Import message** button that can be used in testing scenarios to manually import a message from a user computer without connecting to Service Bus
 
 ### Incoming messages form
 
@@ -264,6 +271,10 @@ To analyse the result, users can view the staging data and check that they are c
 ![Staging data](StagingData.png)
 
 Another useful option to troubleshoot this scenario is a parameter in the **Message types table** for our operation: **Post journal(No/Yes)**. We can switch it off, manually load a test file and check the created journal without posting it. And that may give an idea of what is wrong.
+
+
+
+http://mukesh-ax.blogspot.com/2018/07/dynamics-365-operations-composite-data.html 
 
 ## Summary
 
