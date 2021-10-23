@@ -2,17 +2,17 @@
 title: "How to implement Azure Service Bus integration in Dynamics 365 FinOps using X++"
 date: "2020-12-17T22:12:03.284Z"
 tags: ["XppDEVTutorial", "Integration"]
-path: "/xpptools-fileintegledger"
+path: "/xpptools-integservbussalesjson"
 featuredImage: "./logo.png"
 
-excerpt: "The blog post describes a sample approach to implement recurring file-based integration in D365FO using X++"
+excerpt: "The blog post describes a sample approach to implement Azure Service Bus integration in D365FO using X++"
 ---
 
+This post is an extension of my previous post [How to implement file-based integration in Dynamics 365 FinOps using X++](https://denistrunin.com/xpptools-fileintegledger) but with another media to transfer messages. As file-based aproach still may work for a lot of cases, in a cloud world we have a lot of others, more fancy ways to transfer messages. In this post I will describe how to use Azure Service Bus to do a custom X++ based intergation.
 
+Azure Service Bus is a cloud-based messaging service providing queues with publish/subscribe semantics and rich features. This is a fully managed service with no servers to manage or licenses to buy.
 
-Azure Service Bus is a cloud-based messaging service providing queues with publish/subscribe semantics and rich features. This fully managed service with no servers to manage or licenses to buy.
-
-Use Service Bus to:
+Common Service Bus usage scenarious:
 
 - Build reliable and elastic cloud apps with messaging.
 - Protect your application from temporary peaks.
@@ -25,7 +25,7 @@ The pricing for Service Bus starts from 10USD per month for 12M operations.
 
 ### Setting up Azure service bus
 
-In order to setup a new service bus create a new Service Bus resource is Azure portal and setup a new Queue for incoming messages.
+In order to setup a new service bus we need to create a new Service Bus resource is Azure portal and setup a new Queue for incoming messages.
 
 ![Service Bus Queue](ServiceBusQueue.png)
 
@@ -37,18 +37,17 @@ Then you may install and run  **ServiceBusExplorer**, a very usefull utility to 
 ![Service Bus Explorer](ServiceBusExplorer.png)
 
 
-
 ## Solution description
 
 In this blog post, I try to describe a sample solution(with "Consuming external web services" [type](https://devblog.sertanyaman.com/2020/08/21/how-to-integrate-with-d365-for-finance-and-operations/#Consuming_external_web_services)) for a D365FO Custom Service that will talk to the Integration Platform:
 1.	Process sales orders for different companies
 2.	Avoid issues that OData has with bulk sales orders import like throttling .
 3.	Avoid issues that DMF has with monitoring of failed batch imports and rollback of partial failures.
-4.	Read a custom data format that will be in the sales Queue as messages (sourced from external program).
-5.	Provide a solution to easily Log and Monitor the failures.
+4.	Read a custom data format that will be in the Azure Service Bus queue as messages (sourced from external program).
+5.	Provide a solution to easily log and monitor the failures.
 6.	Perform custom transformations within D365FO as part of the import
 
-The first step for building such integration is to create a mapping document. I put a sample version here - [Field Mapping sample](https://github.com/TrudAX/TRUDScripts/tree/master/Documents/Integration). For the purpose of this blog the format for Sales order will be a simple custom JSON document that describes sales order header and lines
+The first step for building such integration is to create a mapping document. I put a sample template here - [Field Mapping sample](https://github.com/TrudAX/TRUDScripts/tree/master/Documents/Integration). For the purpose of this blog the format for Sales order will be a simple custom JSON document that describes sales order header and lines
 
 ```
 {    "CompanyId": "USMF",
@@ -77,7 +76,7 @@ Our integration should read messages from the Service Bus and create Sales order
 
 ## Proposed solution
 
-In the following section, I provide some code samples that can be used as a starting point to implement import and processing for messages from Azure service Bus.
+In the following section, I provide some code samples that can be used as a starting point to implement import and processing for messages from Azure Service Bus.
 
 ### Connection types form
 
@@ -87,7 +86,7 @@ Connection types form allow to specify Connection type resource(currently 2 reso
 
 Notes:
 
-2. Instead of storing Connection details in a D365FO table,a more secure solution is to create an **Azure Key Vault** and put all secrets into it(for example like [this](https://jatomas.com/en/2020/06/02/azure-key-vault-msdyn365fo-setup-certificates-passwords/)) and store a reference to this Key Vault in our new Connection table.
+1. Instead of storing Connection details in a D365FO table,a more secure solution is to create an **Azure Key Vault** and put all secrets into it(for example like [this](https://jatomas.com/en/2020/06/02/azure-key-vault-msdyn365fo-setup-certificates-passwords/)) and store a reference to this Key Vault in our new Connection table.
 
 ### Inbound message types form
 
@@ -99,9 +98,9 @@ This form contains 3 main sections:
 
 **1 - Details tab**
 
-- Defines Service Bus link and Queue name to .
+- Defines Service Bus connection and Queue name from whitch to import messages .
 
-- Contains link to the Class that will do processing from this folder. The class should extend a base class **DEVIntegProcessMessageBase** and implement the following method:
+- Contains link to the Class that will do processing from the queue. The class should extend a base class **DEVIntegProcessMessageBase** and implement the following method:
 
 ```c#
 abstract void  processMessage(DEVIntegMessageTable  _messageTable, DEVIntegMessageProcessResult _messageProcessResult)
@@ -124,40 +123,41 @@ Contains some common parameters:
 
 - Read limits from the queue(e.g. read only first 3 messages, this is for testing purposes)
 
-Also, this form contains two servicing operations:
+Also, this form contains two service operations:
 
-- **Check connection** button that tries to connect to the specified queue and read(with Peak only) first 3 messages 
-- **Import message** button that can be used in testing scenarios to manually import a message from a user computer without connecting to Service Bus
+- **Check connection** button that tries to connect to the specified queue and read(with Peak only) first 3 messages.
+- **Import message** button that can be used in testing scenarios to manually import a message from a user computer without connecting to Service Bus.
 
 ### Incoming messages form
 
-This table will store the details on each inbound file.
+This table will store the details on each incoming message.
 
 ![Messages form](MessagesForm.png)
 
 Every message has a status field that can contain the following values:
 
-- **Ready** – a file was read to D365FO and successfully moved to the Archive folder.
-- **Hold** – The user has decided not to process the file. This is an alternative to a delete option
-- **In process** – system-generated status, a message is processing now
-- **Error** – failed validation
+- **Ready** – a message was read to D365FO.
+- **Hold** – The user has decided not to process the message. This is an alternative to a delete option
+- **In process** – system-generated status, a message is processing now.
+- **Error** – failed validation or errors during the processing
 - **Processed** – completed successfully
 
 In this form it is also possible to do the following operations:
 
-- View incoming file context
+- View incoming message context
 - Filter by different statuses
 - View a detailed error message
 - Change the status to process the message again
 - View file processing statistics (processing duration, time, number of lines)
+- View the processing attemps counter. This allows to implement scenarious like try to process messages with Error status several times.
 
-### Load incoming file operation
+### Load incoming messages operation
 
 It is a periodic batch job that we can run for one or multiple message types.
 
 ![Load incoming files](LoadIncomingFiles.png)
 
-It connects to the shared folder, reads files, creates a record in **Incoming messages** table with **Ready** status, attaches a file content to this message and moves the file to an Archive directory. If **Run processing** is selected, after the load system will execute processing of the loaded messages.
+It connects to the Service Bus, reads messages(with Peek&Delete type), creates a record in **Incoming messages** table with **Ready** status and attaches a message content to this record. If **Run processing** is selected, after the load system will execute processing of the loaded messages.
 
 ### Process incoming messages
 
