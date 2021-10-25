@@ -1,6 +1,6 @@
 ﻿---
 title: "How to implement Azure Service Bus integration in Dynamics 365 FinOps using X++"
-date: "2020-12-17T22:12:03.284Z"
+date: "2021-10-27T22:12:03.284Z"
 tags: ["XppDEVTutorial", "Integration"]
 path: "/xpptools-integservbussalesjson"
 featuredImage: "./logo.png"
@@ -8,7 +8,7 @@ featuredImage: "./logo.png"
 excerpt: "The blog post describes a sample approach to implement Azure Service Bus integration in D365FO using X++"
 ---
 
-This post is an extension of my previous post [How to implement file-based integration in Dynamics 365 FinOps using X++](https://denistrunin.com/xpptools-fileintegledger) but with another media to transfer messages. As file-based aproach still may work for a lot of cases, in a cloud world we have a lot of others, more fancy ways to transfer messages. In this post I will describe how to use Azure Service Bus to do a custom X++ based intergation.
+This post is an extension of my previous post [How to implement file-based integration in Dynamics 365 FinOps using X++](https://denistrunin.com/xpptools-fileintegledger) but with another media to transfer messages. As file-based aproach still may work for a lot of cases, in a cloud world we have a lot of others, more fancy ways to transfer messages. In this post I will describe how to use **Azure Service Bus** to do a custom X++ based intergation.
 
 Azure Service Bus is a cloud-based messaging service providing queues with publish/subscribe semantics and rich features. This is a fully managed service with no servers to manage or licenses to buy.
 
@@ -25,7 +25,7 @@ The pricing for Service Bus starts from 10USD per month for 12M operations.
 
 ### Setting up Azure service bus
 
-In order to setup a new service bus we need to create a new Service Bus resource is Azure portal and setup a new Queue for incoming messages.
+In order to setup a new service bus we need to create a new **Service Bus** resource is Azure portal and setup a new Queue for incoming messages.
 
 ![Service Bus Queue](ServiceBusQueue.png)
 
@@ -80,13 +80,14 @@ In the following section, I provide some code samples that can be used as a star
 
 ### Connection types form
 
-Connection types form allow to specify Connection type resource(currently 2 resources are supported - Azure file share and Azure service bus) and connection details for the selected resource
+**Connection types** form allow to specify Connection type resource(currently 2 resources are supported - Azure file share and Azure service bus) and connection details for the selected resource
 
 ![Connection types](ConnectionTypesForm.png)
 
-Notes:
+For storing connection string there can be 2 options:
 
-1. Instead of storing Connection details in a D365FO table,a more secure solution is to create an **Azure Key Vault** and put all secrets into it(for example like [this](https://jatomas.com/en/2020/06/02/azure-key-vault-msdyn365fo-setup-certificates-passwords/)) and store a reference to this Key Vault in our new Connection table.
+- Enter the value in this form
+- Store the connection string value as a Secret in the **Azure Key Vault**. In this case user need to provide a reference to the standard Key Vault name (steps to setup it described in [this](https://jatomas.com/en/2020/06/02/azure-key-vault-msdyn365fo-setup-certificates-passwords/) post).
 
 ### Inbound message types form
 
@@ -163,7 +164,9 @@ It connects to the Service Bus, reads messages(with Peek&Delete type), creates a
 
 Message processing may be executed as a separate operation - **Process incoming messages** that selects all not processed messages and calls the processing class for them.
 
-The logic of how to process the file is different per message type/class. For the simple scenario, the class can just read the file content and create some data in one transaction. For this blog post, I implemented two step processing. See the sample diagram below:
+![Process messages](ProcessIncomingMessages.png)
+
+The logic of how to process the file is different per message type/class. For the simple scenario, the class can just read the messagecontent and create some data in one transaction. For this blog post, I implemented two step processing. See the sample diagram below:
 
 ![Process diagram](ProcessDiagram.png)
 
@@ -172,95 +175,61 @@ The logic of how to process the file is different per message type/class. For th
 During the first step, the class reads the file and writes data into a staging table. A sample code for this:
 
 ```c#
-    while (fileReader.readNextRow())
-    {
-        linesStaging.clear();
-        lineNum++;
-        linesStaging.LineNumber     = lineNum;
-        linesStaging.HeaderRefRecId = tutorialLedgerJourHeaderStaging.RecId;
-        linesStaging.MainAccount  = fileReader.getStringByName('MainAccount');
-        linesStaging.BusinessUnit = fileReader.getStringByName('BusinessUnit');
-        linesStaging.Department   = fileReader.getStringByName('Department');
-        linesStaging.CostCenter   = fileReader.getStringByName('CostCenter');
-        linesStaging.Amount       = fileReader.getRealByName('Amount');
-        DEV::validateWriteRecordCheck(tutorialLedgerJourLinesStaging);
-        tutorialLedgerJourLinesStaging.insert();
-    }
+tutorialSOHeaderContract = FormJsonSerializer::deserializeObject(classNum(DEVIntegTutorialSOHeaderContract), serializedJSONstr);
+
 ```
 
-Then based on this staging data values, a new journal is created. As I wrote in this [post](https://denistrunin.com/xpptools-createledgerjournal/) there are two options to create a ledger journal: either using **LedgerJournalEngine** class or using a data entity. The choice between these two should be made by answering the question: if the user wants to create the same journal manually, does he use manual entry or data import?. In this case, I want the result to be similar to manual entry, so **LedgerJournalEngine** class is used.
+Then based on this staging data values, a new sales order is created. This creating can be done using data entities or just directly writing to tables using 
 
 ```c#
-ledgerJournalTrans.AccountType          =   LedgerJournalACType::Ledger;
-ledgerJournalTrans.modifiedField(fieldNum(LedgerJournalTrans, AccountType));
-
-DimensionDefault  dim;
-dim = DEVDimensionHelper::setValueToDefaultDimensionCon(dim,
-  [DEVDimensionHelper::BusinessUnit(), tutorialLedgerJourLinesStaging.BusinessUnit,
-   DEVDimensionHelper::Department(),   tutorialLedgerJourLinesStaging.Department,
-   DEVDimensionHelper::CostCenter(),   tutorialLedgerJourLinesStaging.CostCenter ] );
-
-ledgerJournalTrans.LedgerDimension = LedgerDimensionFacade::serviceCreateLedgerDimension(
-  LedgerDefaultAccountHelper::getDefaultAccountFromMainAccountId(tutorialLedgerJourLinesStaging.MainAccount), dim);
-
-ledgerJournalTrans.modifiedField(fieldNum(LedgerJournalTrans, LedgerDimension));
-ledgerJournalEngine.accountModified(LedgerJournalTrans);
-....
-ledgerJournalTrans.insert();
+salesLine.initValue();
+salesLine.ItemId = salesLineStaging.ItemId;
+salesLine.initFromSalesTable(salesTable);
+salesLine.initFromInventTable(InventTable::find(salesLine.ItemId));
+salesLine.SalesQty              = salesLineStaging.SalesQty;
+salesLine.QtyOrdered            = SalesLine.calcQtyOrdered();
+salesLine.SalesDeliverNow       = salesLine.SalesQty;
+salesLine.setInventDeliverNow();
+...
+salesLine.createLine(true,false,false,true);
 ```
 
 After the journal creation, this class runs journal posting.
 
 ## Error types and how to handle them
 
-It is not a big task to create a journal based on a file. The complexity of integration is often related to exception processing and error monitoring. Let's discuss typical errors and how users can deal with them.
+It is not a big task to create a sales order based on a file. The complexity of integration is often related to exception processing and error monitoring. Let's discuss typical errors and how users can deal with them.
 
-### File share connection errors
+### Connection errors
 
-If our batch job can't connect to a File share or read and move files, a batch job exception will be generated. It is a configuration error and it requires system administrator attention. Notification will be done using a batch job status. After troubleshooting the error system administrator can use the **"Test connection"** button to validate that the system can now connect to the file share.
+If our batch job can't connect to a Service Bus or read messages, a batch job exception will be generated. It is a configuration error and it requires system administrator attention. Notification will be done using a batch job status. After troubleshooting the error system administrator can use the **"Test connection"** button to validate that the system can now read messages from the Service Bus.
 
 ![Test connection](TestConnection.png)
 
 ### File format errors
 
-The next error type is a wrong file format, so we can't even read the file content.
+The next error type is a wrong file format, so we can't even read the key data from the message 
 
-To test this case I renamed one of the columns
-
-![Wrong column](WrongColumn.png)
-
-After the import users will see this file with the Error status. Notification can be done using standard filtering by the **Status** column.
+To test this case I renamed several columns. After the import users will see this message with the Error status. Notification can be done using standard filtering by the **Status** column.
 
 ![Wrong column error](WrongColumnError.png)
 
-Users can view the error log, then download the file and check the reason for this error. There may be two reasons:
+Users can view the error log, then download the message and check the reason for this error. There may be two reasons:
 
-- Our code that reads the file is wrong. In this case, we can send this file example to a developer to fix the logic. After fixing the problem we can run the Processing again.
-- External system sent a file in the wrong format. In this case, the user can send this file back to the external party, then change the message status to **Hold**.
+- Our code that reads the message is wrong. In this case, we can send this message example to a developer to fix the logic. The main advantage of this solution is that developer can run processing without Service Bus by using the **Import message** button .  After fixing the problem we can run the Processing again.
+- External system sent a message in the wrong format. In this case, the user can send this file back to the external party, then change the message status to **Hold**.
 
 ### Data errors
 
-The file has a correct structure but contains a wrong data(e.g.. values that don't exist)
-
-![Wrong data](WrongData.png)
-
-In this case, a Status of our Message will be **Error** and an Error log will be generated.
+The message has a correct structure but contains a wrong data(e.g.. values that don't exist). In this case, a Status of our Message will be **Error** and an Error log will be generated.
 
 ![Wrong Data Error](WrongDataError.png)
 
-Users can view this error, display a Staging data to check the values from the File and take some actions(e.g. create missing values in the related tables if they are valid). After that, they can Process this message again.
+Users can view this error, display a **Staging data** to check the values from the message and take some actions(e.g. create missing values in the related tables if they are valid). After that, they can Process this message again.
 
 ![Staging error](WrongDataErrorStaging.png)
 
-In some implementations(EDI), we can even allow staging data editing.
-
-### Posting errors
-
-A similar type of error is a posting error. For example, in a current implementation if the journal is not balanced the error will be generated and the message gets the **Error** status:
-
-![Posting error](WrongDataPosting.png)
-
-A possible variation to this approach is to create a document(journal in our case), try to post it, and even if posting fails, still set the message Status to **Processed** and leave the journal unposted, allowing accountants to decide what to do with it. As we don't process in transaction this will be a simple modification for our process class.
+In some implementations(EDI), we can even allow staging data editing. A similar type of error is a posting error. 
 
 ### Wrong result errors
 
@@ -283,7 +252,5 @@ I provided a sample implementation for a File-based integration for D365FO. The 
 This may or may not be appropriate in your case(there are different options how to implement this). Anyway I recommend to use the following checklist while designing the integration: [Integration solution specification](https://github.com/TrudAX/TRUDScripts/blob/master/Documents/Integration/Integration%20Data%20Flow%20Requirements.md)
 
 I uploaded files used for this post to the following [folder](https://github.com/TrudAX/XppTools#devtutorialintegration-submodel)
-
-Another important question when you implement a solution like this: is how fast will be your integration. I wrote about sample steps for performance testing in the following post: [D365FO Performance. Periodic import of one million ledger journal lines](https://denistrunin.com/xpptools-fileintegledgerperf/) 
 
 I hope you find this information useful. As always, if you see any improvements, suggestions or have some questions about this work don't hesitate to contact me.
