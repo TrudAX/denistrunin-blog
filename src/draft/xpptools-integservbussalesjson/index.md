@@ -31,23 +31,24 @@ To set up a new Service Bus, we need to create a new **Service Bus** resource in
 Then go to the **Shared access policies** menu and create a new access key for the Service Bus. Copy **Primary Connection String** for this key.
 
 Then you may install and run  **ServiceBusExplorer**, a handy utility to manage Service Bus from a local computer
- https://github.com/paolosalvatori/ServiceBusExplorer/releases
+ <https://github.com/paolosalvatori/ServiceBusExplorer/releases>
 
 ![Service Bus Explorer](ServiceBusExplorer.png)
 
 ## Solution description
 
 In this blog post, I try to describe a solution(with "Consuming external web services" [type](https://devblog.sertanyaman.com/2020/08/21/how-to-integrate-with-d365-for-finance-and-operations/#Consuming_external_web_services)) for a D365FO Custom Service that will talk to the Integration Platform. It will do the following:
-1.    Process sales orders for different companies
-2.    Avoid issues that OData has with bulk sales orders import like throttling.
-3.    Avoid issues that DMF has with monitoring of failed batch imports and rollback of partial failures.
-4.    Read a custom data format in the Azure Service Bus queue as messages (sourced from an external program).
-5.    Provide a solution to log and monitor the failures easily.
-6.    Perform custom transformations within D365FO as part of the import
+
+1. Process sales orders for different companies.
+2. Avoid issues that OData has with bulk sales orders import like throttling.
+3. Avoid issues that DMF has with monitoring of failed batch imports and rollback of partial failures.
+4. Read a custom data format in the Azure Service Bus queue as messages (sourced from an external program).
+5. Provide a solution to log and monitor the failures easily.
+6. Perform custom transformations within D365FO as part of the import.
 
 The first step for building such integration is to create a mapping document. I put a sample template here - [Field Mapping sample](https://github.com/TrudAX/TRUDScripts/tree/master/Documents/Integration). For this post, the format for Sales order will be a simple custom JSON document that describes the sales order header and lines.
 
-```
+```json
 {    "CompanyId": "USMF",
     "customerId": "US-002",
     "externalOrderNumber": "ABCDEFG",
@@ -139,7 +140,7 @@ This table will store the details of each incoming message.
 
 Every message has a status field that can contain the following values:
 
-- **Ready** – a message was read to D365FO.
+- **Ready** – a message was read to D365FO
 - **Hold** – The user has decided not to process the message. This is an alternative to a delete option
 - **In process** – system-generated status, a message is processing now.
 - **Error** – failed validation or errors during the processing
@@ -237,11 +238,9 @@ To analyse the result, users can view the staging data and check that they are c
 
 ![Manual import](ManualImport.png)
 
- 
-
 ## DMF integration
 
-The text above was for the custom-written integration, but the same engine may be used for importing data with the standard Data Management module. 
+The text above was for the custom-written integration, but the same engine may be used for importing data with the standard Data Management module.
 The idea is the same as for the file integration - [Multicompany DMF integration in Dynamics 365 FinOps using X++](https://denistrunin.com/xpptools-fileintegdmf), in the message parameters, we can specify a DMF processing class and the entity from the  Data management import project.
 
 This class connects to Service Bus, saves the message to a temporary file and executes Data management project import for this file. This allows you to use a full set of Data entities, settings and transformations that Data management can provide. Let's consider the simple scenario: Customer group import
@@ -251,10 +250,10 @@ First you need to create an import project based on the sample XML
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
 <Document>
-	<CUSTCUSTOMERGROUPENTITY>
-		<CUSTOMERGROUPID>MyTestGroup</CUSTOMERGROUPID>
-		<DESCRIPTION>MyTestGroup Description</DESCRIPTION>
-	</CUSTCUSTOMERGROUPENTITY>
+ <CUSTCUSTOMERGROUPENTITY>
+  <CUSTOMERGROUPID>MyTestGroup</CUSTOMERGROUPID>
+  <DESCRIPTION>MyTestGroup Description</DESCRIPTION>
+ </CUSTCUSTOMERGROUPENTITY>
 </Document>
 ```
 
@@ -264,7 +263,7 @@ Setup a new Inbound connection type(based on DMF class) and specify the link to 
 
 ![DMF inbound type](DMFProjectSetup.png)
 
-Then load a message to our Service Bus queue and run the import 
+Then load a message to our Service Bus queue and run the import
 
 ![SB Send XML](SBSendXMLMessage.png)
 
@@ -272,7 +271,7 @@ As the result a new message will be created and after processing a new Customer 
 
 ![DMF result CustGroup](DMFResultCustGroup.png)
 
-You can even implement a more complex scenarios, for example, import sales orders by using Composite data entities - [Dynamics 365 Operations | Composite data entity – Sales order import (Only works with XML) ](http://mukesh-ax.blogspot.com/2018/07/dynamics-365-operations-composite-data.html). However, this is not something that is recommended by Microsoft:  "Composite entities are not recommended" from [5 Tips to improve the performance in a DMF import project](https://community.dynamics.com/ax/b/axinthefield/posts/5-tips-to-improve-the-performance-in-a-dmf-import-project).
+You can even implement a more complex scenarios, for example, import sales orders by using Composite data entities - [Dynamics 365 Operations | Composite data entity – Sales order import (Only works with XML)](http://mukesh-ax.blogspot.com/2018/07/dynamics-365-operations-composite-data.html). However, this is not something that is recommended by Microsoft:  "Composite entities are not recommended" from [5 Tips to improve the performance in a DMF import project](https://community.dynamics.com/ax/b/axinthefield/posts/5-tips-to-improve-the-performance-in-a-dmf-import-project).
 
 ## Summary
 
@@ -283,4 +282,3 @@ This may or may not be appropriate in your case(there are different options how 
 Files used for this post can be found in the following [folder](https://github.com/TrudAX/XppTools#devexternalintegration-submodel)
 
 I hope you find this information useful. As always, if you see any improvements, suggestions or have some questions about this work, don't hesitate to contact me.
-
