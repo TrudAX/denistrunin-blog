@@ -1,6 +1,6 @@
 ﻿---
 title: "XppInteg - Azure Service Bus integration solution for Dynamics 365 FinOps"
-date: "2021-11-03T22:12:03.284Z"
+date: "2021-11-11T22:12:03.284Z"
 tags: ["XppDEVTutorial", "Integration"]
 path: "/xpptools-integservbussalesjson"
 featuredImage: "./logo.png"    
