@@ -1,10 +1,11 @@
 ﻿---
 title: "XppInteg - Azure Service Bus integration solution for Dynamics 365 FinOps"
-date: "2021-11-11T22:12:03.284Z"
+date: "2021-11-11T22:12:04.284Z"
 tags: ["XppDEVTutorial", "Integration"]
 path: "/xpptools-integservbussalesjson"
 featuredImage: "./logo.png"    
-excerpt: "The blog post describes a sample approach to implement Azure Service Bus integration in D365FO using X++."
+
+excerpt: "The blog post describes a sample approach to implement Azure Service Bus integration in D365FO using X++"
 ---
 
 This post extends my previous post [How to implement file-based integration in Dynamics 365 FinOps using X++](https://denistrunin.com/xpptools-fileintegledger) but with another way to transfer messages. As the file-based approach still may work for many cases, in the cloud world, we have a lot of other, fancier ways to transfer messages. In this post, I will describe how to use **Azure Service Bus** to do a custom X++ based integration.
