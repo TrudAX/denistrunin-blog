@@ -1,5 +1,5 @@
 ﻿---
-title: "Dynamics AX performance monitoring - missing indexes"
+title: "Dynamics AX performance monitoring: missing indexes"
 date: "2022-01-26T22:12:03.284Z"
 tags: ["Performance", "SQL", "Performance audit"]
 path: "/performance-monitormisind"
@@ -26,27 +26,27 @@ To do this, a developer may write the following code:
     ...    
 ```
 
-The problem is that **InventRefTransId** field is not indexed, so to get the result, SQL Server needs to scan all rows in **VendInvoiceTrans** table. Depending on where this code is used, it may affect users performance or increase the load to a SQL Server. Also, **InventRefTransId** is a highly selective field, so it is a perfect candidate for an index.
+The problem is that **InventRefTransId** field is not indexed, so to get the result, SQL Server needs to scan all rows in **VendInvoiceTrans** table. Depending on where this code is used, it may affect user performance or increase the load to a SQL Server. Also, **InventRefTransId** is a highly selective field, so it is a perfect candidate for an index.
 
 SQL Server query optimiser can automatically detect such cases and generate recommendations for index creation. These recommendations can be displayed by querying [missing index](https://github.com/TrudAX/TRUDScripts/blob/master/Performance/AX%20Technical%20Audit.md#missing-indexes) view. Moreover, analysing the output of this view is a prominent part of any [performance audit](https://denistrunin.com/performance-audit).
 
 ![Missing index recommendations](MissingIndRecommendation.png)
 
-From some real-life experience of Dynamics AX performance optimisation, usually enough to analyse 50 first rows from this view with an impact of more than 99%. Most(but not all) of such recommendations will be valid, and new indexes should be created.
+From some real-life experience of Dynamics AX performance optimisation, usually, it is enough to analyse 50 first rows from this view with an impact of more than 99%. Most(but not all) of such recommendations will be valid, and new indexes should be created.
 
-But you should not automatically apply every recommendation. Some exceptions where you don't need to create an index even if the impact is 99%:
+But you should not automatically apply every recommendation. Here are some exceptions where you don't need to create an index even if the impact is 99%:
 
-1. A select is an external query with a missing DATAAREAID/PARTITION field and a field already presented in the index: In this case, it is better to add DATAAREAID/PARTITION to such an external query.
+1. A "select" is an external query with a missing DATAAREAID/PARTITION field and a field already presented in the index: In this case, it is better to add DATAAREAID/PARTITION to such an external query.
 
-2. There may be a lot of fields in the missing index recommendation, but not all are selective. Extensive indexes may slow down the system, so the number of fields for the new index must be minimal.
+2. There may be a lot of fields in the missing index recommendation, but not all are selective. Extensive indexes may slow down the system, so the number of fields for the new index must be minimal, you should add only selective fields to the new index.
 
 3. A field is already presented in the index but not in the first place. A perfect example of this is **CustPackingSlipJour** table. To get a packing slip for a sales order, a Module(**RefNum**) should be specified. Usually, it contains just one value(Sales order type), and developers often forget to select it.
 
    ![Cust packing slip table](CustPackingJour.png)
 
-Another variation of this case is my example with **VendInvoiceTrans** above. In this case a code contains a condition for  **InventRefTransId** field but is missed a condition for **InventRefType**. This is a development error, and both fields should be specified in the code and in the index.
+Another variation of this case is my example with **VendInvoiceTrans** above. In this case a code contains a condition for **InventRefTransId** field but the value for **InventRefType** is not specified. This is a development error, and both fields should be specified in the code and in the index.
 
-Let's discuss how we can automatically monitor such issues
+Let's discuss how we can automatically monitor such issues.
 
 ## Missing indexes monitoring solution implementation
 
@@ -59,23 +59,23 @@ msdb.dbo.[AXMissingIndexesMonitor] @DBName = 'MicrosoftDynamicsAX',
 
 The idea is the following:
 
-You create an SQL Agent job to run this procedure every day. If there are any missing indexes with 99% impact in the first 50 rows of the missing index view, the system sends an email to a person responsible for Dynamics AX performance monitoring.
+You create a SQL Agent job to run this procedure every day. If there are any missing indexes with 99% impact in the first 50 rows of the missing index view, the system sends an email to the person responsible for Dynamics AX performance monitoring.
 
 ![E-mail](Email.png)
 
-The developer should always react to this email. There can be two outcomes
+The developer should always react to this email. There can be two outcomes:
 
 - Either the index should be created(it should be done in AX application level and new application release deployed)
 
-- If missing index recommendation is not valid a developer may mark it approved(set the flag **IsApproved** from **AXTopMissingIndexesLog** table)
+- Or if missing index recommendation is not valid a developer may mark it approved(set the flag **IsApproved** from **AXTopMissingIndexesLog** table)
 
 ## D365FO Cloud version
 
-The manual monitoring is valid only for On-premise D365FO versions(based on SQL Server). The Cloud version of Dynamics 365 for Operations uses Azure SQL Database at the backend and missing indexes created automatically by the DAMS service. The following article is an excellent description of how the process works internally[Running 1M databases on Azure SQL for a large SaaS provider: Microsoft Dynamics 365 and Power Platform.](https://devblogs.microsoft.com/azure-sql/running-1m-databases-on-azure-sql-for-a-large-saas-provider-microsoft-dynamics-365-and-power-platform/)
+The manual monitoring is valid only for On-premise D365FO versions(based on SQL Server). The Cloud version of Dynamics 365 for Operations uses Azure SQL Database at the backend, and missing indexes are created automatically by the DAMS service. The following article is an excellent description of how the process works internally[Running 1M databases on Azure SQL for a large SaaS provider: Microsoft Dynamics 365 and Power Platform.](https://devblogs.microsoft.com/azure-sql/running-1m-databases-on-azure-sql-for-a-large-saas-provider-microsoft-dynamics-365-and-power-platform/)
 
 ## Conclusion
 
-Using the described solution, you can monitor your Dynamics AX SQL indexes and get a notification when SQL Server identifies new recommendations. It will help to maintain a predictable level of Dynamics AX performance.
+Using the described solution, you can monitor your Dynamics AX SQL indexes and get a notification when SQL Server identifies new recommendations. It will help to maintain a stable level of Dynamics AX performance.
 
 The code for this can be found in the following [folder](https://github.com/TrudAX/TRUDScripts/tree/master/Performance/Jobs/SQLTopQueryMonitor). This procedure is a valuable addition to my previous monitoring solution[Monitoring the most problematic performance problem in Dynamics AX - parameters sniffing](https://denistrunin.com/performance-snifmonitor).
 
