@@ -1,6 +1,6 @@
 ﻿---
 title: "Dynamics AX performance monitoring: missing indexes"
-date: "2022-01-26T22:12:03.284Z"
+date: "2022-01-28T22:12:03.284Z"
 tags: ["Performance", "SQL", "Performance audit"]
 path: "/performance-monitormisind"
 featuredImage: "./logo.png"
