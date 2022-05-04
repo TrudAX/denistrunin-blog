@@ -1,4 +1,4 @@
-﻿﻿---
+﻿---
 title: "XppInteg - Import purchase orders from XML files into D365FO"
 date: "2022-05-04T22:12:04.284Z"
 tags: ["XppDEVTutorial", "Integration"]
@@ -14,7 +14,7 @@ I use a very simplified example of integration with the INFOR system. This syste
 
 ### Reading XML data
 
-The sample file format is below. What is good that a file generated from INFOR is probably is most complex format that you face in XML integrations. It has custom namespace, data in tags, data in attributes, data in the similar elements. Here is the sample file context:
+What is good that a file generated from INFOR is probably is most complex format that you face in XML integrations. It has custom namespace, data in tags, data in attributes, data in the similar elements. Here is the sample file context:
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
