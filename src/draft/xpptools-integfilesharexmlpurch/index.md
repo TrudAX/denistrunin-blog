@@ -5,16 +5,16 @@ tags: ["XppDEVTutorial", "Integration"]
 path: "/xpptools-integfilesharexmlpurch"
 featuredImage: "./logo.png"    
 
-excerpt: "The blog post describes a sample approach to implement XML based integration by importing purchase orders from Azure File Share in D365FO using X++"
+excerpt: "The blog post describes a sample approach how to implement XML based integration by importing purchase orders from Azure File Share in D365FO using X++"
 ---
 
-This post extends my several previous [posts](https://denistrunin.com/tags/integration/) but with another way messages format. We consider an XML format and try to import files in X++ from Azure File Share and create purchase orders.
+This post extends my several previous [posts](https://denistrunin.com/tags/integration/) but with another messages format. We use an XML format and try to import files in X++ from Azure File Share and create purchase orders.
 
 I use a very simplified example of integration with the INFOR system. This system has an integration component that can export the data in XML format, and we will process(import) these files in D365FO.
 
 ### Reading XML data
 
-What is good that a file generated from INFOR is probably is most complex format that you face in XML integrations. It has custom namespace, data in tags, data in attributes, data in the similar elements. Here is the sample file context:
+What is good that a file generated from INFOR is probably the most complex format that you may see in XML integrations. It has a custom namespace, data in tags, data in attributes, data in the similar elements. Here is a sample file context:
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -69,9 +69,9 @@ What is good that a file generated from INFOR is probably is most complex format
 </SyncPurchaseOrder>
 ```
 
-We will read this file in the staging two tables(header and lines) and then create a purchase order based on these tables.
+We will read this file into the two staging tables(header and lines) and then create a purchase order based on these tables.
 
-In order to deal with such complex format I created a helper class [**DEVIntegXMLReadHelper**](https://github.com/TrudAX/XppTools/blob/master/DEVTutorial/DEVExternalIntegration/AxClass/DEVIntegXMLReadHelper.xml). It using the standard **System.Xml*** methods and provides several helper methods that simplify the code structure:
+In order to deal with such a complex format I created a helper class [**DEVIntegXMLReadHelper**](https://github.com/TrudAX/XppTools/blob/master/DEVTutorial/DEVExternalIntegration/AxClass/DEVIntegXMLReadHelper.xml). It uses the standard **System.Xml*** methods and provides several helper methods that simplify the code structure:
 
 ```csharp
 //set up namespace alias(used in search)
@@ -100,7 +100,7 @@ The full class is here [DEVIntegTutorialProcessPurchConfirmXML]( https://github.
 
 ## Solution description
 
-In this blog post, I try to describe a solution(with "Consuming external web services" [type](https://devblog.sertanyaman.com/2020/08/21/how-to-integrate-with-d365-for-finance-and-operations/#Consuming_external_web_services)) for a D365FO Custom Service that will talk to the Integration Platform. It will do the following:
+In this blog post, I describe a solution(with "Consuming external web services" [type](https://devblog.sertanyaman.com/2020/08/21/how-to-integrate-with-d365-for-finance-and-operations/#Consuming_external_web_services)) for a D365FO Custom Service that will talk to the Integration Platform. It will do the following:
 
 1. Process purchase orders for different companies.
 2. Avoid issues like OData or DMF like throttling, monitoring failed batch imports and rollback of partial failures.
@@ -128,7 +128,7 @@ Initially, our XML files will be loaded to the Azure storage and then processed 
 
 ![Connection types](ConnectionTypesForm.png)
 
-For storing connection string, there can be two options:
+For storing a connection string, there can be three options:
 
 - Enter the value in this form as plain text
 - Use encrypted value
@@ -144,7 +144,7 @@ This form contains three main sections:
 
 **1 - Details tab**
 
-- Defines Azure file share connection and path to folders to import messages.
+- Defines Azure file share connection and a path to folders to import messages.
 
 - Contains a link to the custom Class that will do processing from the queue. The class should extend the base class **DEVIntegProcessMessageBase** and implement the following method:
 
@@ -196,7 +196,7 @@ In this form, it is also possible to do the following operations:
 - View a detailed error message
 - Change the status to process the message again
 - View file processing statistics (processing duration, time, number of lines)
-- View the processing attempt counter. It allows to implement scenarios like trying to process messages with "Error" status several times.
+- View the processing attempt counter. It allows implementing scenarios like trying to process messages with "Error" status several times.
 
 ### Load incoming messages operation
 
@@ -204,7 +204,7 @@ It is a periodic batch job that we can run for one or multiple message types.
 
 ![Load incoming files](LoadIncomingFiles.png)
 
-It connects to the Azure file storage, reads a file, creates a record in the **Incoming messages** table with **Ready** status and attaches a message content to this record. After this, the file is moved to the Archive folder. If **Run processing** is selected, the load system will execute the processing of the loaded messages.
+It connects to the Azure file storage, reads a file, creates a record in the **Incoming messages** table with **Ready** status and attaches a message content to this record. After this, the file is moved to the Archive folder. If **Run processing** is selected, the system will execute the processing of the loaded messages.
 
 ### Process incoming messages
 
@@ -212,9 +212,9 @@ Message processing may be executed as a separate operation - **Process incoming 
 
 ![Process messages](ProcessIncomingMessages.png)
 
-The logic of how to process the file is different per message type/class. For a simple scenario, the class can just read the message content and create some data in one transaction. For this blog post, I implemented two-step processing. Also, for the **Process** operation, you can specify the number of **Processing attempts** per file. The system tries to process a message and in case of any error increase, the message **Processing attempts** counter. This allows retrying processing several times without user involvement.
+The logic of how to process the file is different per message type/class. For a simple scenario, the class can just read the message content and create some data in one transaction. For this blog post, I implemented two-step processing. Also, for the **Process** operation, you can specify the number of **Processing attempts** per file. The system tries to process a message and in case of any error, it increases the message **Processing attempts** counter. This allows retrying processing several times without a user involvement.
 
-See the sample diagram below:
+See a sample diagram below:
 
 ![Process diagram](ProcessDiagram.png)
 
@@ -240,7 +240,7 @@ To test this case, I renamed one XML element. After the import, users will see t
 
 Users can view an error log, then download the message and check the reason for this error. For example, there may be the following reasons:
 
-- Our code that processes messages contains some mistakes. In this case, we can download and send this message to a developer to fix the logic. The main advantage of this solution is that users can run processing without connecting to Azure by using the **Import message** button. After fixing the problem, we can rerun the Processing.
+- Our code that processes messages contains some mistakes. In this case, we can download and send this message to a developer to fix the logic. The main advantage of this solution is that users can run processing without connecting to Azure by using the manual **Import message** button. After fixing the problem, we can rerun the Processing.
 - External system sent a message in the wrong format. In this case, the user can send this file back to the external party and then change the message status to **Cancel**.
 
 ### Data errors
@@ -265,9 +265,9 @@ Users can view the staging data and check that they are correct to analyse the r
 
 ## Summary
 
-I provided a sample implementation for an Azure File Share integration for D365FO. The main concept of it is to create a basic framework to simplify troubleshooting(most typical errors and all related data can be viewed in one form - Incoming messages) and provide some additional logging.
+I provided a sample implementation for an Azure File Share integration for D365FO. The main concept of it is to create a basic framework to simplify troubleshooting(most typical errors and all related data can be viewed in one form - **Incoming messages**) and provide some additional logging.
 
-In the [series of posts](https://denistrunin.com/tags/integration/) I provided samples for different file format specifications used for import:
+In the [series of posts](https://denistrunin.com/tags/integration/) I provided samples for different file formats used for import:
 
 - XML
 - CSV
@@ -282,8 +282,8 @@ Different most complex D365FO documents:
 
 And different exchange media:
 
-- Azure file share
-- Azure service bus
+- Azure File Share
+- Azure Service Bus
 - SFTP(in progress)
 
 This may or may not be appropriate in your case(there are different options how to implement this). Anyway, I recommend using the following checklist while designing the integration: [Integration solution specification](https://github.com/TrudAX/TRUDScripts/blob/master/Documents/Integration/Integration%20Data%20Flow%20Requirements.md).
