@@ -1,0 +1,13 @@
+I currently use the following approach:
+
+- Use v5 VMs with 15HDDs(or SSDs), v5 provides you a different development experience, everything is faster
+
+- I restart VS before any debug session and use Debug Attach Manager to run debugger https://marketplace.visualstudio.com/items?itemName=ViktarKarpach.DebugAttachManager
+
+- For infolog messages use this tool, in lot of cases it allows to understand the issue without debugger https://denistrunin.com/xpptools-devinfocallstack/
+
+ 
+
+So for 10.0.25 this works pretty good
+
+In 10.0.27 MS will add a filter for loaded modules, maybe it will be more stable
