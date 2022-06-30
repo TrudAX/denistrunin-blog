@@ -42,6 +42,13 @@ As the result we should get a posted journal in that company:
 
 The integration will be based on two of my previous posts: [How to read CSV/Excel files](https://denistrunin.com/xpptools-readexcelfile/) and [How to create ledger journals in X++](https://denistrunin.com/xpptools-createledgerjournal/).
 
+In order to copy files to Azure storage from the local PC the [following](https://docs.microsoft.com/en-us/azure/storage/common/storage-use-azcopy-files) command may be used
+
+```powershell
+azcopy copy "C:\AAA\CCC\Files/*" "https://f365vmstorage.file.core.windows.net/ledgerinterface/TestUpload/SASToken"
+
+```
+
 ## Proposed solution
 
 In the following section, I provide some code samples that can be used as a starting point to implement a periodic file import and processing.

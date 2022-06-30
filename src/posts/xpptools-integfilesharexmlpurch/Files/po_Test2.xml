@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SyncPurchaseOrder xmlns="http://schema.infor.com/InforOAGIS/2" languageCode="en-US">
+	<DataArea>
+		<PurchaseOrder>
+			<PurchaseOrderHeader>
+				<DocumentID>PO00001</DocumentID>
+				<DocumentDateTime>2022-04-16</DocumentDateTime>
+				<SupplierParty>
+					<PartyIDs>
+						<ID accountingEntity="USMF">1001</ID>
+					</PartyIDs>
+				</SupplierParty>
+				<ShipToParty>
+					<Location type="Warehouse">
+						<ID accountingEntity="USMF">11</ID>
+					</Location>
+				</ShipToParty>
+				<UserArea>
+					<Property>
+						<NameValue name="eam.UDFCHAR01" type="StringType">Requestor Name</NameValue>
+					</Property>
+				</UserArea>
+			</PurchaseOrderHeader>
+			<PurchaseOrderLine>
+				<LineNumber>10</LineNumber>
+				<Quantity unitCode="EA">15</Quantity>
+				<UnitPrice>
+					<Amount currencyID="AUD">10</Amount>
+				</UnitPrice>
+				<UserArea>
+					<Property>
+						<NameValue name="eam.UDFCHAR01" type="StringType">M0001</NameValue>
+					</Property>
+				</UserArea>
+			</PurchaseOrderLine>
+			<PurchaseOrderLine>
+				<LineNumber>20</LineNumber>
+				<Quantity unitCode="EA">2</Quantity>
+				<UnitPrice>
+					<Amount currencyID="AUD">10</Amount>
+				</UnitPrice>
+				<UserArea>
+					<Property>
+						<NameValue name="eam.UDFCHAR01" type="StringType">M0004</NameValue>
+					</Property>
+				</UserArea>
+			</PurchaseOrderLine>
+		</PurchaseOrder>
+	</DataArea>
+</SyncPurchaseOrder>

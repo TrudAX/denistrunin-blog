@@ -122,3 +122,7 @@ Following some performance tips(even if they are given by Microsoft experts) wit
 - If you still want to use **update_recordset**, check that all fields, used in WHERE condition, are covered by the existing indexes
 
 I put objects used in this article to GitHub (form **DEVBlockingTest**, table **DEVBlockingTestTable** - https://github.com/TrudAX/XppTools/tree/master/DEVTutorial). Feel free to experiment with it.
+
+**Update 16/08/2021** 
+
+Check this video from Brent Ozar [Blocking and Locking: How to Find and Fight Concurrency Problems](https://youtu.be/EqfAPZGKifA) that explains the fundamentals of locking in detail

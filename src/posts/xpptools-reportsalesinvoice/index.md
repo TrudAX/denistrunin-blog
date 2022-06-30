@@ -105,6 +105,8 @@ Let's also add a totals section. The resulting design should look like this
 
 A sales invoice can be used in a Print management module. In order to connect our report to this module, we need to subscribe to two events(create 2 new classes):
 
+Update 25/11/2021. A more detailed description can be found in the following blog [How to Add New Report Format to Print Management](https://ax.docentric.com/how-to-add-new-report-format-to-print-management/)
+
 ```csharp
 [ExtensionOf(classstr(PrintMgmtReportFormatPopulator))]
 final class PrintMgmtReportFormatPopulatorDEVTutorial_Extension // highlight-line
