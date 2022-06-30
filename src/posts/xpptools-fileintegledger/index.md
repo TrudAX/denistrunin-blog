@@ -46,7 +46,7 @@ In order to copy files to Azure storage from the local PC the [following](https:
 
 ```powershell
 azcopy copy "C:\AAA\CCC\Files/*" "https://f365vmstorage.file.core.windows.net/ledgerinterface/TestUpload/SASToken"
-
+(if used in bat file need to replace % to %% in SASToken value)
 ```
 
 ## Proposed solution
