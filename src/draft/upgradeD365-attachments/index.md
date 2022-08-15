@@ -86,6 +86,6 @@ And as the result you get a destination table record with created attachments
 ## Summary
 
 
-All code used in this post can be found in the following folder. Another important question when you implement a solution like this: is how fast will be your integration. I wrote about sample steps for performance testing in the following post: [https://github.com/TrudAX/XppTools/tree/master/DEVTutorial/DEVDocuExpImp](https://github.com/TrudAX/XppTools/tree/master/DEVTutorial/DEVDocuExpImp) 
+All code used in this post can be found in the following folder: [https://github.com/TrudAX/XppTools/tree/master/DEVTutorial/DEVDocuExpImp](https://github.com/TrudAX/XppTools/tree/master/DEVTutorial/DEVDocuExpImp) 
 
 I hope you find this information useful. As always, if you see any improvements, suggestions or have some questions about this work don't hesitate to contact me.
