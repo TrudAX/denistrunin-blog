@@ -1,35 +1,31 @@
 ﻿---
 title: "D65FO upgrade. Transfer attachments from AX2012"
-date: "2022-05-17T22:12:03.284Z"
+date: "2022-08-17T22:12:03.284Z"
 tags: ["XppDEVTutorial", "Integration"]
 path: "/upgradeD365-attachments"
 featuredImage: "./logo.png"
 excerpt: "The blog post describes a procedure to transfer attachments from AX2012 to D365FO"
 ---
 
-Attachments export/import journal name
+One of the tricky part that you may faced during the AX2012 - D365FO project upgrade will be an attachment migration procedure. In this post I try to describe a **Attachments export/import journal** solution for doing such migration.
 
-## D365FO Attachments migration
+![Fun image](CloudFunny.jpg)
 
-One of the tricky part that you may faced during the AX2012 - D365FO project upgrade will be an attachment migration procedure. As D365FO is a cloud based system attachment storage types may be different from what users saw in the previous system
+## D365FO Attachments types
 
-Let's discuss D365FO attachments types and pros/cons each of them:
+As D365FO is a cloud based system, attachment storage types may be different from what users get used previously. Let's discuss D365FO attachments types and pros/cons each of them:
 
-Database: attachments are stored in the database as a blob field. This is perfect for text attachments, like notes. You can edit the attachment content, but only from D365FO interface. The attachment is increasing D365FO database size.
-
-Azure storage: attachments are stored inside internal Azure storage, managed by Microsoft. Users can't edit the attachments(only download and upload files) and this storage account is accesible only from D365FO user interface. This approach does not consume DB space, Microsoft charges for storage separatelly
-
-SharePoint: attachments are stored on Sharepoint site, managed by the client. Users can edit attachments and documents are availiable outside of D365FO interface(for example you may use a group in Teams and attach SharePint folder to it). But in this case the customer needs to maintain the Sharepoint site
+- **Database**: attachments are stored in the database in a blob field. This is perfect for text attachments, like notes. You can edit the attachment content, but only from D365FO interface. The attachment is increasing D365FO database size.
+- **Azure storage**: attachments are stored inside internal Azure storage, managed by Microsoft. Users can't edit the attachments(only download and upload files) and this storage account is accesible only from D365FO user interface. This approach does not consume DB space, Microsoft charges for storage separatelly
+- **SharePoint**: attachments are stored on Sharepoint site, managed by the client. Users can edit attachments and documents are availiable outside of D365FO interface(for example you may use a group in Teams and attach SharePint folder to it). But in this case the customer needs to maintain the Sharepoint site
 
 ## Transfer attachment module description
 
 There are already several ways of transferring attachments while doing a migration project from AX2012 to D365FO, but in this post I will describe additional method, and probable can be called "yet another way to transfer attachments from AX2012".
 
 Some of the of the box ways for attachment migration are:
- [MoveDocumentsToDatabase](https://github.com/microsoft/Dynamics-365-FastTrack-Implementation-Assets/blob/master/AX2012DataUpgrade/MoveDocumentsToDatabase ) job from the FastTack team. It moves all attachments to AX2012 database that can be used in the upgrade process
-
- Standard entities for attachments creation(e.g. CustomerAttachmentsV2Entity). In case of entity usage you need to create a ZIP datapackage that contains all files and the entity data.
-
+- [MoveDocumentsToDatabase](https://github.com/microsoft/Dynamics-365-FastTrack-Implementation-Assets/blob/master/AX2012DataUpgrade/MoveDocumentsToDatabase ) job from the FastTack team. It moves all attachments to AX2012 database that can be used in the upgrade process
+-  Standard entities for attachments creation(e.g. CustomerAttachmentsV2Entity). In case of entity usage you need to create a ZIP datapackage that contains all files and the entity data.
 
 The reason for development was to provide more flexibility and control over AX2012 attachment transfer.
 Lets check how it works
@@ -103,7 +99,6 @@ And as the result you get a destination table record with created attachments
 
 ## Summary
 
-
-All code used in this post can be found in the following folder: [https://github.com/TrudAX/XppTools/tree/master/DEVTutorial/DEVDocuExpImp](https://github.com/TrudAX/XppTools/tree/master/DEVTutorial/DEVDocuExpImp) 
+The provided solution provides a great flixibility for moving attachments from AX2012 to D365FO. All code used in this post can be found in the following folder(AX2012 project is stored as a resouce): [https://github.com/TrudAX/XppTools/tree/master/DEVTutorial/DEVDocuExpImp](https://github.com/TrudAX/XppTools/tree/master/DEVTutorial/DEVDocuExpImp) 
 
 I hope you find this information useful. As always, if you see any improvements, suggestions or have some questions about this work don't hesitate to contact me.
