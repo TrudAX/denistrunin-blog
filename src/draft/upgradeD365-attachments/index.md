@@ -9,9 +9,27 @@ excerpt: "The blog post describes a procedure to transfer attachments from AX201
 
 Attachments export/import journal name
 
-## Transfer attachment module description 
+## D365FO Attachments migration
+
+One of the tricky part that you may faced during the AX2012 - D365FO project upgrade will be an attachment migration procedure. As D365FO is a cloud based system attachment storage types may be different from what users saw in the previous system
+
+Let's discuss D365FO attachments types and pros/cons each of them:
+
+Database: attachments are stored in the database as a blob field. This is perfect for text attachments, like notes. You can edit the attachment content, but only from D365FO interface. The attachment is increasing D365FO database size.
+
+Azure storage: attachments are stored inside internal Azure storage, managed by Microsoft. Users can't edit the attachments(only download and upload files) and this storage account is accesible only from D365FO user interface. This approach does not consume DB space, Microsoft charges for storage separatelly
+
+SharePoint: attachments are stored on Sharepoint site, managed by the client. Users can edit attachments and documents are availiable outside of D365FO interface(for example you may use a group in Teams and attach SharePint folder to it). But in this case the customer needs to maintain the Sharepoint site
+
+## Transfer attachment module description
 
 There are already several ways of transferring attachments while doing a migration project from AX2012 to D365FO, but in this post I will describe additional method, and probable can be called "yet another way to transfer attachments from AX2012".
+
+Some of the of the box ways for attachment migration are:
+ [MoveDocumentsToDatabase](https://github.com/microsoft/Dynamics-365-FastTrack-Implementation-Assets/blob/master/AX2012DataUpgrade/MoveDocumentsToDatabase ) job from the FastTack team. It moves all attachments to AX2012 database that can be used in the upgrade process
+
+ Standard entities for attachments creation(e.g. CustomerAttachmentsV2Entity). In case of entity usage you need to create a ZIP datapackage that contains all files and the entity data.
+
 
 The reason for development was to provide more flexibility and control over AX2012 attachment transfer.
 Lets check how it works
@@ -75,11 +93,11 @@ It will create journal lines(one line per file)
 
 ![Line View](LineView.png)
 
-The final step is to load attachments, you can do this only for one line(to test the process) or for the whole journal. It will use the standard attach document procedure. so the attachment will be created according to the document type setup. 
+The final step is to load attachments, you can do this only for one line(to test the process) or for the whole journal. It will use the standard attach document procedure. so the attachment will be created according to the document type setup.
 
 ![Journal Status](JournalStatus.png)
 
-And as the result you get a destination table record with created attachments 
+And as the result you get a destination table record with created attachments
 
 ![Cust Attachments](CustAttachments.png)
 
