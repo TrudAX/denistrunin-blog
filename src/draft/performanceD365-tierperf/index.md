@@ -1,6 +1,6 @@
 ﻿---
 title: "Understanding D365FO different Tiers performance"
-date: "2022-05-17T22:12:03.284Z"
+date: "2022-09-17T22:12:03.284Z"
 tags: ["Performance"]
 path: "/performance-tiers"
 featuredImage: "./logo.png"
@@ -9,29 +9,31 @@ excerpt: "The blog post describes performance differences between various enviro
 
 ERP system performance is always an important topic in system implementation. There are not much public availiable information related to D365FO hardware configuration, in this blog post I describe some cases that allows better to understand the performance basics.
 
+https://learn.microsoft.com/en-us/dynamics365/fin-ops-core/fin-ops/imp-lifecycle/environment-planning
+
 ## Different tiers and their performance
 
 D365FO as a backend uses different databases types: **SQL Sever** for Tier1 and **SQL Server Azure** for Tier2+ and PROD. 
 
-A **Performance testing** form allows to see the execution speed for different SQL queries. 
+A **Run performance test** form allows to see the execution speed for different SQL queries. 
 
+![RUn performance test form](PerfTestForm.png)
 
+I used 10k rows instead of default 1k and run it on several clients/enviroments and got the following results(to presend data in a table view copy them to Excel and run Data > Text to Columns with ":" delimeter)
 
-I used 10k rows instead of default 1k and run it on several clients/enviroments and got the following results
-
-
+![Performance results](TierPerfTable.png)
 
 Let's discuss these results
 
 - In operations that include a lot of small calls SQL Azure is slower(4-8 times) than a standard SQL Server. This probably happening due to a large latency. The difference looks dramatic(as typical X++ code often contains a lot of small selects statements), but in the latest releases Microsoft implemented a lot of caching classes, so for business operations it is not so critical in general
 
-- No difference in bulk operations(like update_recordset). They are also much faster compared to individual operation(e.g. row by row update). You may often see an advice to use these bulk operations by default, but I recommend to avoid this. The main issue is that **update_recordset** and **delete_recordset** are blocking operations and may stop the whole system if used in wrong way. And for the cloud system if will be very hard to troubleshoot and fix that. I wrote an article regarding this (link) and my advice is to use them only if you can measure the business operation benefit.
+- No much difference in bulk operations(like **update_recordset**). They are also much faster compared to individual operation(e.g. row by row update). You may often see an advice to use these bulk operations by default, but I recommend to avoid this. The main issue is that **update_recordset** and **delete_recordset** are blocking operations and may stop the whole system if used in wrong way. And for the cloud system if will be very hard to troubleshoot and fix that. I wrote an article regarding this (link) and my advice is to use them only if you can measure the business operation benefit.
 
 - The fun fact is your laptop probably is more performant that a PROD instance of multi-million ERP system. Keep this in mind while discussing performance issues with Microsoft support
 
 ## Enviroment planning 
 
-Let's discuss some considerations used for enviroments planning 
+Let's discuss some considerations used for enviroments planning.
 
 ### Pricing
 
@@ -39,9 +41,11 @@ The actual price may depends of you agreements with Microsoft, but some indicati
 
 Pricing for a typical Tier1 is ~700$/month and billed hourly, Tier2 is 2000$/month and Tier5 ~8000$/month and billed monthly
 
-### Tier1 or Tier2+ for long data load processes 
+### Tier1 or Tier2+ for large data load processes 
 
-If we check the performance in most cases Tier1 will be faster than a Tier2, here are some tests for data load 
+If we check the performance, in most cases Tier1 will be faster than a Tier2, here are some tests for data load
+
+
 
 Another point to consider is a stability. Tier2 is a shared enviroment, you can even execute the following command and see who are your neiborths
 
@@ -55,7 +59,7 @@ Microsoft may dynamically scale PROD database level depending on customer worklo
 
 ### Performance testing 
 
-You will see this advice in every Microsoft presentation, if you need to measure performance, always use Tier2+ instances.
+You will see this advice in every Microsoft presentation, if you need to measure performance, always use Tier2+ instances. Also performance testing should not be considered as one off excersise, the test should define some measures and a way to monitor them
 
 ### Applications servers 
 
