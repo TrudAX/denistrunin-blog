@@ -7,21 +7,21 @@ featuredImage: "./logo.png"
 excerpt: "The blog post describes a procedure to transfer attachments from AX2012 to D365FO"
 ---
 
-An attachment migration procedure may be one of the tricky parts you may face during the AX2012 - D365FO project upgrade. In this post, I try to describe an **Attachments export/import journal** solution for doing such migration.
+An attachment migration procedure is one of the tricky parts you may face during the AX2012 - D365FO project upgrade. In this post, I describe an **Attachment export/import journal** solution for doing such migration.
 
 ![Fun image](CloudFunny.jpg)
 
 ## D365FO Attachments types
 
-As D365FO is a cloud-based system, attachment storage types may be different from what users get used previously. So, let's discuss D365FO attachments types and the pros/cons of each of them:
+As D365FO is a cloud-based system, attachment storage types may be different from what users get used to previously. So, let's discuss D365FO attachments types and the pros/cons of each of them:
 
-- **Database**: attachments are stored in the database in a blob field. This is perfect for text attachments, like notes. You can edit the attachment content, but only from the D365FO interface. It also increases the D365FO database size.
-- **Azure storage**: attachments are stored inside internal Azure storage, managed by Microsoft. Users can't edit attachments directly(only download and upload files) as this storage account is accessible only from the D365FO user interface. This approach does not consume Database space, Microsoft charges for the storage separately.
-- **SharePoint**: attachments are stored on the SharePoint site, managed by the client. Users can edit attachments, and documents are available outside of the D365FO interface(for example, you may use a group in Teams and link a SharePoint folder to it). But in this case, the customer needs to maintain the SharePoint site.
+- **Database**: attachments are stored in the database in a blob field. This is perfect for text attachments, like notes. You can edit the attachment content, but only from the D365FO user interface. It increases the D365FO database size.
+- **Azure storage**: attachments are stored inside an internal Azure storage, managed by Microsoft. Users can't edit attachments directly(only download and upload files) as this storage account is accessible only from the D365FO user interface. This approach does not consume Database space, Microsoft charges for the storage separately.
+- **SharePoint**: attachments are stored on the SharePoint site, managed by clients. Users can edit attachments, and documents are available outside of the D365FO interface(for example, you may use a group in Teams and link a SharePoint folder to it). But in this case, the customer needs to maintain the SharePoint site.
 
 ## Transfer attachment module description
 
-There are already several ways of transferring attachments while doing a migration project from AX2012 to D365FO, but in this post, I will describe the additional method, and probable it can be called "yet another way to transfer attachments from AX2012".
+There are already several ways of transferring attachments while doing a migration project from AX2012 to D365FO, but in this post, I will describe the additional method, and probably it can be called "yet another way to transfer attachments from AX2012".
 
 Some of the out-of-the-box ways for attachment migration are:
 
@@ -29,21 +29,21 @@ Some of the out-of-the-box ways for attachment migration are:
 
 - Standard entities for attachments creation(e.g. CustomerAttachmentsV2Entity). In the case of entity usage, you need to create a ZIP data package that contains all files and entity data.
 
-The reason for the module development was to provide more flexibility and control over AX2012 attachment transfer. Let's check how it works.
+The reason for the module development is to provide more flexibility and control over AX2012 attachment transfer. Let's check how it works.
 
-The module consists of AX2012 and D365FO part.
+The module consists of AX2012 and D365FO parts.
 
 ## AX2012 functionality
 
-It is an XPO project that needs to be imported into AX2012 live application. After the import run **DEVDocuExport** menu item
+It is an XPO project that needs to be imported into an AX2012 live application. After the import, you need to run the **DEVDocuExport** menu item.
 
 It will display the following window:
 
 ![Export dialog](ExportAx2012.png)
 
-This dialog allows you to specify a table and setup some filters for it(e.g. export attachments only for not blocked customers).
+This dialog allows you to specify a table and set up some filters for it(e.g. export attachments only for not blocked customers).
 
-As a result of this run, you will get a directory with all attachments to the selected table exported to files and a **Descriptor file** that links the primary table key to an attachment file.
+As a result of this run, the system exports all attachments for the selected table to the directory and creates a **Descriptor file** that links the primary table key to an attachment file.
 
 ![Export Ax2012 Result](ExportAx2012Result.png)
 
@@ -69,19 +69,19 @@ After installing the required X++ objects, open the following link
 https://mycompany.operations.dynamics.com/?cmp=CMP&mi=DEVDocuExpImpJournalTable
 ```
 
-It will open the empty import attachment form.
+It will open the Import attachment form.
 
 ![Empty Journal Form](EmptyJournalForm.png)
 
-The first step is to go to **Journal name** field(View detail) and create a new **Journal type**. A **Journal type** defines a reference to Azure file share, you need to specify a connection string and a share reference.
+The first step is to go to the **Journal name** field(View detail) and create a new **Journal type**. A **Journal type** defines a reference to Azure file share (a connection string and a share reference).
 
 ![Journal Name Setup](JournalNameSetup.png)
 
-Then you need to specify the Azure location for our import and press **Test connection** button to validate the settings.
+Then you need to specify the Azure location(folder with files) for our import and press the **Test connection** button to validate the settings.
 
 ![Journal Setup](JournalSetup.png)
 
-Journal created, the next step is to import lines from the Excel **Descriptor file** created during the AX2012 export(**Import lines from Excel** button).
+After Journal creation, the next step is to import lines from the Excel **Descriptor file** generated previously during the AX2012 export(**Import lines from Excel** button).
 
 ![Import Lines Function](ImportLinesFunction.png)
 
@@ -89,11 +89,11 @@ It will create journal lines(one line per file).
 
 ![Line View](LineView.png)
 
-The final step is to load attachments to D365FO, you can do this only for one line(to test the process) or for the whole journal. It will use the standard "Attach document" procedure, which creates attachments according to the document type setup.
+The final step is to load attachments to D365FO, you can do this only for one line(to test the process) or for the whole journal. It will use the standard "Attach document" procedure, which creates attachments according to the document type settings.
 
 ![Journal Status](JournalStatus.png)
 
-And as a result, you get a destination table record with created attachments(e.g. attachments for the customer)
+And as a result, you get a destination table record with attachments(e.g. attachments for the customer)
 
 ![Cust Attachments](CustAttachments.png)
 
