@@ -1,6 +1,6 @@
 ﻿---
 title: "D365FO upgrade. Transfer attachments from AX2012"
-date: "2022-09-20T22:12:03.284Z"
+date: "2022-09-21T22:12:03.284Z"
 tags: ["XppDEVTutorial", "D365FO Upgrade"]
 path: "/upgradeD365-attachments"
 featuredImage: "./logo.png"
