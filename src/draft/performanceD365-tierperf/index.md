@@ -9,6 +9,8 @@ excerpt: "The blog post describes performance differences between various enviro
 
 ERP system performance is always an important topic in system implementation. There are not much public availiable information related to D365FO hardware configuration, in this blog post I describe some cases that allows better to understand the performance basics.
 
+Environment planning
+
 https://learn.microsoft.com/en-us/dynamics365/fin-ops-core/fin-ops/imp-lifecycle/environment-planning
 
 ## Different tiers and their performance
@@ -31,7 +33,7 @@ Let's discuss these results
 
 - The fun fact is your laptop probably is more performant that a PROD instance of multi-million ERP system. Keep this in mind while discussing performance issues with Microsoft support
 
-## Enviroment planning 
+## Enviroment planning
 
 Let's discuss some considerations used for enviroments planning.
 
@@ -39,42 +41,45 @@ Let's discuss some considerations used for enviroments planning.
 
 The actual price may depends of you agreements with Microsoft, but some indicative values are the following:
 
-Pricing for a typical Tier1 is ~700$/month and billed hourly, Tier2 is 2000$/month and Tier5 ~8000$/month and billed monthly
+Pricing for a typical Tier1 is ~500$/month and billed per hour. Tier2 is 1400$/month, Tier3 is 4000$/month and Tier5 ~12000$/month and billed per month.
 
-### Tier1 or Tier2+ for large data load processes 
+### Tier1 or Tier2+ for large data load processes
 
-If we check the performance, in most cases Tier1 will be faster than a Tier2, here are some tests for data load
+If we check the performance, in most cases Tier1 will be faster than a Tier2. On one customer we measured data load time for Released products/Product/Customers enrities and the time difference between Tier1(D8v3) and Tier2 was 200-250%  (e.g. load run for 1h on Tier1 and 2-2.5h on Tier2)
 
+Another point to consider is a stability. Tier2+ are located on Elastic scale server, you can even execute the following command and see who are your neiborths
 
+SELECT * from sys.dm_user_db_resource_governance
 
-Another point to consider is a stability. Tier2 is a shared enviroment, you can even execute the following command and see who are your neiborths
+The following cloud actions may happen:
+Database may be migrated to different instance. (SQL TransientSqlConnectionError https://learn.microsoft.com/en-us/dynamics365/fin-ops-core/dev-itpro/dev-ref/sql-connection-error). 
 
-Database may be migrated to different instance. (SQL Transilent). Or table may be reindexed by DAMS service during the large data load(it leads to cursor)
+Or table may be reindexed by DAMS Running 1M databases on Azure SQL for a large SaaS provider: Microsoft Dynamics 365 and Power Platform.
+(https://devblogs.microsoft.com/azure-sql/running-1m-databases-on-azure-sql-for-a-large-saas-provider-microsoft-dynamics-365-and-power-platform/) service during the large data load(it leads to "Could not complete cursor operation because the table schema changed after the cursor was declared." error)
 
-Some function may not handle such errors properly(on one projects with 10.0.21 DAMS actions stopped multithereaded DIXF job after 3 hours of execution)
+Some function may not handle such errors properly(on one projects with 10.0.20 DAMS actions stopped multithereaded DIXF job after 3 hours of execution)
 
 ### PROD performance
 
-Microsoft may dynamically scale PROD database level depending on customer workload. The exact scale up/down criterias are unknows, but I saw some cases where PROD database was allocated even to a lower database tier than a standard Tier2 enviroment. So you need to be able to measure and compare the performance for critical operations to communicate with support properly. 
+Microsoft may dynamically scale PROD database level depending on customer workload. The exact scale up/down criterias are unknows, but I saw some cases where PROD database was allocated even to a lower database tier than a standard Tier2 enviroment. So you need to be able to measure and compare the performance for critical operations to communicate with support properly.
 
-### Performance testing 
+### Performance testing
 
 You will see this advice in every Microsoft presentation, if you need to measure performance, always use Tier2+ instances. Also performance testing should not be considered as one off excersise, the test should define some measures and a way to monitor them
 
-### Applications servers 
+### Applications servers
 
-It seems now Applicatoins servers are standard VMs with the following specs: 4-cores CPUs and 16GB of RAM. You can't get a better AOSes, but Microsoft may add more servers if needed. 
+It seems now Applicatoins servers are standard VMs with the following specs: 4-cores CPUs and 16GB of RAM. You can't get a better AOSes, but Microsoft may add more servers if needed.
 
-LCS provides a view for AOS CPU load and AOSes free memory, so it is quite easy to check if you reach your capacity 
+LCS provides a view for AOS CPU load and AOSes free memory, so it is quite easy to check if you reach your capacity
 
-
+![Environment monitoring](HealthMetric.png)
 
 One of the AOS CPU intensive operation is a Data management import. For every recors it scans all record fields with all extensions in all modules that produses a huge workload on application server CPUs
 
-
-
 ## Summary
 
-I described some measures related to different D365FO enviroemntal type performance.I hope you find this information useful. 
+I described some measures related to different D365FO enviroemntal type performance.I hope you find this information useful.
 
-If you have Tier3-Tier5 availiable it will be great if you can share the Performance form results on these enviroments(with 10k records) and don't hesitate to contact me in case of any questions
+If you have Tier3-Tier5 availiable it will be great if you can share the Performance form results on these enviroments(with 10k records).
+As usual and don't hesitate to contact me in case of any questions.
