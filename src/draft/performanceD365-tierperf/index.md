@@ -7,17 +7,19 @@ featuredImage: "./logo.png"
 excerpt: "The blog post describes performance differences between various enviroments Tiers in D365FO"
 ---
 
-ERP system performance is always an important topic in system implementation. There are not much public availiable information related to D365FO hardware configuration, in this blog post I describe some cases that allows better to understand the performance basics.
+ERP system performance is always an important topic in system implementation. And with the cloud systems it is even more complex. General planning described in the following docs acticle:   [Environment planning](https://learn.microsoft.com/en-us/dynamics365/fin-ops-core/fin-ops/imp-lifecycle/environment-planning)  and where we have the following enviroments 
 
-Environment planning
+![Standard tiers](StandardTiers.png)
 
-https://learn.microsoft.com/en-us/dynamics365/fin-ops-core/fin-ops/imp-lifecycle/environment-planning
+
+
+But there is not much public availiable information related to D365FO hardware configuration for these Tiers, in this blog post I describe some cases that allows better to understand the performance basics.
 
 ## Different tiers and their performance
 
 D365FO as a backend uses different databases types: **SQL Sever** for Tier1 and **SQL Server Azure** for Tier2+ and PROD. 
 
-A **Run performance test** form allows to see the execution speed for different SQL queries. 
+In the standard system we have a **Run performance test** form that allows to see the execution speed for different SQL queries. This is the single threaded test, it measures the speed on the individual queries, not the overal capacity of the system
 
 ![RUn performance test form](PerfTestForm.png)
 
@@ -25,9 +27,17 @@ I used 10k rows instead of default 1k and run it on several clients/enviroments 
 
 ![Performance results](TierPerfTable.png)
 
-Let's discuss these results
+I also run the test in Tier3 and Tier4, and it seems they are similar to Tier2.
 
-- In operations that include a lot of small calls SQL Azure is slower(4-8 times) than a standard SQL Server. This probably happening due to a large latency. The difference looks dramatic(as typical X++ code often contains a lot of small selects statements), but in the latest releases Microsoft implemented a lot of caching classes, so for business operations it is not so critical in general
+Let's discuss these results:
+
+#### Single row operations
+
+In operations that include a lot of small calls **SQL Azure** is slower(4-8 times) than a standard SQL Server. This probably happening due to a large latency. The difference looks dramatic(as a typical X++ code often contains a lot of small selects statements), but in the latest releases Microsoft implemented a lot of caching classes, so for business operations it is not so critical in general. 
+
+One of the real life example where you can see this differences may be a display method that contains multiple SQL statements added to a grid. Even with the caching it may dramatically slow down the form behaviour  
+
+#### Multiple rows operations
 
 - No much difference in bulk operations(like **update_recordset**). They are also much faster compared to individual operation(e.g. row by row update). You may often see an advice to use these bulk operations by default, but I recommend to avoid this. The main issue is that **update_recordset** and **delete_recordset** are blocking operations and may stop the whole system if used in wrong way. And for the cloud system if will be very hard to troubleshoot and fix that. I wrote an article regarding this (link) and my advice is to use them only if you can measure the business operation benefit.
 
