@@ -107,4 +107,4 @@ One of the CPU-intensive operations on AOS is a Data management import. For ever
 
 I described some performance measures related to different Dynamics 365 F&O environments. I hope you find this information useful for project planning. As usual, don't hesitate to contact me in case of any questions or comments.
 
-Also, I can't find a working **Tier5** environment. If you have **Tier5** available, it would be great if you could share the "Performance form" results on this environment(with 10k records and when the system is not loaded).
+Also, I can't find a working **Tier5** environment. If you have **Tier5** available, it would be great if you could share the "Performance form" results on this environment(with 10k records and when the system is not loaded).**Update 04/11/2022 - it seems from a DB level Tier5 has the same speed as Tier2**
