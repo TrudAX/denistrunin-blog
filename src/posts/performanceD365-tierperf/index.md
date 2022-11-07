@@ -95,7 +95,7 @@ So after GoLive, they have this data for any arguments that the PROD is “not f
 
 ### Applications servers
 
-Now application servers are similar to 4-core CPUs and 16GB of RAM VMs. You can't get better AOSes, but Microsoft may add more servers if needed.
+Now application servers are similar to 4-core CPUs and 16GB of RAM VMs. ~~You can't get better AOSes, but~~ Microsoft may add more servers if needed. **Update 07/11/2022** - Several people [reported](https://twitter.com/IevgenMir/status/1589014609029378048) that for the large number of users, AOSes may contain up to 50GB of RAM, so it seems it is possible to have a different config.
 
 LCS provides a view for AOS CPU load and AOSes free memory, so it is quite easy to check if you have reached your capacity
 
