@@ -1,4 +1,6 @@
 -Put your event handlers to random classes
+-Naming convention per developer
+-Create one branch per env. 
 -Always provide your developers storage based on HDD
 -Do not create indexes, indexes slow down the system and consume space
 -If you use onpremise version always allocate more than one VM per CPU core. You can save on electricity.
@@ -14,3 +16,4 @@
                          return RetailTransactionServiceOrders::convertCustomerQuoteToOrderFixed(custOrderXmlStr);
         }
     }
+-create a package from dev vms 
