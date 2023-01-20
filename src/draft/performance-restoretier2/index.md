@@ -1,13 +1,13 @@
 ﻿---
 title: "Improve the speed for bacpac database restore from Tier2 to Tier1"
-date: "2022-05-17T22:12:03.284Z"
-tags: ["XppDEVTutorial", "Integration"]
+date: "2023-01-17T22:12:03.284Z"
+tags: ["ALM"]
 path: "/performance-restoretier2"
 featuredImage: "./logo.png"
-excerpt: "The blog post describes a sample approach to implement recurring file-based integration in D365FO using X++"
+excerpt: "The blog post tests various options for restoring bacpac files on local SQL Server "
 ---
 
-Working with the real data is a very important of the delelopment process, espesially during the support phase. One of the issues you may face is the different database format on development VMs(that are using SQL Server) and UAT-PROD Tier2 enviroments that are using SQL Azure as database.
+Working with the real data can be vital for a development process, espesially during the Go-Live and Support phase. One of the issues you may face is the different database format on development VMs(that are using SQL Server) and UAT/PROD enviroments that are using SQL Azure as database.
 
 One of the workaroud is to use debugger on Tier2(link here), but in this article we consider a restore backpack from a Tier2 to Tier1 enviroment.
 
