@@ -94,6 +94,12 @@ I compared two different environments:
 
 For the small file, the restore times varied from one hour to 20 minutes. What is interesting here is that for fast hardware, the restore time is almost independent of various switches. Delayed durability provided a significant boost for slow disk systems(standard DEV VM). Also, for a small amount of data, it is worth considering/p:DisableIndexesForDataPhase=FALSE flag
 
+**update 06/03/2023**: you can auto clean log tables from the file using the following script
+  
+```powershell
+Clear-D365TableDataFromBacpac -Path "X:\MSSQL_BACKUP\AxDB.bacpac" -TableName "SECURITYOBJECTHISTORY","*Staging*","BatchHistory","SYSDATABASELOG*","ReqCalcTaskTrace" -ClearFromSource
+```
+
 ## Summary
 
 I described different options for the BACPAC restore process. Of course, every database size is unique, but this should be a good place to start if you want to optimise the restore time for your project. For example, in my test, a "standard" size file may be restored in 4 hours or just in 1 hour, depending on different configurations.
