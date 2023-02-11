@@ -7,16 +7,16 @@ featuredImage: "./logo.png"
 excerpt: "The blog post describes the solution for exporting data from D365FO."
 ---
 
-External integration is a framework that can be used to implement inbound and outbound integrations from D365FO. It supports several chanels: Azure file share, SFTP, Azure service bus and several integration types
+**External integration** is a framework that can be used to implement inbound and outbound integrations from D365FO. It supports several chanels: Azure file share, SFTP, Azure service bus and several integration types
 Inbound async, Inbound sync, Outbound data, Outbound event basis. The framework designed to provide logging, error handling, troubleshooting for various integration types.
 
 In this blog post I will describe how to export data from D365FO to SFTP server
 
 ## SFTP server setup
 
-Several years ago Microsoft didn't provide any support for SFTP hosting, claiming that is obsollete in the cloud word, but it seems this options still quite popular with clients and finally SFTP support was added to Azure storage servive
+Several years ago Microsoft didn't provide any support for SFTP hosting, claiming that is obsollete in the cloud world, but it seemsSFTP still quite popular among clients and finally it support was added to Azure storage servive
 
-The option to access Azure storage via SFTP enpoint described in the following topic(https://learn.microsoft.com/en-us/azure/storage/blobs/secure-file-transfer-protocol-support), in brief you need to create a storage account and enable access to it.
+The option to access Azure storage via SFTP enpoint described in the following topic(https://learn.microsoft.com/en-us/azure/storage/blobs/secure-file-transfer-protocol-support), in brief you need to create a storage account and enable SFTP access to it.
 
 ![SFTP Setup Azure](SFTPSetup.png)
 
@@ -36,10 +36,13 @@ The first form to setup SFPT connection is External integration – Connection t
 
 It requires the host name and User/Password to access this host
 
-The password can be stored in several formats
-Manual entry - unencrypted string, that may be used for dev testing
-Encrypted - Encrypted value
-Azure Key Vault - link to the standard D365FO key vault form 
+The password can be stored in several formats:
+
+- Manual entry - unencrypted string, that may be used for dev testing
+
+- Encrypted - Encrypted value
+- Azure Key Vault - link to the standard D365FO key vault form that stores the password
+
 
 ### Outbound message types
 
@@ -61,16 +64,18 @@ Very often the export needs to create a file with some date part in it. This set
 Advanced group
 
 Advanced group defines used log types and a Company range validation. The export runs in the current company and some exports may be logically only related to certain companies. **Company range** allows to specify a list of companies where the export may be run
- 
+
 ## Export scenarious 
 
 Let's describe most typical scenarious that can be used to export the data from D365FO
 
 ### Export store onhand data(low code scenario)
 
-**Business scenario**: our company has a store and we want to export daily onhand data from this store to our web site.
+**Business scenario**: our company has a store and we want to export daily onhand data from this store to our web site. We need to include ItemId, Stype and AvailiablePhysical value
 
-External integration module contains a class that allows to export the result of the custom SQL string and the basic task like this can be done even without writing any code 
+External integration module contains a class that allows to export the result of the custom SQL string and the basic task like this can be done even without writing any code.
+
+..
 
 ### Export customers (low code with data entity)
 
@@ -78,11 +83,33 @@ External integration module contains a class that allows to export the result of
 
 This taks is also simple, we can use a standard data entity to fetch the data
 
-### Export store onhand data(complex procedure)
+..
 
-For the real word tasks 
+### Export store onhand data(full X++ based procedure)
 
-### Export invoices (incremental export)
+It is very likely that real word tasks will be more complex that just using SELECT statement. In this case you need to write X++ code that generates the export. Let's extend the previous task and check how this can be done
+
+**Business scenario**: our company has a store and we want to export daily onhand data from this store. We want the quantity in sales unit and we also want the current sales price. Our export should be a CSV file that contain the following fields: ItemId, Style, AvailiablePhysical(in sales unit) and Sales Price
+
+In order to do this we need to create a class that extends DEVIntegExportBulkBase. The code for this class is the following
+
+A developer should write only export business logic related to the export
+
+Also in this export we can add some additional monitoring. For exampe for some items we don't have a price. It is not a critical error, but we need to notify a user about this, he may adjust the query to exclude this items or notify pricing department to enter prices
+
+
+
+### Export invoices (incremental X++ procedure)
+
+Let's describe other scenario where we need incremental export
+
+**Business scenario**: our company wants to export customer invoices to external system. The export runs daily and should include all invoices for this day. The export file should contain Account number, InvoiceIId, SalesId, Department dimension, Item, Qty,  LineAmount
+
+To start with let's describe the typical mistake that sometimes I saw on projest. We need somehow track incremental changes and sometimes people using CratedDateTime for this. The idea is you export all data up to the current time, save this time and next time process all records starting from this time. The problem with this aproach is that it doen't take into consideration existing transactions. The SQL transaction may start in 1pm, create an invoice at 1.05 and finish at 2pm. If the export runs at 1.30, it will not see 1.05 uncommited transaction and the invoice will not be exported
+
+In the following implementation I propose the following - Add 2 fields IsExported and ExportedDateTime to the invoices and update these fields after the export. It may not sound technically perfect(for example DMF may use SQL change tracking), but  simplifies troubleshooting and provides a full visibility to a user, you can just open invoice and see it's status 
+
+
 
 [**SQL BACPAC**](https://learn.microsoft.com/en-us/azure/azure-sql/database/database-export?view=azuresql) is a zip file that contains table data in text format. If you change the .backpac extension to .zip and open it in the archive tool, you will see something like that:
 
@@ -170,7 +197,7 @@ I compared two different environments:
 For the small file, the restore times varied from one hour to 20 minutes. What is interesting here is that for fast hardware, the restore time is almost independent of various switches. Delayed durability provided a significant boost for slow disk systems(standard DEV VM). Also, for a small amount of data, it is worth considering/p:DisableIndexesForDataPhase=FALSE flag
 
 **update 06/03/2023**: you can auto clean log tables from the file using the following script
-  
+
 ```powershell
 Clear-D365TableDataFromBacpac -Path "X:\MSSQL_BACKUP\AxDB.bacpac" -TableName "SECURITYOBJECTHISTORY","*Staging*","BatchHistory","SYSDATABASELOG*","ReqCalcTaskTrace" -ClearFromSource
 ```
