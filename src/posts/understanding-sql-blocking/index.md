@@ -15,7 +15,7 @@ SQL Server engine doesn't support "true" row-level blocking, and this was a big 
 
 For more information check this article
 
-https://blogs.msdn.microsoft.com/emeadaxsupport/2009/07/08/about-locking-and-blocking-in-dynamics-ax-and-how-to-prevent-it/
+https://cloudblogs.microsoft.com/dynamics365/no-audience/2009/07/08/about-locking-and-blocking-in-dynamics-ax-and-how-to-prevent-it/ 
 
 ## Test example
 
