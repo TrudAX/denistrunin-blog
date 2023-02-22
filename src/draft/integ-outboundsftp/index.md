@@ -87,7 +87,11 @@ This taks is also simple, we can use a standard data entity to fetch the data
 
 ### Export store onhand data(full X++ based procedure)
 
-It is very likely that real word tasks will be more complex that just using SELECT statement. In this case you need to write X++ code that generates the export. Let's extend the previous task and check how this can be done
+It is very likely that "real word" tasks will be more complex than just using SELECT statement. In this case you need to write X++ code that generates the export data. 
+
+**Implementation concept:** In order to do this External integration provides the following consepts: We can't predict how complex will be our export, it may export to different sources(like SFTP, Service Bus), export data to one file or to multiple files, requires different parameters, etc.. So in order to do cover all possible scenarious we can use a standard RunBaseBatch class. But export classes  will have some common methods. So I created a base DEVIntegExportBulkBase(that extends RunBase) in order to store these common properties and methods(like variables to store number of exports records, methods to create log, writes data to a file, etc..). And the Export class should extend this DEVIntegExportBulkBase
+
+Let's extend the previous task and check how this can be done
 
 **Business scenario**: our company has a store and we want to export daily onhand data from this store. We want the quantity in sales unit and we also want the current sales price. Our export should be a CSV file that contain the following fields: ItemId, Style, AvailiablePhysical(in sales unit) and Sales Price
 
@@ -95,19 +99,21 @@ In order to do this we need to create a class that extends DEVIntegExportBulkBas
 
 A developer should write only export business logic related to the export
 
-Also in this export we can add some additional monitoring. For exampe for some items we don't have a price. It is not a critical error, but we need to notify a user about this, he may adjust the query to exclude this items or notify pricing department to enter prices
+Warning message status. Export may finish Successfylly or may have an exception during the file generation(Error state). But sometimes you need to log an event, that the exported data has some issues, but still want to perform the export. For exampe, for some exported items we can't find a price. It is not a critical error, but we need to notify a user about this, he may adjust the query to exclude these items or notify another department to enter prices. To cover this scenario the export class may mark the status as Warning and the user may setup a standard alert for this
 
 
 
 ### Export invoices (incremental X++ procedure)
 
-Let's describe other scenario where we need incremental export
+Let's describe the scenario where we need an incremental export
 
 **Business scenario**: our company wants to export customer invoices to external system. The export runs daily and should include all invoices for this day. The export file should contain Account number, InvoiceIId, SalesId, Department dimension, Item, Qty,  LineAmount
 
-To start with let's describe the typical mistake that sometimes I saw on projest. We need somehow track incremental changes and sometimes people using CratedDateTime for this. The idea is you export all data up to the current time, save this time and next time process all records starting from this time. The problem with this aproach is that it doen't take into consideration existing transactions. The SQL transaction may start in 1pm, create an invoice at 1.05 and finish at 2pm. If the export runs at 1.30, it will not see 1.05 uncommited transaction and the invoice will not be exported
+To start with let's describe the typical mistake that sometimes I saw on projest. We need somehow track incremental changes and sometimes people using CreatedDateTime for this. The idea is you export all data up to the current time, save this time and next time process all records starting from this time. The problem with this aproach is that it doen't take into consideration existing transactions. The SQL transaction may start in 1pm, create an invoice at 1.05 and finish at 2pm. If the export runs at 1.30, it will not see 1.05 uncommited transaction and the invoice will not be exported. So better to avoid such architecture.
 
-In the following implementation I propose the following - Add 2 fields IsExported and ExportedDateTime to the invoices and update these fields after the export. It may not sound technically perfect(for example DMF may use SQL change tracking), but  simplifies troubleshooting and provides a full visibility to a user, you can just open invoice and see it's status 
+To implement incrementatl tracking I propose the following: Add 2 fields IsExported and ExportedDateTime to the invoices and update these fields after the export. It may not sound technically perfect(for example DMF may use SQL change tracking, so you don't need add any fields), but simplifies troubleshooting and provides a full visibility to a user, you can just open invoice and see it's status and when it was exported.
+
+Another important concept here is there can be a situation when we need to reexport some data(for example export may contains errors or we need to add additional information to the export). WIth these status fields it is quite easy to implement
 
 
 
