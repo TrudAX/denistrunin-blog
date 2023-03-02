@@ -61,13 +61,15 @@ Also the poing to consider here that PROD relase can't be fully automated and re
 
 I asked the question on LinkedIn and got the following results
 
+![Poll results](PollUpdateTime.png)
+
 Make sure that you discuss this with the person who will do releases that some overtime work is needed.
 
 ### Branch management
 
 During the GoLive phase simplify the brach namagement as simple as possible. I suggest keep just one Main branch or the version of this stragegy as Main-Release where the Release is just a copy of Main for most of the time
 
-## Integration issues 
+## Integration issues
 
 During the initial GoLive phase you may see the full set of error types related to integrations:
 
@@ -90,27 +92,29 @@ I can recomend to consider [XPPInteg(External integration)](https://github.com/T
 
 ## Update planning and Feature management
 
-Microsoft releasing 8 updates per year and allow you pause 
+Microsoft releasing 8 updates per year and allow you pause 2 updates. I suggest to do this pause after GoLive.
 
+Feature management contains triggers for gradually onboarding to new features for exising client(it is not a configuration tool). If you a new client the good strategy may be to enable all features before main UAT. In this case you test the current version of the system, not legacy code.
 
-
-## Tooling 
+## Tooling
 
 The good tools may really simplify some issues resolutions. What I have used on the latest projects
 
-Field list
+[DEV tools](https://github.com/TrudAX/XppTools#devtools-model)
+
+### Field list
 
 May be used for quicly debug and change values.
 
-Call Stack to Infolog
+### Call Stack to Infolog
 
 Several times it allowed us to resolve the issue in several munutes instead of spending hours on it
 
-SQL Execute
+### SQL Execute
 
 Great for doing quick repors. In the last update I added separate roles for select and update the data and output to Excel. The standard aproach is to export the database to Tier2 that is not instant
 
-Execute custom code
+### Execute custom code
 
 Microsoft did a great job by introducing the execute code utility. Howewer the  aproval process they implemented is quite strange, they run the class in the transaction(not allowing dialogs) and require 2 people approval to do a final run. 
 
