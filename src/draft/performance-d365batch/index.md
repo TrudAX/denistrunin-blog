@@ -1,70 +1,79 @@
----
-title: "D365FO Performance issue - batch job stucked in Executing status"
-date: "2021-05-27T22:12:03.284Z"
-tags: ["Performance", "PowerBI", "Performance audit"]
+﻿---
+title: "D365FO batch job errors and how they may affect the performance"
+date: "2023-05-13T22:12:03.284Z"
+tags: ["Performance"]
 path: "/performance-d365batch"
 featuredImage: "./logo.png"
-excerpt: "The blog post describes how D365FO batch framework handle errors and what kind on problem is may cause"
+excerpt: "The blog post describes how D365FO batch framework handle errors and what kind of problems it may cause"
 ---
 
-In the current versoion of Dynamics 365 for Finance and Operation Microsoft introduced slightly new batch job processing logic with several main changes 
+In the current version of Dynamics 365 for Finance and Operation, Microsoft introduced an updated batch job processing logic with several main changes:
 
-- No dedicated AOS services 
-- Batch retries consept
+- No dedicated AOS services
+- Batch retries concept
 
-The consept is not complex and described in the following presentation, but may be very confusing when you see it in a real life. I will try to provide a sample class to demonstate it and discuss how it may affect real life batch processing and cause several issues
+D365FO batch jobs run in the cloud, so there is no guarantee of successful execution. For example, the batch job may be moved to a different batch server, or the SQL database may be migrated to another pool. In both cases, the execution fails with a system error. To handle these cases, Microsoft has introduced the batch Retryable feature.
 
-## Some theory behind this
+The concept is not complex and is explained in this presentation, [Introduction to the BatchRetryable Feature](https://community.dynamics.com/365/dynamics-365-fasttrack/b/techtalks/posts/introduction-to-the-batchretryable-feature-august-2-2021). However, it may be very confusing when you see it in real life. In this post, I will demonstrate the concept with a sample class and discuss its potential impact on real-life batch processing scenarios.
 
-I asked this question in my linkedIn page(thank you everyone who answered) and got the following results
+## Exploring with a Simple Test Class
 
-I have the following run base class, what will be the execution time 
+I recently posted a question on my LinkedIn page (many thanks to all who responded), and the results were intriguing:
 
-Only 4% answered correctly, the correct time will be 500 seconds. Feel free to download the sample class and play with it.
+![Poll execution time](Poll.png)
 
-Let's discuss how this may happen 
+Only 4% answered correctly; the correct time would be 500 seconds. Feel free to download the [sample class](https://github.com/TrudAX/XppTools/blob/master/DEVTools/DEVBatchControlUtil/AxClass/DEVBatchControlTestClass.xml) and play with it.
 
-D365FO batch job is executing in the cloud, so there is no guarantie that the execution will be sucessfull. The batch job may be migrated to a different Batch server or the SQL Database may be migrated to different pool. In both cases execution fails with the system error. To cover this cases Microsoft introduced Batch retried mechanism
+![Execution duration](ExecDuration.png)
 
-So in our case the batch job starts on the specified time and after 60 seconds it generates the error. The batch framework checks the number of retries(and it will be 0) and compares this value with the maximum retries value(that is 5). So it desided to execute batch job again. It puts it into the queue(so the may be some delay between it started again). The total execution times will be around 500 seconds
+Let’s discuss how this happens.
 
-The next interesting question will be - how many errors do you see in Batch job execution history for this long runnig batch job. And the answer is more confusing - you don't see any errors during execution and see only one last error at the end.
+When a batch job starts and encounters an error after 60 seconds, the batch framework checks the number of retries. If this is less than the max retries (5), it executes the batch job again. This cycle(with some queue waits) extends the total execution time to about 500 seconds. 
 
+It then raises an interesting question: how many errors do you see in the Batch job execution history for this long-running batch job?
 
+![Execution log](ExecLog.png)
 
-## Real-life scenaio
+And the answer is more surprising - you don’t see any errors generated during execution and only see one final error at the end.
 
-Let's discuss how this behaviour may affect D365FO batch job monitoring
+## A Real-life scenario
 
-### Batch job stuck in Executing
+Now, let's explore how this behaviour can affect real-life batch job execution in D365FO.
 
-This is probably the most common case you may see. Imagine you have a very critical bath job that should have a predictable exection time of 1h. For example you you do some orders reservation at 6am and at 8am you warehouse starts processing these reserved orders. You did all performance testing and also have 1h between 7am-8am as a backup time. But you see the job Executing at 7am, Executing at 8am(where the problems begins), Executing at 9am(where call starting involving management). 
+### Batch job stuck in Executing status
 
-The reason for this may be very simple,  for example one of the orders has a new unit of measure that doesn't have a conversion setup. The batch job generates the error, D365FO batch framework desided to retry this job 5 times. The very confusing part that you don't see any errors in log, also if you ask Microsoft to check the top queries or servers load, they also will not see any unusual values.
+This is a performance problem. Imagine you have a critical bath job that should complete within 1 hour. For example, you do some order reservations at 6 am and at 8 am your warehouse starts processing these reserved orders. You did all the performance testing (and verified that it always takes 1 hour) and have 1 hour between 7 am and 8 am as a buffer time. But someday, you notice that the job is still executing at 7 am and continues to execute at 8 am, which is when the problems begin. It keeps executing at 9 am, involving management in the troubleshooting process.
 
-The proper troubleshooting should probably check the number of retries, if it is more than 1, cancel the current execution, run it without a batch mode and see the error
+![Timeline](Timeline.png)
+
+The root cause of this issue could be a simple error, such as a new unit of measure without a conversion setup. When the batch job encounters this error, the batch framework retries the job five times. The confusing part is that you don't see any errors in the log. Even if you ask Microsoft to check the top queries or server load, they won't find any unusual values.
+
+To troubleshoot this issue, check the number of retries. If the number exceeds one, cancel the current execution, run it without batch mode, and investigate the error.
 
 ### Email send procedure
 
-This may be a second case. You have a report that should sends as a e-mail to the specified customers. You run it a a daily batch job that executes this report. Some day when there will be the problem with one e-mail some customers may get a 5 copies, and some - none  
+Another scenario involves a batch job that sends reports as emails to customers. This job runs daily to execute the report. However, due to a problem with one email, some customers might receive five copies on a certain day while others receive none.
 
-Fixing this behaviour may be quite complex, on one project we implemented so called e-mail send log to track what was send and what was not.
+Fixing this behaviour may be complex. In one of our projects, we implemented an email send log to track what was sent and what was not, providing better visibility and control.
 
-### The opposite case - parrallel reservation
+### The opposite case - process waves procedure
 
-Sometimes people knows about this behavour and try to avoid it. 
+Some developers are aware of this behaviour and try to avoid it (by using catch-all logic). For example, let’s review the process wave logic:
 
-As an example we can take Report as finished procedure. During the procedure the system tries to pick some items and it is a typical situation that there may not be enought onhand do do this picking. In this case the procedure generate the error(not enought onhand), but to prevent retries(that are not help in this case) the procedure marks batch job as Succeded. In general looks good.
+- There are processes (e.g. running Release to warehouse from the user interface) that automatically create multiple batch jobs to process waves.
+- Each batch job runs wave processing, which includes the picking step, where the system tries to find available on-hand inventory.
+- Since we have parallel jobs, they might select the same on-hand data, resulting in the error "Not available on-hand" for some jobs(which is a typical and expected situation).
+  
+The problem exists in WHSPostEngine::post(waveTable); method.
 
-But what may happens if you have several procedures in parrallel. They may find the same dimension for the re
+![WHSPostEngine](WHSPostEngine.png)
 
+In this method, a try/catch block catches all errors and marks the batch job as "Processed," even if the processing failed.
 
-
-
+In this case, a retry feature may be helpful, as the second run may find free items without affecting parallel jobs, but it is not used in this case.
 
 ## Conclusion
 
-In this blog post I provided some samples on how to implement performance monitoring in Dynamics AX and analyse performance of Dynamics AX operations with Power BI. Sample files(xpo that contains log table, form and a helper class) can be found in the following [folder](https://github.com/TrudAX/TRUDScripts/tree/master/Performance/Jobs/TimeLogTable).
+The current implementation of D365FO batch jobs error handling is very confusing. The main problems are the default retry count of 5 (which would be more reasonable to set at 2 or 3) and that no log is saved for failed runs. Additionally, the framework should provide some default behaviour instead of developers having to write boilerplate code to set up retry logic.
 
-I hope you find this information useful. Don't hesitate to contact me in case of any questions or if you want to share your Dynamics AX/D365FO operations monitoring approach. 
-
+I hope the examples presented in this blog post have helped you better understand the batch job process and its potential challenges. If you have any questions or want to share your D365FO batch job cases, please feel free to contact me.
