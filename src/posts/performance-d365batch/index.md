@@ -1,5 +1,5 @@
 ﻿---
-title: "D365FO batch job errors and how they may affect the performance"
+title: "Batch Job errors in D365FO: How they can ruin the performance and how to fix them"
 date: "2023-05-13T22:12:03.284Z"
 tags: ["Performance"]
 path: "/performance-d365batch"
@@ -28,7 +28,7 @@ Only 4% answered correctly; the correct time would be 500 seconds. Feel free to 
 
 Let’s discuss how this happens.
 
-When a batch job starts and encounters an error after 60 seconds, the batch framework checks the number of retries. If this is less than the max retries (5), it executes the batch job again. This cycle(with some queue waits) extends the total execution time to about 500 seconds. 
+When a batch job starts and encounters an error after 60 seconds, the batch framework checks the number of retries. If this is less than the max retries (5), it executes the batch job again. This cycle(with some queue waits) extends the total execution time to about 500 seconds.
 
 It then raises an interesting question: how many errors do you see in the Batch job execution history for this long-running batch job?
 
