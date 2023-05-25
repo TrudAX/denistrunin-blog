@@ -1,6 +1,6 @@
 ﻿---
 title: "Batch Job errors in D365FO: How they can ruin the performance and how to fix them"
-date: "2023-05-13T22:12:03.284Z"
+date: "2023-05-25T22:12:03.284Z"
 tags: ["Performance"]
 path: "/performance-d365batch"
 featuredImage: "./logo.png"
