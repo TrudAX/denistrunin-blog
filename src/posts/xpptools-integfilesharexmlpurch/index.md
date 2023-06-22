@@ -284,7 +284,7 @@ And different exchange media:
 
 - Azure File Share
 - Azure Service Bus
-- SFTP(in progress)
+- SFTP
 
 This may or may not be appropriate in your case(there are different options how to implement this). Anyway, I recommend using the following checklist while designing the integration: [Integration solution specification](https://github.com/TrudAX/TRUDScripts/blob/master/Documents/Integration/Integration%20Data%20Flow%20Requirements.md).
 
