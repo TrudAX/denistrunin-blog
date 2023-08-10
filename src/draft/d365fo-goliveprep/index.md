@@ -83,8 +83,8 @@ For inbound integration:
 
 For outbound integration typical problems are the following:
 
-- External system may complain that they didn't reveived some documents from you
-- Reveived messages contained wrong values for individual fields
+- External system may complain that they didn't receive some documents from you
+- Received messages contained wrong values for individual fields
 
 On the top of that there may always be errors in the X++ code that is processing integration messages or you may expect the performance issues. 
 
