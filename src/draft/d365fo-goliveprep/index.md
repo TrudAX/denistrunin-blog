@@ -8,7 +8,7 @@ I wrote an article how to do an Enviroments plannig, but here I want to outline 
 
 ### Naming convention
 
-Microsoft provides 1 Tier2 enviroment as a part of the standard subscription. The biggest hint here - don't name this enviroment as UAT(User testing). Instead It should be named as PrePROD(PP or PPN). 
+Microsoft provides 1 Tier2 enviroment as a part of the standard subscription. The biggest hint here - don't name this enviroment as UAT(User testing). Instead It should be named as PrePROD(PP or PPN).
 
 The problem here if you have some issue that can't be replicated on DEV/TEST enviroment, it is likelly a data-related issue, and you need to create a database copy. **PROD** database can be copied to **PRE-PROD** only. If the enviroment is named as UAT it may create wrong feeling for some users that it is a test playground for their testing and when you try to do a restore they may complain that you deleted their important test cases.  
 
@@ -16,7 +16,7 @@ So I suggest a emphasize the fact that **PRE-PROD** enviroment can be restored f
 
 ### Proactive restore process
 
-For the first several days of GoLive, I suggest doing **PRE-PROD** refresh proactively every day e.g. at the end of the day. So All PRE-PROD data will be overwritten. This may create an issue for integrations and some external access as encrypted data will be not copied during the refresh. Create a document or an automation procedure that allow to restore these settings, the main criteria here - it should not require a lot of human time to run. We used the following actions: 
+For the first several days of GoLive, I suggest doing **PRE-PROD** refresh proactively every day e.g. at the end of the day. So All PRE-PROD data will be overwritten. This may create an issue for integrations and some external access as encrypted data will be not copied during the refresh. Create a document or an automation procedure that allow to restore these settings, the main criteria here - it should not require a lot of human time to run. We used the following actions:
 
 1. Run the refresh from PROD procedure(for small DB It takes ~ 1h, also there are some rumors that it may work faster if you do a restore to a specific time)
 2. Run a script that adjusts test settings
@@ -55,11 +55,11 @@ How release happens and some timings:
 
 - Developer fix and test the issue on DEV VM
 - The fix is deployed to PreProd for the final validation(this should be done via Pipeline), it takes 1.5h
-- Release person should login to LCS, mark the PrePROD package as a Release candidate, swith to PROD enviroment, shedule the release(40 min of downtime)
+- Release manager should login to LCS, mark the PrePROD package as a Release candidate, swith to PROD enviroment, shedule the release(40 min of downtime)
 
 Also the poing to consider here that PROD relase can't be fully automated and requires some manual effors. This may vary from project to project
 
-I asked the question on LinkedIn and got the following results
+I asked the question on [LinkedIn](https://www.linkedin.com/posts/denis-trunin-3b73a213_question-to-people-who-maintain-d365fo-production-activity-7030514980114362368-sBVy?utm_source=share&utm_medium=member_desktop) and got the following results:
 
 ![Poll results](PollUpdateTime.png)
 
@@ -88,7 +88,7 @@ For outbound integration typical problems are the following:
 
 On the top of that there may always be errors in the X++ code that is processing integration messages or you may expect the performance issues. 
 
-I can recomend to consider [XPPInteg(External integration)](https://github.com/TrudAX/XppTools#devexternalintegration-submodel) module that is designed to provide all logging and replay/debug every message to investigate such kind of issues, it worked really well for the latest projects. But if you using some other integration approach make sure that the team has a plan to resolve every type of integration issues. 
+I can recomend to consider [XPPInteg(External integration)](https://github.com/TrudAX/XppTools#devexternalintegration-submodel) module that is designed to provide all logging and replay/debug every message to investigate such kind of issues, it worked really well for the latest projects. But if you using some other integration approach make sure that the team has a plan to resolve every type of integration issues.
 
 ## Update planning and Feature management
 
@@ -98,29 +98,37 @@ Feature management contains triggers for gradually onboarding to new features fo
 
 ## Tooling
 
-The good tools may really simplify some issues resolutions. What I have used on the latest projects
-
-[DEV tools](https://github.com/TrudAX/XppTools#devtools-model)
+The good tools may really simplify some issues resolutions. I highly recomend to check what is availible in the current [DEV tools](https://github.com/TrudAX/XppTools#devtools-model). Let's see how some of them may be used during the support phase
 
 ### Field list
 
-May be used for quicly debug and change values.
+May be used for quickly check data, and compare values from different records. E.g. if you have 2 sales orders that looks similar to you, but some buttons are not visible for the second one, you can easily compare these records
+
+![Fields list](FieldList.png)
 
 ### Call Stack to Infolog
 
-Several times it allowed us to resolve the issue in several munutes instead of spending hours on it
+It is a real time saver. Several times it allowed us to resolve the issue in several munutes instead of spending hours on data restore/debugging. Enable them for the key users and for every message it will log an X++ call stack. Some D365FO messages are not clear and when you get something like "Account not specified" this tool allow to see the X++ call stack of the message
+
+![Call stack](DevCallStackInfoMain.jpg)
+
+**Standard solution**: Restore database, put a breakpoint into info.add();
 
 ### SQL Execute
 
-Great for doing quick repors. In the last update I added separate roles for select and update the data and output to Excel. The standard aproach is to export the database to Tier2 that is not instant
+Great tool to data analysis. A lot of people call it unsafe(not considering ER where you can do the similar modifications), so in the last update I added separate roles for Select and Update mode and extended logging. Also added a function to export results to Excel with correct Enums and DateTime convertions.
+
+![SQL Execute](DEVSQLExecute.png)
+
+**Standard solution**: Export database to Tier2, connect via SQL Management Studio
 
 ### Execute custom code
 
-Microsoft did a great job by introducing the execute code utility. Howewer the  aproval process they implemented is quite strange, they run the class in the transaction(not allowing dialogs) and require 2 people approval to do a final run. 
+On every project so far there was a case where we require to change values in Inventory or Ledger transactions. Some data may not be loaded correctly, or parameters missing, or users can press wrong buttons or choose wrong accounts etc... Microsoft did a great job by introducing the [Run custom X++ scripts with zero downtime](https://learn.microsoft.com/en-us/dynamics365/fin-ops-core/dev-itpro/deployment/run-custom-scripts) utility. Howewer the  aproval process they implemented is quite strange, they run the class in the transaction(not allowing dialogs) and require 2 people approval to do a final run.
 
-But the actual project scenario is different. You write a custom class and run it on Pre-PROD then ask key users to confirm. If they confirms the data change, you run the same class on PROD. So there is nothing to confirm from their side when the code reached production. 
+The actual project scenario is different. You write a custom class that is doing data correction and run it on Pre-PROD then ask key users to confirm. If they approve the changed data, you run the same class on PROD. So there is nothing to confirm from their side when the code reached Production.
 
-The improved code execution util just removes all standatd validations and provide a form to run a custom class without external transaction(so you can use dialogs)
+The improved Code execution util just removes all standard validations and provide a form to run a custom class without external transaction(so you can use dialogs)
 
-
+![Custom script](DEVCustomScripts.png)
 
