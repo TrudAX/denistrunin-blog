@@ -116,7 +116,9 @@ It is a real time saver. Several times it allowed us to resolve the issue in sev
 
 ### SQL Execute
 
-Great tool to data analysis. A lot of people call it unsafe(not considering ER where you can do the similar modifications), so in the last update I added separate roles for Select and Update mode and extended logging. Also added a function to export results to Excel with correct Enums and DateTime convertions.
+Great tool to data analysis. A lot of people call it unsafe(not considering ER where you can do the similar modifications), so in the last update I added separate roles for Select and Update mode and extended logging. Please note that [Microsoft does not provide assistance for correcting damaged data](https://learn.microsoft.com/en-us/power-platform/admin/support-overview?toc=%2Fdynamics365%2Ffin-ops-core%2Fdev-itpro%2Ftoc.json&bc=%2Fdynamics365%2Fbreadcrumb%2Ftoc.json#does-microsoft-provide-support-for-data-corruption)
+
+Also added a function to export results to Excel with correct Enums and DateTime convertions.
 
 ![SQL Execute](DEVSQLExecute.png)
 
