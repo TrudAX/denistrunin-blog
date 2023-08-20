@@ -2,25 +2,27 @@ Notes about Go-Live preparation
 
 
 
-## Enviroments plannig 
+## Enviroments plannig
 
-I wrote an article how to do an Enviroments plannig, but here I want to outline some management hints
+I wrote an article how to do an Enviroments [performance](https://denistrunin.com/performanceD365-tierperf/), but here I want to outline some plannig hints.
 
-### Naming convention
+Microsoft provides 1 Tier2 enviroment as a part of the standard D365FO subscription. The main hint here: don't name this enviroment as UAT or TEST. Instead It should be named as PrePROD(PP or PPN).
 
-Microsoft provides 1 Tier2 enviroment as a part of the standard subscription. The biggest hint here - don't name this enviroment as UAT(User testing). Instead It should be named as PrePROD(PP or PPN).
+The problem here if you have some issue that can't be replicated on DEV/TEST enviroment, it is likelly a data-related issue, and you need to create a database copy. **PROD** database can be copied to **PRE-PROD** only. If the enviroment is named as UAT it may create wrong feeling for some users/managers that it is a test playground for their testing and when you try to do a restore they may complain that you deleted their important test cases.  
 
-The problem here if you have some issue that can't be replicated on DEV/TEST enviroment, it is likelly a data-related issue, and you need to create a database copy. **PROD** database can be copied to **PRE-PROD** only. If the enviroment is named as UAT it may create wrong feeling for some users that it is a test playground for their testing and when you try to do a restore they may complain that you deleted their important test cases.  
+So I suggest a emphasize the fact that **PRE-PROD** enviroment can be restored from **PROD** anytime and it should not contain any valuable data. Also try to avoid the approval procedure for PROD to PRE-PROD data refresh, just a notification should be enough. If the project involve development, the client need to have at least two Tier2 enviroments(one PreProd and one for user testing)
 
-So I suggest a emphasize the fact that **PRE-PROD** enviroment can be restored from **PROD** anytime and it should not contain any valuable data. Also try to avoid the approval procedure for PRE-PROD refresh, a normal notification should be enough.
+For Development VMs: never use a standard Development configuration from LCS The default is 3HDD which gives you only 1500 IOPS total, that will be consumed by the Operation system itself. Everything will be slow. D8v5 with 15HDDs is [a better](https://denistrunin.com/devvm-perfv13) choise.
+ 
+## Proactive restore process
 
-### Proactive restore process
+For the first several days of GoLive, I suggest doing **PRE-PROD** refresh proactively every day e.g. at the end of the day. So All PRE-PROD data will be overwritten. This may create an issue for integrations and some external access as encrypted data will be not copied during the refresh. Create a document or an automation procedure that allow to restore these settings, the main criteria here, it should not require a lot of human time to run. We used the following actions:
 
-For the first several days of GoLive, I suggest doing **PRE-PROD** refresh proactively every day e.g. at the end of the day. So All PRE-PROD data will be overwritten. This may create an issue for integrations and some external access as encrypted data will be not copied during the refresh. Create a document or an automation procedure that allow to restore these settings, the main criteria here - it should not require a lot of human time to run. We used the following actions:
-
-1. Run the refresh from PROD procedure(for small DB It takes ~ 1h, also there are some rumors that it may work faster if you do a restore to a specific time)
+1. Run the refresh from PROD procedure(for small DB it takes ~ 1h)
 2. Run a script that adjusts test settings
-3. Run an export job from LCS
+3. Run an export job from LCS (that also takes at least 1h)
+
+So if something happens there is some chance that a developer can restore DB and start debugging in 1-2h need to restore a database and start 
 
 ### Timings that are knows by the project team
 
@@ -29,8 +31,6 @@ If the issue is happeting in PROD, you do you best to understand it and if it is
 By default this process takes a lot of manual steps, but I shared some automation scripts that may save some time
 
 If you have multiple developers that require fresh data I suggest the following approach - Perform backpack to SQL conversion on one VM and then load the SQL backup to Azure file share. Then developers can use this script to upload the file to their boxes in one click
-
-
 
 ## Release management
 
@@ -92,9 +92,13 @@ I can recomend to consider [XPPInteg(External integration)](https://github.com/T
 
 ## Update planning and Feature management
 
-Microsoft releasing 8 updates per year and allow you pause 2 updates. I suggest to do this pause after GoLive.
+Microsoft releasing 8 updates per year and allows to pause 2 updates. I suggest to do this pause during GoLive.
 
-Feature management contains triggers for gradually onboarding to new features for exising client(it is not a configuration tool). If you a new client the good strategy may be to enable all features before main UAT. In this case you test the current version of the system, not legacy code.
+Feature management contains triggers for gradually onboarding to new features for exising client(it is not a configuration tool). If you a new client the good strategy may be to enable all features before main User testing. In this case you test the current version of the system, and not the legacy code. 
+
+![Feature management](FeatureManagement.png)
+
+So to do this: Press Enable all button and then exclude Features marked as "Preview".
 
 ## Tooling
 
@@ -134,3 +138,22 @@ The improved Code execution util just removes all standard validations and provi
 
 ![Custom script](DEVCustomScripts.png)
 
+## Automation scripts
+
+A very important step in project flow is to automate as more as practically possible. On out project we use the following scripts
+
+- Automated build and deployment pipelines. This will require a service account user without MFA. A sample instruction for pipeline setup is located here TODO
+- Script to [prepare the development VM](https://github.com/TrudAX/TRUDScripts/blob/master/D365FO/PrepareNewVMScript.ps1). It guaranties that all tools will be availiable on any project VM
+- Script to [refresh the code](https://github.com/TrudAX/TRUDScripts/blob/master/D365FO/RestoreCode.ps1) on DEV VM. It can compile one or all models with the correct compile sequence
+- Various scripts to support [development process](https://github.com/TrudAX/TRUDScripts/blob/master/D365FO/UsefulScripts.ps1). Most important here, restore Tier2 database and share it via a separate storage account
+- SQL script to process database after PROD restore(enabling users, change integration settings to Test values)
+
+## Summary
+
+In this post I tried to describe some practical experiece for technical preparatoin to GoLive D365FO projects. In general it is quite simple, you need to organize an efficient process for the following activities:
+
+- Deliver fixes from Development VM to PROD
+- Deliver test cases for PROD issues to Development VM(data restore)
+- Perform system monitoring to be able troubleshoot typical issues
+
+but the complexity in the details. Hope you find this post usefull, don't hesitate to post questions or if you want to add something.
