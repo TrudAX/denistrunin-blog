@@ -1,6 +1,8 @@
 Notes about Go-Live preparation
 
+Go-live preparation
 
+Now that we have completed all the other phases of the project, testing has been completed, and we all agree that the project is ready for deployment, we now start the go-live phase. Here, we develop a detailed go-live plan that outlines the sequence of activities and tasks required to transition from the current system to Microsoft Dynamics
 
 ## Enviroments plannig
 
