@@ -65,7 +65,7 @@ Before diving into the setup, perform a few essential pre-checks:
    </packages>
    ```
 
-   Obtain the version number from the package files.
+   Obtain the version number from the package files(there should be 2 different versions, 2 for Applications and 2 for Platform).
 
    ![Version number](VersionNumber.png)
 
@@ -121,6 +121,13 @@ Open the created pipeline and make the following adjustments:
    ![Licence](Licence.png)
 
 5. Run the pipeline and verify that everything is working as expected.
+
+## Updating Build Pipeline to a new version
+
+If you need to update a Build Pipeline to a new version follow these steps:
+
+1. Execute steps 1-6 from the Create pipeline process
+2. Copy **nuget.config** and **packages.config** files to the AxBuild solution folder(replace existing files).
 
 ## Creating a New Release Pipeline
 
