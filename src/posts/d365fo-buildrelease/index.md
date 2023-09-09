@@ -122,7 +122,7 @@ Open the created pipeline and make the following adjustments:
 
 5. Run the pipeline and verify that everything is working as expected.
 
-## Updating Build Pipeline to a new version
+## Updating the Build Pipeline to a new version
 
 If you need to update a Build Pipeline to a new version follow these steps:
 
