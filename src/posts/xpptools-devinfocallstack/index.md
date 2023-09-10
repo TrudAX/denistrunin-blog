@@ -1,7 +1,7 @@
 ---
 title: "D365FO Infolog call stack"
 date: "2021-09-24T20:12:03.284Z"
-tags: ["XpTools"]
+tags: ["XppTools"]
 path: "/xptools-devinfo call stack"
 featuredImage: "./logo.png"
 excerpt: "This post describes an extension for the standard D365FO system that allows saving stack trace data for infolog messages."
