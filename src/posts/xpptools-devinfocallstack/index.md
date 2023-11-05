@@ -75,6 +75,28 @@ Then form **DEVCSXppCallStackTable** displays the saved data.
 
 An additional tool that may be combined with this one is [Arbela AOT Browser](https://arbelatech.github.io/aotbrowser/) that allows viewing the code on Tier1 environments without Visual Studio usage.
 
+## Trace dialog calls (update 05.11.2023)
+
+The Trace dialog calls option allows you to see the class and the stack trace information of any dialog form in D365FO. You can enable or disable this option for each user by checking or unchecking the Trace dialog calls checkbox in the “Dev Tools – Call stack” form.
+
+![Trace DialogCalls Option](TraceDialogCallsOption.png)
+
+To demonstrate how this feature works, I ran some periodic operations that use dialogs, such as:
+
+- History by transaction report
+- Create prenotes
+- Rebate management
+
+These operations use different types of dialogs, such as Reports, Runbase classes, and SysOperation classes.
+
+![Sample dialog operation](SampleDialogOperation.png)
+
+After running the operations, I opened the Trace form and saw the class and the X++ stack trace information for each dialog
+
+![Dialog Trace Results](DialogTraceResults.png)
+
+This feature is very handy when you need to quickly identify the related classes and operations in D365FO. I have used it several times during calls with business users and it works very nicely.
+
 ## Summary
 
 You can download the tool using the following link - https://github.com/TrudAX/XppTools#installation. I hope you may find this tool useful, also feel free to comment if you see something is missing.
