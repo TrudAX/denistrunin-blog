@@ -142,6 +142,8 @@ To implement incrementatl tracking I propose the following: Add 2 fields IsExpor
 
 Another important concept here is there can be a situation when we need to reexport some data(for example export may contains errors or we need to add additional information to the export). WIth these status fields it is quite easy to implement
 
+https://www.linkedin.com/pulse/d365-fscm-recurring-integrations-francisco-zanon/
+
 
 
 ## Summary
