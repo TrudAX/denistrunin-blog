@@ -112,6 +112,21 @@ The problem is that for HDD based machines the test failed in the first attempt,
 
 ![HandWhenRunJob](HandWhenRunJob.png)
 
+## Update 10.0.37 local
+
+Recently I made an upgrade for my local PC and tested the performance of the local 10.0.37 VM with VS2022. 
+I upgraded to a Ryzen 7 7700X CPU(not the fastest, but close to the top CPU https://www.cpubenchmark.net/singleThread.html), and a Samsung 990PRO SSD(more than 1 million IOPS). The results are the following:
+
+- Full sync for the database: around 3 minutes
+- Recompile the project: almost instant (1.5 seconds)
+- Refresh the simple form (like CustGroup) after recompile: 25 seconds
+- Refresh the complex form (SalesTable) after recompile: 35 seconds
+- Put a breakpoint to SalesTable.init and attach to process: almost instant (2-3 seconds)
+
+Local VMs may not be the most convenient options, but if you write a lot of X++ code(with change/test/fix cycles), they are worth considering.
+
+To increase responce time even more enable Preload feature https://abhimantiwari.github.io/blog/Application-Initialization/ (thanks **Huber Gomez Hernandez** for this advice)
+
 ## Conclusion
 
 Let's summarize the current recommendations based on these tests for Visual Studio 2017 D365FO development environment and what to do if it is slow:
