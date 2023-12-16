@@ -16,7 +16,7 @@ import {
   LinkedinIcon,
   EmailIcon
 } from "react-share";
-import { OutboundLink } from "gatsby-plugin-google-analytics";
+import { OutboundLink } from "gatsby-plugin-google-gtag";
 import Layout from "../components/layout"
 import { graphql } from "gatsby";
 
