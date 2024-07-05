@@ -1,0 +1,48 @@
+analyze the provided TSQL query and write why it generates an error "Invalid column name 'COMPANYCODE'" :
+
+with s as (
+select
+src.COMPANYCODE as [Company Code]
+,src.[INVENTTRANSID] as [Inventory Transaction Id]
+/*
+,case
+when SALESTYPE=4 then isnull(nullif(so.COSTPRICE,0),ipp.PRICE) --Return order: must use the original price.
+else
+case
+when nullif(src.INVOICEID,'') is not null then (src.COSTAMOUNTPOSTED + isnull(ivs.COSTAMOUNTADJUSTMENT,0) ) / nullif(src.QTY,0)
+when nullif(src.PACKINGSLIPID,'') is not null then src.COSTAMOUNTPHYSICAL / src.QTY
+else ipp.PRICE
+end
+end as [Cost Price]
+*/
+,isnull(src.ReservedDatePhysical,'1900-01-01') [Reserved Date Physical]
+,isnull(src.[ReservedPhysical],0) as [Reserved Physical]
+		,src.[COSTAMOUNTPOSTED] as [Gross Cost Amount] 
+		,so.[SOAMOUNT] - src.[COSTAMOUNTPOSTED] as [Gross Margin Amount]		
+	from (
+	select	INVENTTRANSID
+			,COMPANYCODE 
+			,-SUM([COSTAMOUNTPOSTED]) as [COSTAMOUNTPOSTED]
+			,SUM([COSTAMOUNTPHYSICAL]) as [COSTAMOUNTPHYSICAL]
+			,SUM([QTY]) as [QTY]
+			,MAX([INVOICEID]) as [INVOICEID], MAX([PACKINGSLIPID]) as [PACKINGSLIPID] 
+			,-SUM(case when statusissue = 4 then [QTY] else 0 end) as [ReservedPhysical]
+			,MAX(case when statusissue = 4 then DATESTATUS else null end) [ReservedDatePhysical]
+	from  #DWInventoryValueCopy
+	group by INVENTTRANSID, COMPANYCODE
+	) src
+	inner join [ax7].[SalesLine] so on src.INVENTTRANSID = so.[INVENTTRANSID] and src.[COMPANYCODE] = so.[DataAreaId]
+	left join ax7.DWInventoryDimensions id on so.INVENTDIMID=id.INVENTDIMID and so.COMPANYCODE=id.COMPANYCODE)
+
+select * from s;  
+
+https://x.com/deepseek_ai/status/1802680388256768145
+
+GPT4 
+https://www.meta.ai/
+
+GPT-4o
+https://chat.deepseek.com/coder
+BING Copilot, Creative mode 
+https://gemini.google.com
+https://claude.ai (both free and 3-opus)
