@@ -127,7 +127,7 @@ Let's start with a simple case where you need to write X++ code that generates t
 
 ***Business scenario**: We want to export all companies' inventory onhand data to SFTP. Our export should be a CSV file that contains the following fields: 'Company', 'ItemId', 'InventLocationId', 'LastUpdDatePhysical', 'AvailPhysical'.*
 
-The following class solves this task
+The following class solves this task.
 
 ```csharp
 class DEVIntegTutorialExportBulkInventOnhand extends DEVIntegExportBulkBase
@@ -159,40 +159,174 @@ class DEVIntegTutorialExportBulkInventOnhand extends DEVIntegExportBulkBase
 }
 ```
 
-The class is very simple to modify and contains only the export logic; all related processes will be handled by the **External integration** framework. 
+The class is quite simple, but it contains a business definition for the export and defines an export flow(so, if you want to create a file per company instead of one file, it can be easily modified). The **External Integration** framework will handle all related processes. 
 
-After we setup this class, we get the following file as result: 
+After we setup this class, we get the following file as a result: 
 
 ![Simple onhand setup](SimpleOnhandXpp.png)
 
 
 
+### Export onhand and price data(X++ based on a query)
 
+Let's consider an export scenario with more advanced logic
 
+***Business scenario**: we want to implement a periodic export to SFTP of onhand data for one of our customers from his main Warehouse for a set of Items(the default should be 'Audio' Item group, but it should be configurable. The export should be a CSV file that contains the following fields: 'ItemId', 'InventLocationId', 'AvailPhysical', 'Price*
 
+To do this, we need to create a class that extends **DEVIntegExportBulkBase**. The code for this class contains the following blocks:
 
+A method that defines the initial query and settings, they just provide default values that can be overridden by the user:
 
-_**Business scenario**: our company has a store and we want to export daily onhand data from this store. We want the quantity in sales unit and we also want the current sales price. Our export should be a CSV file that contain the following fields: ItemId, Style, AvailiablePhysical(in sales unit) and Sales Price_
+```csharp
+class DEVIntegTutorialExportBulkOnhandPricesQuery extends DEVIntegExportBulkBase
+{
+    CustTable           custTable;
+    public Query exportQueryInit()
+    {
+        Query                 query;
+        QueryBuildDataSource  qBDS;
 
-In order to do this we need to create a class that extends DEVIntegExportBulkBase. The code for this class is the following
+        query   = new Query();
+        
+        qBDS = query.addDataSource(tablenum(InventTable));
 
-A developer should write only export business logic related to the export
+        qBDS = qBDS.addDataSource(tablenum(InventItemGroupItem));
+        qBDS.relations(true);
+        qBDS.addRange(FieldNum(InventItemGroupItem, ItemGroupId)).value('Audio');
 
-Warning message status. Export may finish Successfylly or may have an exception during the file generation(Error state). But sometimes you need to log an event, that the exported data has some issues, but still want to perform the export. For exampe, for some exported items we can't find a price. It is not a critical error, but we need to notify a user about this, he may adjust the query to exclude these items or notify another department to enter prices. To cover this scenario the export class may mark the status as Warning and the user may setup a standard alert for this
+        return query;
+    }
+    public DEVIntegMessageTypeTableOutbound initDefaultParameters(DEVIntegMessageTypeTableOutbound    _messageTypeTableOutbound)
+    {
+        DEVIntegMessageTypeTableOutbound  tableOutbound = super(_messageTypeTableOutbound);
+        tableOutbound.FileNameParameterD   = 'yyyyMMdd_HHmm';
+        tableOutbound.FileName             = 'OnhandPrices_%d.csv';
+        tableOutbound.FileColumnDelimiter  = '|';
 
+        return tableOutbound;
+    }
+```
 
+A main export logic, that inits the file, uses the stored query to process export records.
 
-### Export invoices (incremental X++ procedure)
+```csharp
+    public void exportData()
+    {
+        container               lineData;
+        InventTable             inventTable;
+        Query                   query;
+        QueryRun                qr;
 
-Let's describe the scenario where we need an incremental export
+        //init parameters
+        DEVIntegParametersPerCompany integParametersPerCompany = DEVIntegParametersPerCompany::find();
+        DEV::validateCursorField(integParametersPerCompany, fieldNum(DEVIntegParametersPerCompany, ProductExportCustomer), true);
 
-**Business scenario**: our company wants to export customer invoices to external system. The export runs daily and should include all invoices for this day. The export file should contain Account number, InvoiceIId, SalesId, Department dimension, Item, Qty,  LineAmount
+        custTable = CustTable::find(integParametersPerCompany.ProductExportCustomer);
 
-To start with let's describe the typical mistake that sometimes I saw on projest. We need somehow track incremental changes and sometimes people using CreatedDateTime for this. The idea is you export all data up to the current time, save this time and next time process all records starting from this time. The problem with this aproach is that it doen't take into consideration existing transactions. The SQL transaction may start in 1pm, create an invoice at 1.05 and finish at 2pm. If the export runs at 1.30, it will not see 1.05 uncommited transaction and the invoice will not be exported. So better to avoid such architecture.
+        this.initCSVStream();
+        lineData = ['ItemId', 'InventLocationId', 'AvailPhysical', 'Price'];
+        this.writeHeaderLine(lineData);
 
-To implement incrementatl tracking I propose the following: Add 2 fields IsExported and ExportedDateTime to the invoices and update these fields after the export. It may not sound technically perfect(for example DMF may use SQL change tracking, so you don't need add any fields), but simplifies troubleshooting and provides a full visibility to a user, you can just open invoice and see it's status and when it was exported.
+        query   = this.exportQueryGet();
+        qr = new QueryRun(query);
+        
+        while (qr.next())
+        {
+            inventTable = qr.get(TableNum(InventTable));
+            this.itemRecord(inventTable);
+        }
 
-Another important concept here is there can be a situation when we need to reexport some data(for example export may contains errors or we need to add additional information to the export). WIth these status fields it is quite easy to implement
+        this.sendFileToStorage();
+    }
+```
+
+And a method that calculates the exported values 
+
+```csharp
+    void itemRecord(InventTable _inventTable)
+    {
+        InventDim       inventDimFind;
+        Price           price;
+        InventSum       inventSum;
+        
+        inventDimFind = null;
+        inventDimFind.InventLocationId  =   custTable.InventLocation;
+        inventDimFind.InventSiteId      =   custTable.InventSiteId;
+        inventDimFind   =   inventDim::findOrCreate(inventDimFind);
+
+        PriceDiscParameters parameters = PriceDiscParameters::construct();
+        parameters.parmModuleType(ModuleInventPurchSales::Sales);
+        parameters.parmItemId(_inventtable.ItemId);
+        parameters.parmInventDim(inventDimFind);
+        parameters.parmUnitID(_inventtable.inventTableModuleSales().UnitId);
+        parameters.parmPriceDiscDate(DEV::systemdateget());
+        parameters.parmQty(1);
+        parameters.parmAccountNum(custTable.AccountNum);
+        parameters.parmCurrencyCode(custTable.Currency);
+        PriceDisc       priceDisc = PriceDisc::newFromPriceDiscParameters(parameters);
+
+        if (priceDisc.findPrice(custTable.PriceGroup))
+        {
+            price       = CurrencyExchangeHelper::amount(priceDisc.price());
+        }
+        else
+        {
+            if (exportBulkStatus != DEVIntegExportBulkStatus::Warning)
+            {
+                warning(strFmt("Price is not found for %1 Item", _inventtable.ItemId));
+                this.setExportStatus(DEVIntegExportBulkStatus::Warning);
+            }
+        }
+        select sum(AvailPhysical) from inventSum
+            where inventSum.ItemId           == _inventTable.ItemId &&
+                  inventSum.Closed           == false &&
+                  inventSum.InventSiteId     == custTable.InventSiteId &&
+                  inventSum.InventLocationId == custTable.InventLocation;
+        
+        this.writeDataLine([
+                _inventTable.ItemId,
+                custTable.InventLocation,
+                inventSum.AvailPhysical,
+                price ]);
+```
+
+ The settings for such class will be the followings:
+
+![Prices query](PricesQuery.png)
+
+The resulting file will be like this:
+
+![Prices query results](PricesQueryResults.png)
+
+As in the previous example, a developer writes only export business logic related to the export.
+
+#### Warning message status
+
+This class also contains a concept called a **Warning** status. An export may finish successfully or may have an exception during the file generation(Error state). But sometimes, you need to log an event that the exported data has issues but still wants to perform the export. For example, in our case, we can't find a price for some exported items. It is not a critical error, but we need to notify a user about this, he may adjust the query to exclude these items or notify another department to enter prices. To cover this scenario, the export class may mark the status as **Warning,** and the user may set a standard alert for it.
+
+![Warning image](WarningImage.png)
+
+The same purpose for the skipped lines counter. If we need to skip some lines and notify a user about this, we can increase the Skipped counter that will be displayed in the log.
+
+### Export invoices to the EDI provider (incremental X++ procedure)
+
+Let's describe the scenario where we need an incremental export.
+
+***Business scenario**: our company wants to export customer invoices to an external EDI system. The export runs daily and should include all invoices for this day. The export file should contain information about customer invoices, lines and charges.*
+
+To start this task, you get an EDI specification document and need to figure out how it will be mapped to D365FO data
+
+![Typical EDI structure](TypicalEDIStructure.png)
+
+From the practical experience, the first question to ask is how the EDI line data is defined. In the best scenario, it may match what you have in invoice lines, but in more complex cases, they can be defined on a more granular level(like related inventory transactions) or on a more summary level(e.g. lines grouped by Item number). Such requirements may even create quite complex system modifications to support such line splits.
+
+The next decision is how to track incremental updates. The typical mistake that I sometimes see on projects is using the CreatedDateTime field for this. The idea is you export all data up to the current time, save this time and next time process all records starting from this time. The problem with this approach is that it doesn't take into consideration existing transactions. The SQL transaction may start at 1 pm, create an invoice at 1.05 and finish at 2 pm. If the export runs at 1.30, it will not see a 1.05 uncommitted transaction, and the invoice will not be exported. So, it is better to avoid such architecture.
+
+To implement incremental tracking, I propose the following: Add 2 fields, **IsExported** and **ExportedDateTime**, to the invoices and update these fields after the export. It may not sound technically perfect(for example, DMF may use SQL change tracking, so you don't need to add any fields), but it simplifies troubleshooting and provides full visibility to a user. They can just open an invoice and see its status and when it was exported.
+
+![EDI Invoice form](EDIInvoiceForm.png)
+
+So when the export runs in incremental mode, it should just take all records that are not exported. Another advantage of this approach is there can be a situation when we need to reexport some data(for example export may contains errors or we need to add additional information to the export). With these status fields it is quite easy to implement
 
 https://www.linkedin.com/pulse/d365-fscm-recurring-integrations-francisco-zanon/
 
