@@ -293,7 +293,7 @@ void itemRecord(InventTable _inventTable)
         price ]);
 ```
 
- The settings for this class will be the following:
+ The settings for such class will be the following:
 
 ![Prices query](PricesQuery.png)
 
@@ -450,4 +450,4 @@ In this post, I have described different types of periodic exports to file from 
 
 All used classes can be found on [GitHub](https://github.com/TrudAX/XppTools/tree/master/DEVTutorial/DEVExternalIntegrationSamples) and can be used as a starting point for your own integrations.
 
-I hope you find this information useful. As always, if you see any improvements, suggestions, or have questions about this work, don't hesitate to contact me.
+I hope you find this information useful. As always, if you see any improvements, suggestions, or questions about this work, don't hesitate to contact me.
