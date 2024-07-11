@@ -4,18 +4,18 @@ date: "2024-07-12T22:12:03.284Z"
 tags: ["Integration", "XppDEVTutorial"]
 path: "/integ-outboundsftp"
 featuredImage: "./logo.png"
-excerpt: "This blog post describes how to implement various scenarios for a periodic data export date from D365FO to a file and uploading it to SFTP."
+excerpt: "This blog post describes how to implement various scenarios for periodic data export from D365FO to a file and uploading it to SFTP server."
 ---
 
-**External integration** is a framework for implementing inbound and outbound integrations from D365FO. It supports several channels: Azure file share, SFTP, Azure service bus, and various integration types. The framework is designed to provide logging, error handling, and troubleshooting for various integration types.
+**External integration** is a framework designed for inbound and outbound integrations in D365FO. It supports several channels: Azure file share, SFTP, Azure service bus, and provides comprehensive features for logging, error handling, and troubleshooting.
 
 In this blog post, I will describe how to implement periodic data export from D365FO to a file and upload it to an SFTP server.
 
-## SFTP server setup
+## SFTP Server Setup
 
-Several years ago, Microsoft didn't support SFTP hosting, claiming it was obsolete in the cloud world. However, SFTP remains quite popular among clients. Finally, its support was added to the Azure storage service.
+A few years ago, Microsoft did not support SFTP hosting, claiming it was obsolete in the cloud world. However, SFTP remains quite popular among clients. Eventually, SFTP support was included in the Azure storage service.
 
-The option to access Azure storage via SFTP endpoint is described in the following topic: [SSH File Transfer Protocol (SFTP) support for Azure Blob Storage](https://learn.microsoft.com/en-us/azure/storage/blobs/secure-file-transfer-protocol-support). In brief, you need to create a storage account and enable SFTP access to it.
+To use Azure storage via an SFTP endpoint, you must first create a storage account and enable SFTP access. More information can be found here: [SSH File Transfer Protocol (SFTP) support for Azure Blob Storage](https://learn.microsoft.com/en-us/azure/storage/blobs/secure-file-transfer-protocol-support).
 
 ![SFTP Setup Azure](SFTPSetup.png)
 
@@ -23,59 +23,59 @@ Then, create an SFTP user:
 
 ![SFTP User creation](SFPTSetup2.png)
 
-Please note that SFTP access incurs additional charges compared to Azure file storage (about $10 per day). Some alternatives to Azure SFTP, e.g., [files.com](https://files.com), provide additional functions, like more granular access control.
+Please note that SFTP access incurs additional charges of about $10 per day compared to Azure file storage. Alternatives such as [files.com](https://files.com) offer additional features, including more granular access control.
 
-## Client library to connect to SFTP
+## Client Library for SFTP Connection
 
-There are several .NET libraries to work with SFTP, but probably the most popular is the open-source [SSH.NET](https://github.com/sshnet/SSH.NET). It adds a reference **Renci.SshNet.dll** that can be used in X++.
+Several .NET libraries are available for working with SFTP. One of the most popular is the open-source [SSH.NET](https://github.com/sshnet/SSH.NET). It adds a reference **Renci.SshNet.dll** that can be used in X++.
 
-To work with SFTP from the user interface, I recommend [FileZilla](https://filezilla-project.org/).
+For user interface operations, I recommend using [FileZilla](https://filezilla-project.org/).
 
 ![FileZilla](FileZilla.png)
 
-## System setup
+## System Setup
 
-Let's discuss common setup options before exploring different integration scenarios.
+Before exploring different integration scenarios, let's discuss common setup options.
 
 ### Connection types
 
 The first form to setup an SFTP connection is **External integration – Connection types**.
 
-It requires the hostname and User/Password to access this host.
+It requires the hostname and user/password credentials to access this host.
 
 ![Connection types](ConnectionTypes.png)
 
-The password can be stored in several formats:
+The password can be stored in several ways:
 
-- Manual entry - An unencrypted string that may be used for dev testing.
-- Encrypted - Encrypted value
-- Azure Key Vault - Link to the standard D365FO key vault that stores the password
+- Manual entry - An unencrypted string suitable for development testing.
+- Encrypted - An encrypted value.
+- Azure Key Vault - A link to the standard D365FO key vault that stores the password.
 
 ### Outbound message types
 
-In Outbound message types, we set parameters for our export.
+In Outbound message types, we set parameters for our data export.
 
 ![Outbound message types](MessageTypeForm.png)
 
 **Source group**
-Here, we specify a link to the connection type and a folder on the SFTP server where to export the data.
+Here, we specify a link to the connection type and a folder on the SFTP server for data export.
 
 **Processing group**
-Contains a link to the class that performs the export. The class is a standard RunBase class (extended from **DEVIntegExportBulkBase**) that can define custom parameters and use some base class helper functions.
+Contains a link to the class that performs the export. The class is a standard RunBase class (extended from **DEVIntegExportBulkBase**) that can define custom parameters and utilizes helper functions from the base class.
 
 **File parameters**
-The export often needs to create a file name with a **date** part in it. This setting allows the name template to be specified with the '%d' parameter. **Date format(%d)** defines how this symbol is converted to date(e.g., you can include date-time or use just date). The rules for format are defined by the standard .NET DateTime.ToString [format parameter](https://learn.microsoft.com/en-us/dotnet/api/system.datetime.tostring?view=net-7.0#system-datetime-tostring(system-string)).
+Often, exports require creating a file name that includes a **date** component. This setting enables specifying a name template using the '%d' parameter. **Date format(%d)** defines how this symbol is converted into a date (e.g., you can include date-time or use just date). The format rules are defined by the .NET DateTime.ToString [format parameter](https://learn.microsoft.com/en-us/dotnet/api/system.datetime.tostring?view=net-7.0#system-datetime-tostring(system-string)).
 
 **Delimiter** defines a CSV-type delimiter.
 
 **Advanced Group**
-The advanced group defines used log types and a Company range validation. The export runs in the current company, and some exports may be logically related only to certain companies. The **Company range** allows you to specify a list of companies where the export may run.
+The advanced group defines used log types and a Company range validation. The export runs in the current company, and some exports may be logically related only to certain companies. The **Company range** allows specifying a list of companies eligible for the export.
 
 ## Export scenarios
 
-Let's describe the most typical scenarios that can be used to export the data from D365FO.
+Let's describe the most typical scenarios that can be used to export data from D365FO.
 
-### Export store onhand data (no-code scenario)
+### Export Store Onhand Data (no-code scenario)
 
 **Business scenario**: *Our company has a store, and we want to export daily onhand data from this store to our website. We need to include ItemId, Warehourse, and AvailiablePhysical value.*
 
@@ -117,7 +117,7 @@ The examples above are great for prototyping, but "real world" export scenarios 
 
 ### X++ Export Implementation concept
 
-The External Integration framework provides the following development concept: We can't predict how complex our exports will be. They may export to different sources(like SFTP, Azure storage, Service Bus, Web service), export data to one file or multiple files, require different parameters, etc. To cover all possible scenarios, we can use a standard **RunBaseBatch** class. 
+The External Integration framework provides the following development concept: We can't predict how complex our exports will be. They may export to different sources (like SFTP, Azure storage, Service Bus, Web service), export data to one file or multiple files, require different parameters, etc. To cover all possible scenarios, we can use a standard **RunBaseBatch** class. 
 
 However, export classes will have some common methods. So, I created a base **[DEVIntegExportBulkBase](https://github.com/TrudAX/XppTools/blob/master/DEVTutorial/DEVExternalIntegration/AxClass/DEVIntegExportBulkBase.xml)** (that extends RunBaseBatch) to store these common properties and methods (like variables to store the number of export records, methods to create logs, write data to a file, etc.). The Export class should extend it.
 
@@ -293,7 +293,7 @@ void itemRecord(InventTable _inventTable)
         price ]);
 ```
 
- The settings for this class will be the following:
+The settings for this class will be the following:
 
 ![Prices query](PricesQuery.png)
 
@@ -410,7 +410,7 @@ while select custinvoicetrans
 .......        
 ```
 
-As the result, you will get a file similar to this one:
+As a result, you will get a file similar to this one:
 
 ![EDI file results](EDIInvoiceResult.png)
 
