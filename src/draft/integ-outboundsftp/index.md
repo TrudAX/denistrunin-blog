@@ -13,7 +13,7 @@ In this blog post, I will describe how to implement periodic data export from D3
 
 ## SFTP Server Setup
 
-A few years ago, Microsoft did not support SFTP hosting, claiming it was obsolete in the cloud world. However, SFTP remains quite popular among clients. Eventually, SFTP support was included in the Azure storage service.
+A few years ago, Microsoft did not support SFTP hosting, claiming it was obsolete in the cloud world. However, SFTP remains quite popular among clients and eventually, SFTP support was included in the Azure storage service.
 
 To use Azure storage via an SFTP endpoint, you must first create a storage account and enable SFTP access. More information can be found here: [SSH File Transfer Protocol (SFTP) support for Azure Blob Storage](https://learn.microsoft.com/en-us/azure/storage/blobs/secure-file-transfer-protocol-support).
 
@@ -69,7 +69,7 @@ Often, exports require creating a file name that includes a **date** component. 
 **Delimiter** defines a CSV-type delimiter.
 
 **Advanced Group**
-The advanced group defines used log types and a Company range validation. The export runs in the current company, and some exports may be logically related only to certain companies. The **Company range** allows specifying a list of companies eligible for the export.
+The advanced group defines used log types and a Company range validation. The exports run in the current company, and some exports may be logically related only to certain companies. The **Company range** allows specifying a list of companies eligible for export.
 
 ## Export scenarios
 
@@ -117,11 +117,11 @@ The examples above are great for prototyping, but "real world" export scenarios 
 
 ### X++ Export Implementation concept
 
-The External Integration framework provides the following development concept: We can't predict how complex our exports will be. They may export to different sources (like SFTP, Azure storage, Service Bus, Web service), export data to one file or multiple files, require different parameters, etc. To cover all possible scenarios, we can use a standard **RunBaseBatch** class. 
+The External Integration framework provides the following development concept: We can't predict how complex our exports will be. They may export to different sources (like SFTP, Azure storage, Service Bus, Web service), export data to one file or multiple files, require different parameters, etc. To cover all possible scenarios, we can use a standard **RunBaseBatch** class.
 
 However, export classes will have some common methods. So, I created a base **[DEVIntegExportBulkBase](https://github.com/TrudAX/XppTools/blob/master/DEVTutorial/DEVExternalIntegration/AxClass/DEVIntegExportBulkBase.xml)** (that extends RunBaseBatch) to store these common properties and methods (like variables to store the number of export records, methods to create logs, write data to a file, etc.). The Export class should extend it.
 
-### Export onhand data (simple X++ based procedure)
+### Export onhand data (simple X++ procedure)
 
 Let's start with a simple case where you need to write X++ code that generates the export data.
 
@@ -159,14 +159,14 @@ class DEVIntegTutorialExportBulkInventOnhand extends DEVIntegExportBulkBase
 }
 ```
 
-The class is quite simple, but it contains the following key parts: 
+The class is quite simple, but it contains the following key parts:
 
-- A business definition for the export 
+- A business definition for the export
 - An export flow
 
-If you want to create a file per company instead of one file, you can easily modify it. The **External Integration** framework will handle all related processes. 
+For example, if you want to create a file per company instead of one file, you can easily modify it. The **External Integration** framework will handle all related processes.
 
-After we setup this class, we get the following file as a result: 
+After we setup this class, we get the following file as a result:
 
 ![Simple onhand setup](SimpleOnhandXpp.png)
 
@@ -210,7 +210,7 @@ class DEVIntegTutorialExportBulkOnhandPricesQuery extends DEVIntegExportBulkBase
     }
 ```
 
-A main export logic that initializes the file and uses the stored query to process export records:
+A main export logic that initialises the file and uses the stored query to process export records:
 
 ```csharp
 public void exportData()
@@ -243,7 +243,7 @@ public void exportData()
 }
 ```
 
-And a method that calculates the exported values: 
+And a method that calculates the exported values:
 
 ```csharp
 void itemRecord(InventTable _inventTable)
@@ -305,7 +305,7 @@ As in the previous example, a developer writes only export business logic relate
 
 #### Warning message status
 
-This class also contains a concept called a **Warning** status. An export may finish successfully or may have an exception during file generation (Error state). But sometimes, you need to log an event that the exported data has issues but still want to perform the export. For example, in our case, we can't find a price for some exported items. It is not a critical error, but we need to notify a user about this; they may adjust the query to exclude these items or notify another department to enter prices. To cover this scenario, the export class may mark the status as **Warning,** and the user may set a standard alert for it.
+This class also contains a concept called a **Warning** status. An export may finish successfully or may have an exception during file generation (Error state). But sometimes, you need to log an event where the exported data has issues but still wants to perform the export. For example, in our case, we can't find a price for some exported items. It is not a critical error, but we need to notify a user about this; they may adjust the query to exclude these items or notify another department to enter prices. To cover this scenario, the export class may mark the status as **Warning,** and the user may set a standard alert for it.
 
 ![Warning image](WarningImage.png)
 
@@ -317,7 +317,7 @@ Let's describe a scenario where we need an incremental export.
 
 ***Business scenario**: Our company wants to export customer invoices to an external EDI system. The export runs daily and should include all invoices for this day. The export file should contain information about customer invoices, lines, and charges.*
 
-To start this task, you get an EDI specification document and need to figure out how it will be mapped to D365FO data.
+To start this task, you will receive an EDI specification document and need to determine how it will be mapped to D365FO data.
 
 ![Typical EDI structure](TypicalEDIStructure.png)
 
@@ -331,7 +331,7 @@ To implement incremental tracking, I propose the following: Add 2 fields, **IsEx
 
 So when the export runs in the Incremental mode, it just takes all records that are not exported. Another advantage of this approach is there can be a situation when we need to reexport some data (for example, the export may contain errors, or we need to add additional information to the export). With these status fields, it is quite easy to implement.
 
-The main **exportData** method:
+The main **[exportData](https://github.com/TrudAX/XppTools/blob/master/DEVTutorial/DEVExternalIntegrationSamples/AxClass/DEVIntegTutorialExportBulkCustInvEDIInc.xml)** method:
 
 ```csharp
 if (exportType == DEVIntegExportBulkIncrementalType::Incremental)
@@ -364,7 +364,7 @@ if (! isTestRun)
 }
 ```
 
-and method that translates invoice to EDI format:
+And method that translates invoice to EDI format:
 
 ```csharp
 ......
@@ -414,7 +414,7 @@ As a result, you will get a file similar to this one:
 
 ![EDI file results](EDIInvoiceResult.png)
 
-Below are the dialog and parameters set up for this export. By default, we export invoices from US-005 customers incrementally, but the user can export All invoices for a period or an individual invoice if needed. 
+Below are the dialog and parameters set up for this export. By default, we export invoices from US-005 customers incrementally, but the user can export All invoices for a period or an individual invoice if needed.
 
 ![IncrementalEDIDialog](IncrementalEDIDialog.png)
 
@@ -424,7 +424,7 @@ Let's discuss how we can support our periodic exports.
 
 ### Test run parameter
 
-One of the parameters of the base export class is a **Test run** checkbox. When running with this parameter, the export sends a file to a user's browser instead of SFTP. For incremental export, it will not update the "Last exported date" field, so it will not break the export sequence. This is very handy when you need to check what will be exported without putting anything on SFTP. Also, developers may develop exports without needing to have a connection to SFTP.
+One of the parameters of the base export class is a **Test run** checkbox. When running with this parameter, the export sends a file to a user's browser instead of SFTP. For incremental export, it also will not update the "Last exported date" field, so it will not break the export sequence. This is very handy when checking what will be exported without putting anything on SFTP. Also, developers may develop exports without needing to have a connection to SFTP.
 
 ![Recent download file](RecentDownloadFile.png)
 
@@ -434,7 +434,7 @@ The export log allows one to view how many lines were exported and the time it t
 
 ![Export log](ExportLog2.png)
 
-### Test connection 
+### Test connection
 
 The **Test connection** button tries to connect to the specified SFTP folder and list files in it. So you can check the connection before running the export.
 
@@ -445,7 +445,7 @@ The **Test connection** button tries to connect to the specified SFTP folder and
 In this post, I have described different types of periodic exports to file from Dynamics 365 Finance and Operations based on the **External Integration** framework. We discussed the following exports:
 
 - Simple SQL query export
-- Export based on custom X++ code and query settings 
+- Export based on custom X++ code and query settings
 - Incremental X++ export
 
 All used classes can be found on [GitHub](https://github.com/TrudAX/XppTools/tree/master/DEVTutorial/DEVExternalIntegrationSamples) and can be used as a starting point for your own integrations.
