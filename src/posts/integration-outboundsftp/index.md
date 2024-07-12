@@ -2,7 +2,7 @@
 title: "Implement Periodic Data Export from D365FO to SFTP"
 date: "2024-07-12T22:12:03.284Z"
 tags: ["Integration", "XppDEVTutorial"]
-path: "/integ-outboundsftp"
+path: "/integration-outboundsftp"
 featuredImage: "./logo.png"
 excerpt: "This blog post describes how to implement various scenarios for periodic data export from D365FO to a file and uploading it to SFTP server."
 ---
@@ -47,7 +47,7 @@ It requires the hostname and user/password credentials to access this host.
 
 The password can be stored in several ways:
 
-- Manual entry - An unencrypted string suitable for development testing.
+- Manual entry - An unencrypted string suitable for development testing. It will remain after DB restores.
 - Encrypted - An encrypted value.
 - Azure Key Vault - A link to the standard D365FO key vault that stores the password.
 
@@ -127,7 +127,7 @@ Let's start with a simple case where you need to write X++ code that generates t
 
 ***Business scenario**: We want to export all companies' inventory onhand data to SFTP. Our export should be a CSV file containing the following fields: 'Company', 'ItemId', 'InventLocationId', 'LastUpdDatePhysical', 'AvailPhysical'.*
 
-The following class solves this task:
+The following [class](https://github.com/TrudAX/XppTools/blob/master/DEVTutorial/DEVExternalIntegrationSamples/AxClass/DEVIntegTutorialExportBulkInventOnhand.xml) solves this task:
 
 ```csharp
 class DEVIntegTutorialExportBulkInventOnhand extends DEVIntegExportBulkBase
@@ -178,7 +178,7 @@ Let's consider an export scenario with more advanced logic.
 
 To do this, we need to create a [class](https://github.com/TrudAX/XppTools/blob/master/DEVTutorial/DEVExternalIntegrationSamples/AxClass/DEVIntegTutorialExportBulkOnhandPricesQuery.xml) that extends **DEVIntegExportBulkBase**. The code for this class contains the following blocks:
 
-A method that defines the initial query and settings, providing default values that can be overridden by the user:
+A method that defines the initial query and settings, providing default values(that can be overridden by the user):
 
 ```csharp
 class DEVIntegTutorialExportBulkOnhandPricesQuery extends DEVIntegExportBulkBase
