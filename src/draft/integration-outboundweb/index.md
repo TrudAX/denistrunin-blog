@@ -4,30 +4,82 @@ date: "2024-09-12T22:12:03.284Z"
 tags: ["Integration", "XppDEVTutorial"]
 path: "/integration-outboundweb"
 featuredImage: "./logo.png"
-excerpt: "This blog post describes how to implement various scenarios for periodic data export from D365FO to a file and uploading it to SFTP server."
+excerpt: "This blog post describes how to implement integration with an external Web service by sending data from D365FO based on events"
 ---
 
 **External integration** is a [framework](https://github.com/TrudAX/XppTools?tab=readme-ov-file#devexternalintegration-submodel) designed for inbound and outbound integrations in D365FO. It supports several channels: Azure file share, SFTP, Azure service bus, and provides comprehensive features for logging, error handling, and troubleshooting.
 
-In this blog post, I will describe how to implement periodic data export from D365FO to a file and upload it to an SFTP server.
+In this blog post, I will describe how to implement event-based data export to the external web service. I will show it on a a simplified example but the approach is based on real-life integrations , and provided implementation contains common elements that contains some reusable code for similar tasks.  
 
-## SFTP Server Setup
+## Task description
 
-A few years ago, Microsoft did not support SFTP hosting, claiming it was obsolete in the cloud world. However, SFTP remains quite popular among clients and eventually, SFTP support was included in the Azure storage service.
+Let's start with our task definition:
 
-To use Azure storage via an SFTP endpoint, you must first create a storage account and enable SFTP access. More information can be found here: [SSH File Transfer Protocol (SFTP) support for Azure Blob Storage](https://learn.microsoft.com/en-us/azure/storage/blobs/secure-file-transfer-protocol-support).
+**We want to send confirmed purchase orders from D365FO to our partner website via the Rest API endpoint.**
 
-![SFTP Setup Azure](SFTPSetup.png)
+To create a demo for this post, I asked Claude Sonnet 3.5 to generate a simple Purchase Order Management application and deploy it to Azure.
 
-Then, create an SFTP user:
+The source code is on [GtHub](https://github.com/TrudAX/TestWebService_PurchaseOrderApp), and the application consists of a frontend displaying orders.
 
-![SFTP User creation](SFPTSetup2.png)
+![Purch management App](PurchManagementAppScreen.png)
 
-Please note that SFTP access incurs additional charges of about $10 per day compared to Azure file storage. Alternatives such as [files.com](https://files.com) offer additional features, including more granular access control.
+And the backend that contains API for accepting these orders.
+
+![API sample](ApiPicture.png)
+
+UML diagram for our test process is the following 
+
+![UML Diagram](UMLDiagram.png)
+
+## How to manage such integration task
+
+To start doing tasks like this I suggest an initial meeting with business users from D365FO and WebService site(3-party team) where we discuss the following questions:
+
+#### Discuss and create a mapping document
+
+What data do we want to send, and how to map these data to what 3-party can accept? This is a main question for the whole integration and it often consumes quite a lot of time.
+
+A template for such document  can be found here.
+
+In our example, we want to send all confirmed purchase orders for vendors from the specified Vendor group
+
+#### How reference data are managed 
+
+The message may contain some reference data (for example, Item or Vendor code), how this will be managed. Typical scenarios here :
+
+1. Web service accepts only a limited set of data. In this case, we probably need to create some tables in D365FO to maintain possible options.
+2. Reference data are stable and will be loaded manually. For example, every month, a user loads a list of items to a website
+3. Reference data changes quite often, and we need to develop a separate integration for this.
+4. Web service can automatically create reference data from the message. In this case we need include all required fields for this (for example Item name, Vendor name, etc..)
+
+#### Agreed error processing rules
+
+How errors will be processed. Typical scenarios here:
+
+1. All Web service business validations happen during a call. If a call is successful, that means that the document is accepted. (that is a preferred way)
+2. During the call, the Web service checks only the message format, if it is good, the message is accepted.
+
+Option 1 actually means that there should be someone from the D365FO team who will react to integration errors, make sure that this person has a documented support channel with the Web service support team. For example, how the returned message "Item AAA can't be purchased" will be processed.
+
+Option 2 is simpler from the D365FO side, but it creates some challenges. You need to know the current status of the document somehow. This may be implemented as another integration(inbound to D365FO).
+
+#### Data cardinality
+
+The data structure may be different, and what is possible in D365FO may not be possible in other systems. For example, in D365FO, a Purchase order may contain multiple lines with the same item ID; some other systems may not allow this.  
+
+#### Update rules
+
+What happens if the user modifies the same document and sends the updated version? For example, in our case, multiple confirmations can be made for one purchase order, Web service should accepts the updated version.
+
+#### Can 3-party modify their API to do this integration 
+
+Systems may have different rules for data validations, and sometimes they don't match. How flexible is the 3-party team to modify their rules? Usually, there can be the following situations - API is public, used by several clients, and they can't modify it, or they may be flexible and allocate a developer to work on integration from their side.
+
+#### Batch or real-time send
+
+Do we want to export the document via a batch job (that means at least a couple of minutes delay) or immediately after the action 
 
 
-
-## System Setup
 
 Before exploring different integration scenarios, let's discuss common setup options.
 
