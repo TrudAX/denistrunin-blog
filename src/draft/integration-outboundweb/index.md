@@ -31,7 +31,7 @@ UML diagram for our test process is the following
 
 ![UML Diagram](UMLDiagram.png)
 
-## How to manage such integration task
+## How to implement such integration task
 
 To start doing tasks like this I suggest an initial meeting with business users from D365FO and WebService site(3-party team) where we discuss the following questions:
 
@@ -43,18 +43,18 @@ A template for such document  can be found here.
 
 In our example, we want to send all confirmed purchase orders for vendors from the specified Vendor group
 
-#### How reference data are managed 
+#### Define how reference data are managed 
 
 The message may contain some reference data (for example, Item or Vendor code), how this will be managed. Typical scenarios here :
 
 1. Web service accepts only a limited set of data. In this case, we probably need to create some tables in D365FO to maintain possible options.
-2. Reference data are stable and will be loaded manually. For example, every month, a user loads a list of items to a website
+2. Reference data are stable and will be loaded manually. For example, every month, a user loads a list of items to an external website
 3. Reference data changes quite often, and we need to develop a separate integration for this.
 4. Web service can automatically create reference data from the message. In this case we need include all required fields for this (for example Item name, Vendor name, etc..)
 
 #### Agreed error processing rules
 
-How errors will be processed. Typical scenarios here:
+How errors will be processed. Typical options here:
 
 1. All Web service business validations happen during a call. If a call is successful, that means that the document is accepted. (that is a preferred way)
 2. During the call, the Web service checks only the message format, if it is good, the message is accepted.
@@ -65,7 +65,7 @@ Option 2 is simpler from the D365FO side, but it creates some challenges. You ne
 
 #### Data cardinality
 
-The data structure may be different, and what is possible in D365FO may not be possible in other systems. For example, in D365FO, a Purchase order may contain multiple lines with the same item ID; some other systems may not allow this.  
+The data structure may be different, and what is possible in D365FO may not be possible in other systems. For example, in D365FO, a Purchase order may contain multiple lines with the same itemID; some other systems may not allow this.  
 
 #### Update rules
 
@@ -73,15 +73,194 @@ What happens if the user modifies the same document and sends the updated versio
 
 #### Can 3-party modify their API to do this integration 
 
-Systems may have different rules for data validations, and sometimes they don't match. How flexible is the 3-party team to modify their rules? Usually, there can be the following situations - API is public, used by several clients, and they can't modify it, or they may be flexible and allocate a developer to work on integration from their side.
+Systems may have different rules for data validations, and sometimes they don't match. How flexible is the 3-party team to modify their rules? Usually, there can be the following situations: 
 
-#### Batch or real-time send
+- API is public, used by several clients, and they can't modify it, or 
+- They may be flexible and allocate a developer to work on integration from their side.
 
-Do we want to export the document via a batch job (that means at least a couple of minutes delay) or immediately after the action 
+#### Batch or real-time call
+
+Do we want to export the document via a batch job (that means at least a couple of minutes delay) or immediately after the action. The more complex case is a real-time call, that will be reviewed in this blog post 
+
+## Export Class Implementation detail 
+
+External integration framework provides a base class to implement an event-based integration, a developer needs to extend this class. To provide an example, I created [DEVIntegTutorialExportPurchOrder]( https://github.com/TrudAX/XppTools/blob/master/DEVTutorial/DEVExternalIntegrationSamples/AxClass/DEVIntegTutorialExportPurchOrder.xml), let's consider methods in this class
+
+**isNeedToCreateLog** - methods define validation rules on whether the record should be exported or not. In our case, the purchase order should be Confirmed and the Vendor group should match the parameters
+
+```csharp
+boolean isNeedToCreateLog(PurchTable  _purchTable)
+{
+    boolean                             res;
+    DEVIntegParametersPerCompany        integParametersPerCompany = DEVIntegParametersPerCompany::find();
+    ;
+    if (this.isMessageTypeEnabled() &&
+        _purchTable.DocumentState == VersioningDocumentState::Confirmed  &&
+        _purchTable.PurchaseType == PurchaseType::Purch &&
+        integParametersPerCompany.POExportOnConfirm != DEVIntegTutorialExportOnConfirm::None &&
+        _purchTable.vendTable_OrderAccount().VendGroup == integParametersPerCompany.VendGroupId
+        )
+    {
+        res = true;
+        if (DEVIntegExportDocumentLog::sentRecordExists(_purchTable, messageTypeTableOutbound.ClassName))  //already marked to send
+        {
+            res = false;
+        }
+    }
+    return res;
+}
+```
+
+**exportAllData** - Method used to reexport of selected records. It should contain the query dialogue and allow the user to specify which records to re-export. This is needed in 2 cases: when we just started this integration, to mark already existing records or when something changes(for example we added more fields) and we want to reexport existing records. 
+
+```csharp
+public void exportAllData()
+{
+    Query                   query = new Query();
+    QueryBuildDataSource    qBDS;
+    PurchTable              purchTable;
+    int                     processedCounter, insertCounter;
+
+    qBDS = query.addDataSource(tableNum(PurchTable));
+    qBDS.addRange(fieldNum(PurchTable, DocumentState)).value(SysQuery::value(VersioningDocumentState::Confirmed));
+    qBDS = qBDS.addDataSource(tableNum(VendTable));
+    qBDS.joinMode(JoinMode::InnerJoin);
+    qBDS.relations(false);
+    qBDS.addLink(fieldnum(PurchTable, OrderAccount), fieldNum(VendTable, AccountNum));
+    qBDS.addRange(fieldNum(VendTable, VendGroup)).value(SysQuery::value(DEVIntegParametersPerCompany::find().VendGroupId));
+  
+    QueryRun     queryRun;
+    queryRun = new QueryRun(query);
+    if (queryRun.prompt())
+    {
+        while (queryRun.next())
+        {
+            purchTable = queryRun.get(tableNum(PurchTable));
+            if (this.insertFromPurchTable(purchTable))
+            {
+                insertCounter++;
+            }
+            processedCounter++;
+        }
+        info(strfmt("%1 record(s) processed, %2 marked to export", processedCounter, insertCounter));
+    }
+}
+public boolean insertFromPurchTable(PurchTable  _purchTable)
+{
+    boolean  res;
+    ;
+    if(this.isNeedToCreateLog(_purchTable))
+    {
+        this.createLogFromCommon(_purchTable, _purchTable.PurchId);
+        res = true;
+    }
+    return res;
+}
+```
+
+**exportWebMessage**: used actually to implement the export call. As we used a custom service, we also need to define a load class [DEVIntegTutorialExportPurchLoad](https://github.com/TrudAX/XppTools/blob/master/DEVTutorial/DEVExternalIntegrationSamples/AxClass/DEVIntegTutorialExportPurchLoad.xml) that implements communication with the service using a HttpClient call(In case we integrate using Azure file share or Azure service bus, External integration framework already has base classes for this). This method also responsible for processing results, in our case getting the number from external Order and linking it to our order.   
+
+```csharp
+public void exportWebMessage(DEVIntegExportDocumentLog    _exportDocumentLog, DEVIntegMessagesLoadBaseType     _loadFileStorageCache)
+{
+    PurchTable purchTable = PurchTable::findRecId(_exportDocumentLog.RefRecId);
+    DEVIntegTutorialExportPurchLoad  exportPurchLoad = _loadFileStorageCache as DEVIntegTutorialExportPurchLoad;
+    exportPurchLoad.initConnection();
+    DEVIntegTutorialExportPurchContractHeader  contractData = new DEVIntegTutorialExportPurchContractHeader();
+    contractData.initFromPurchOrder(purchTable);
+
+    str sJSON = FormJSONSerializer::serializeClass(contractData);
+    Num  externalId = exportPurchLoad.postContract(sJSON, _exportDocumentLog.DocumentId);
+
+    /*
+    ttsbegin;
+    purchTable = PurchTable::findRecId(_exportDocumentLog.RefRecId, true);
+    purchTable.DEVTutorialWebID          = externalId;
+    purchTable.update();
+    ttscommit;
+    */
+}
+```
+
+This method uses data contract classes(in our case, a [header](https://github.com/TrudAX/XppTools/blob/master/DEVTutorial/DEVExternalIntegrationSamples/AxClass/DEVIntegTutorialExportPurchContractHeader.xml) and [lines](https://github.com/TrudAX/XppTools/blob/master/DEVTutorial/DEVExternalIntegrationSamples/AxClass/DEVIntegTutorialExportPurchContractLine.xml)). What I found is that the "**X++ Dev Helper for Dynamics 365 F&O**" custom [GPT](https://chatgpt.com/g/g-F7D3IGTqo-x-dev-helper-for-dynamics-365-f-o) for ChatGPT is quite good at creating these classes based on just the sample JSON. 
+
+![](chatGPTGenerateClasses.png)
+
+**Methods to mark the record to export**: Usually it is some event handlers to the standard insert/update calls. It can be multiple such methods, if there are several ways the document is modified. These methods should be executed in the posting transaction and just update or insert a reference in **DEVIntegExportDocumentLog**, with a status = "To send", they don't do the export. In our case it is just one method
+
+```csharp
+[DataEventHandler(tableStr(PurchTable), DataEventType::Updated)]
+public static void PurchTable_onUpdated(Common sender, DataEventArgs e)
+{
+    PurchTable purchTable = sender as PurchTable;
+    if (purchTable.DocumentState == VersioningDocumentState::Confirmed  &&               
+        purchTable.orig().DocumentState != purchTable.DocumentState )
+    {
+        DEVIntegTutorialExportPurchOrder  exportMessage = DEVIntegTutorialExportPurchOrder::construct();
+        exportMessage.insertFromPurchTable(purchTable);
+    }
+}
+```
+
+**Methods to export the data after the operation:** These methods should be executed after the main operation, outside transactions, so any failure in export should not block the document posting, or export itself do not increase the transaction. Export sequence is presented on the following diagram:
+
+![](ExportSequence.png)
+
+In our case, we want to check at the end of porch confirmation whether any export records have been created and, if so, run an export operation for these records. 
+
+```csharp
+[PostHandlerFor(classStr(FormletterService), methodStr(FormletterService, postPurchaseOrderConfirmation))]
+public static void FormletterService_Post_postPurchaseOrderConfirmation(XppPrePostArgs args)
+{
+    if (DEVIntegParametersPerCompany::find().POExportOnConfirm != DEVIntegTutorialExportOnConfirm::OnConfirm)
+    {
+        return;
+    }
+
+    PurchFormLetterPurchOrderContract contract = args.getArg('_contract') as PurchFormLetterPurchOrderContract;
+    if (contract)
+    {
+        PurchParmUpdate purchParmUpdate = contract.parmParmUpdate();
+        PurchParmTable  purchParmTable;
+        PurchTable      purchTable;
+        DEVIntegExportDocumentLog  integExportDocumentLog;
+        ClassName       exportClass = classStr(DEVIntegTutorialExportPurchOrder);
+        DEVIntegExportRecordList  exportRecordList;
+
+        //or if one record - DEVIntegExportRecordList::constructFromRecord()
+        while select ParmId from purchParmTable
+            where purchParmTable.ParmId == purchParmUpdate.ParmId
+        join PurchId from purchTable
+            where purchTable.PurchId        == purchParmTable.PurchId 
+        join integExportDocumentLog
+            where integExportDocumentLog.RefTableId == purchTable.TableId
+                && integExportDocumentLog.RefRecId == purchTable.RecId
+                && integExportDocumentLog.ClassName == exportClass
+        {
+            if (! exportRecordList)
+            {
+                exportRecordList = new DEVIntegExportRecordList();
+            }    
+            exportRecordList.addExportLog(integExportDocumentLog.recId);
+        }
+        if (exportRecordList)
+        {
+            DEVIntegExportDocumentsLog::exportRecordList(exportRecordList);
+        }
+    }
+
+}
+```
+
+### Comparing export class with standard Business events 
+
+On the first sign, Microsoft provides a very similar concept with [Business events](https://learn.microsoft.com/en-us/dynamics365/fin-ops-core/dev-itpro/business-events/home-page), although there are conceptual differences:
+
+- A Business event is created and gets all data at the time of the event. In External Integration, the message data is created at the time of export.
+- A business event is created per event. If you do a 2 confirmations for the same purchase order, you get 2 business events. And the sequence of delivering these events is not guaranteed. In External integration Export log is unique per document, so only 1 record will be created/updated. For documents that can't be modified after the export(e.g. Invoices), this difference is probably not critical, but in case exporting some modified data, you need to make sure that the consuming side [can handle](https://learn.microsoft.com/en-us/dynamics365/fin-ops-core/dev-itpro/business-events/home-page#idempotency) the sequence correctly in case business event usage(not just take the last message). 
+- Business event export procedure is common, it is not linked to the document. In External integration export class should implement the export method. It can be useful when you need to process the response.
 
 
-
-Before exploring different integration scenarios, let's discuss common setup options.
 
 ### Connection types
 
@@ -177,5 +356,3 @@ All used classes can be found on [GitHub](https://github.com/TrudAX/XppTools/tre
 I hope you find this information useful. As always, if you see any improvements, suggestions, or have questions about this work, don't hesitate to contact me.
 
 
-
-X++ Dev Helper for Dynamics 365 F&O
