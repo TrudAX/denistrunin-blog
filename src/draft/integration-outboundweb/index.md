@@ -19,11 +19,11 @@ Let's start with our task definition:
 
 To create a demo for this post, I asked Claude Sonnet 3.5 to generate a simple Purchase Order Management application and deploy it to Azure.
 
-The source code is on [GtHub](https://github.com/TrudAX/TestWebService_PurchaseOrderApp), and the application consists of a frontend displaying orders.
+The source code is on [GitHub](https://github.com/TrudAX/TestWebService_PurchaseOrderApp), and the application consists of a frontend displaying orders.
 
 ![Purch management App](PurchManagementAppScreen.png)
 
-And the backend that contains API for accepting these orders.
+And the backend, which contains API for accepting these orders.
 
 ![API sample](ApiPicture.png)
 
@@ -31,19 +31,19 @@ UML diagram for our test process is the following
 
 ![UML Diagram](UMLDiagram.png)
 
-## How to implement such integration task
+## How to manage such integration task
 
-To start doing tasks like this I suggest an initial meeting with business users from D365FO and WebService site(3-party team) where we discuss the following questions:
+To start doing integration like this, I suggest an initial meeting with business users from D365FO and WebService site(3-party team) where you should discuss the following questions:
 
-#### Discuss and create a mapping document
+#### -Discuss and create a mapping document
 
 What data do we want to send, and how to map these data to what 3-party can accept? This is a main question for the whole integration and it often consumes quite a lot of time.
 
-A template for such document  can be found here.
+A template for such document can be found here.
 
-In our example, we want to send all confirmed purchase orders for vendors from the specified Vendor group
+In our example, we want to send all confirmed purchase orders for vendors from the specified Vendor group without any mapping to simplify the example.
 
-#### Define how reference data are managed 
+#### -Define how reference data are managed 
 
 The message may contain some reference data (for example, Item or Vendor code), how this will be managed. Typical scenarios here :
 
@@ -52,35 +52,37 @@ The message may contain some reference data (for example, Item or Vendor code), 
 3. Reference data changes quite often, and we need to develop a separate integration for this.
 4. Web service can automatically create reference data from the message. In this case we need include all required fields for this (for example Item name, Vendor name, etc..)
 
-#### Agreed error processing rules
+#### -Agree on error processing rules
 
 How errors will be processed. Typical options here:
 
-1. All Web service business validations happen during a call. If a call is successful, that means that the document is accepted. (that is a preferred way)
+1. All Web service business logic validations happen during a call. If the call is successful, that means that the document is accepted. (that is a preferred way)
 2. During the call, the Web service checks only the message format, if it is good, the message is accepted.
 
-Option 1 actually means that there should be someone from the D365FO team who will react to integration errors, make sure that this person has a documented support channel with the Web service support team. For example, how the returned message "Item AAA can't be purchased" will be processed.
+Option 1 actually means that there should be someone from the D365FO team who will react to integration errors. Ensure this person has a documented support channel with the Web Service support team. For example, how the returned message "Item AAA can't be purchased" will be processed.
 
-Option 2 is simpler from the D365FO side, but it creates some challenges. You need to know the current status of the document somehow. This may be implemented as another integration(inbound to D365FO).
+Option 2 is more straightforward from the D365FO side, but it creates some challenges. You need to know the document's current status somehow. This may be implemented as another integration(inbound to D365FO).
 
-#### Data cardinality
+#### -Data cardinality
 
 The data structure may be different, and what is possible in D365FO may not be possible in other systems. For example, in D365FO, a Purchase order may contain multiple lines with the same itemID; some other systems may not allow this.  
 
-#### Update rules
+#### -Update rules
 
 What happens if the user modifies the same document and sends the updated version? For example, in our case, multiple confirmations can be made for one purchase order, Web service should accepts the updated version.
 
-#### Can 3-party modify their API to do this integration 
+#### -Can 3-party modify their API for this integration 
 
 Systems may have different rules for data validations, and sometimes they don't match. How flexible is the 3-party team to modify their rules? Usually, there can be the following situations: 
 
 - API is public, used by several clients, and they can't modify it, or 
-- They may be flexible and allocate a developer to work on integration from their side.
+- They may be flexible and allocate a developer to work on integration from their side. In this case, discuss the communication channel, developer availability, and how to track bugs.
 
-#### Batch or real-time call
+#### -Batch or real-time call
 
-Do we want to export the document via a batch job (that means at least a couple of minutes delay) or immediately after the action. The more complex case is a real-time call, that will be reviewed in this blog post 
+Do we want to export the document via a batch job (at least a few minutes delay) or immediately after the action? 
+
+The more complex case is a real-time call that will be implemented in this blog post. 
 
 ## Export Class Implementation detail 
 
@@ -254,11 +256,11 @@ public static void FormletterService_Post_postPurchaseOrderConfirmation(XppPrePo
 
 ### Comparing export class with standard Business events 
 
-On the first sign, Microsoft provides a very similar concept with [Business events](https://learn.microsoft.com/en-us/dynamics365/fin-ops-core/dev-itpro/business-events/home-page), although there are conceptual differences:
+On the first sign, Microsoft provides a very similar concept to External Integration with [Business events](https://learn.microsoft.com/en-us/dynamics365/fin-ops-core/dev-itpro/business-events/home-page), although there are conceptual differences related to integration tasks:
 
-- A Business event is created and gets all data at the time of the event. In External Integration, the message data is created at the time of export.
-- A business event is created per event. If you do a 2 confirmations for the same purchase order, you get 2 business events. And the sequence of delivering these events is not guaranteed. In External integration Export log is unique per document, so only 1 record will be created/updated. For documents that can't be modified after the export(e.g. Invoices), this difference is probably not critical, but in case exporting some modified data, you need to make sure that the consuming side [can handle](https://learn.microsoft.com/en-us/dynamics365/fin-ops-core/dev-itpro/business-events/home-page#idempotency) the sequence correctly in case business event usage(not just take the last message). 
-- Business event export procedure is common, it is not linked to the document. In External integration export class should implement the export method. It can be useful when you need to process the response.
+- A Business event is created and gets all data at the time of the event. In External Integration, the message data is created during the export. This is quite important when you use mapping. For example, an export may fail due to incorrect or missing mapping. For External integration, you just need to fix this mapping; it will be automatically applied at the time of the next export.
+- A business event is created per event. You get two business events if you do two confirmations for the same purchase order. And the sequence of delivering these events is not guaranteed. For documents that can't be modified after the export(e.g. Invoices), this difference is probably not critical, but in case exporting some documents that can be modified, you need to make sure that the consuming side [can handle](https://learn.microsoft.com/en-us/dynamics365/fin-ops-core/dev-itpro/business-events/home-page#idempotency) the message sequence correctly in case a business event usage, that may add some complexity. In External integration, the Export log is unique per document, so only one record will be created/updated. And the consumer can just take the last message. 
+- The Business event export procedure is universal and not linked to the document. The External Integration export class should implement the export method. This can be useful when processing the response, e.g. in our case we can to link our PO with the external PO.
 
 
 
