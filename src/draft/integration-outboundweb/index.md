@@ -174,13 +174,11 @@ public void exportWebMessage(DEVIntegExportDocumentLog    _exportDocumentLog, DE
     str sJSON = FormJSONSerializer::serializeClass(contractData);
     Num  externalId = exportPurchLoad.postContract(sJSON, _exportDocumentLog.DocumentId);
 
-    /*
     ttsbegin;
     purchTable = PurchTable::findRecId(_exportDocumentLog.RefRecId, true);
-    purchTable.DEVTutorialWebID          = externalId;
+    purchTable.VendorRef   = externalId;
     purchTable.update();
     ttscommit;
-    */
 }
 ```
 
