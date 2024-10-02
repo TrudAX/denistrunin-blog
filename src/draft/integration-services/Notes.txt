@@ -1,0 +1,3 @@
+    //https://www.jsonescaper.com/unescape/paste/
+    //https://learn.microsoft.com/en-us/dynamics365/fin-ops-core/dev-itpro/data-entities/third-party-service-test#query-odata-by-using-postman
+    //http://daxvisionerp.com/call-ax-data-entity-from-postman/

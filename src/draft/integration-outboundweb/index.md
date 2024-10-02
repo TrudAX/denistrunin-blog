@@ -27,7 +27,7 @@ And the backend, which contains API for accepting these orders.
 
 ![API sample](ApiPicture.png)
 
-UML diagram for our test process is the following 
+In our scenario we will send confirmed PO from D365FO to this API. UML diagram for our test process is the following:
 
 ![UML Diagram](UMLDiagram.png)
 
@@ -160,7 +160,7 @@ public boolean insertFromPurchTable(PurchTable  _purchTable)
 }
 ```
 
-**exportWebMessage**: used actually to implement the export call. As we used a custom service, we also need to define a load class [DEVIntegTutorialExportPurchLoad](https://github.com/TrudAX/XppTools/blob/master/DEVTutorial/DEVExternalIntegrationSamples/AxClass/DEVIntegTutorialExportPurchLoad.xml) that implements communication with the service using a HttpClient call(In case we integrate using Azure file share or Azure service bus, External integration framework already has base classes for this). This method also responsible for processing results, in our case getting the number from external Order and linking it to our order.   
+**exportWebMessage**: used actually to implement the export call. As we used a custom service, we also need to define a load class [DEVIntegTutorialExportPurchLoad](https://github.com/TrudAX/XppTools/blob/master/DEVTutorial/DEVExternalIntegrationSamples/AxClass/DEVIntegTutorialExportPurchLoad.xml) that implements communication with the service using a **HttpClient** call(In case we integrate using Azure file share or Azure service bus, the External integration framework already has base classes for this). This method is also responsible for processing results, in our case, getting the number from an external Order and linking it to our order.   
 
 ```csharp
 public void exportWebMessage(DEVIntegExportDocumentLog    _exportDocumentLog, DEVIntegMessagesLoadBaseType     _loadFileStorageCache)
@@ -202,11 +202,11 @@ public static void PurchTable_onUpdated(Common sender, DataEventArgs e)
 }
 ```
 
-**Methods to export the data after the operation:** These methods should be executed after the main operation, outside transactions, so any failure in export should not block the document posting, or export itself do not increase the transaction. Export sequence is presented on the following diagram:
+**Methods to export the data after the operation:** These methods should be executed after the main operation, outside transactions, so any failure in export should not block the document posting, or export itself do not increase the posting transaction time. The export sequence is presented on the following diagram:
 
 ![](ExportSequence.png)
 
-In our case, we want to check at the end of porch confirmation whether any export records have been created and, if so, run an export operation for these records. 
+In our case, we want to check at the end of purch confirmation whether any export records have been created and, if so, run an export operation for these records. 
 
 ```csharp
 [PostHandlerFor(classStr(FormletterService), methodStr(FormletterService, postPurchaseOrderConfirmation))]
@@ -260,13 +260,15 @@ On the first sign, Microsoft provides a very similar concept to External Integra
 - A business event is created per event. You get two business events if you do two confirmations for the same purchase order. And the sequence of delivering these events is not guaranteed. For documents that can't be modified after the export(e.g. Invoices), this difference is probably not critical, but in case exporting some documents that can be modified, you need to make sure that the consuming side [can handle](https://learn.microsoft.com/en-us/dynamics365/fin-ops-core/dev-itpro/business-events/home-page#idempotency) the message sequence correctly in case a business event usage, that may add some complexity. In External integration, the Export log is unique per document, so only one record will be created/updated. And the consumer can just take the last message. 
 - The Business event export procedure is universal and not linked to the document. The External Integration export class should implement the export method. This can be useful when processing the response, e.g. in our case we can to link our PO with the external PO.
 
+## Integration setup and validation
 
+In this section I describe how to setup this integration scenario 
 
 ### Connection types
 
-The first form to setup an SFTP connection is **External integration – Connection types**.
+The first form to set up a Web service connection is **External integration – Connection types**.
 
-It requires the hostname and user/password credentials to access this host.
+It requires the hostname and allows specify user/password credentials to access this host(in our case they will be empty)
 
 ![Connection types](ConnectionTypes.png)
 
@@ -282,48 +284,75 @@ In Outbound message types, we set parameters for our data export.
 
 ![Outbound message types](MessageTypeForm.png)
 
-**Source group**
-Here, we specify a link to the connection type and a folder on the SFTP server for data export.
+The "Export type" should be "Document on event" and we should select our export class and specify a connection ID.
 
-**Processing group**
-Contains a link to the class that performs the export. The class is a standard RunBase class (extended from **DEVIntegExportBulkBase**) that can define custom parameters and utilizes helper functions from the base class.
+### Parameters setup
 
-**File parameters**
-Often, exports require creating a file name that includes a **date** component. This setting enables specifying a name template using the '%d' parameter. **Date format(%d)** defines how this symbol is converted into a date (e.g., you can include date-time or use just date). The format rules are defined by the .NET DateTime.ToString [format parameter](https://learn.microsoft.com/en-us/dotnet/api/system.datetime.tostring?view=net-7.0#system-datetime-tostring(system-string)).
+For our integration, we also created the following parameters
 
-**Delimiter** defines a CSV-type delimiter.
+![Parameters setup](IntegrationParameters.png)
 
-**Advanced Group**
-The advanced group defines used log types and a Company range validation. The exports run in the current company, and some exports may be logically related only to certain companies. The **Company range** allows specifying a list of companies eligible for export.
+**Vendor Group**: defines a filter for exported PO.
+
+**Export on confirmation** option: Specify whether we want to run the actual export(do web service call) in the user session after the confirmation or if the export should be performed via periodic batch.
 
 ## Export scenarios
 
-Let's describe the most typical scenarios that can be used to export data from D365FO.
+Initial export of the data 
 
-### Export Store Onhand Data (no-code scenario)
+Some POs already exist in the database; let's just export them using the "Export all" button on the "Outbound message types" form. You will get the standard query dialog 
 
-**Business scenario**: *Our company has a store, and we want to export daily onhand data from this store to our website. We need to include ItemId, Warehourse, and AvailiablePhysical value.*
+![Initial query dialog](InitialQueryDialog.png)
 
-The External integration module contains a **[DEVIntegExportBulkSQL](https://github.com/TrudAX/XppTools/blob/master/DEVTutorial/DEVExternalIntegration/AxClass/DEVIntegExportBulkSQL.xml)** class that allows exporting the result of a custom SQL string. This basic task can be done without writing any code.
+After that, all Purch orders from this query will be processed and the record with order reference will be added to the Export document log table with **To send** status
 
-```SQL
-SELECT ITEMID, sum(availPhysical) as Qty, InventLocationId FROM INVENTSUM
-WHERE CLOSEDQTY = 0 AND DATAAREAID = 'USMF' 
-GROUP BY ITEMID, InventLocationId
-HAVING sum(availPhysical) > 0
-```
+![](ExportLogInitial.png)
 
-![Run onhand SQL export](OnhandSQLRun.png)
+After that, they will be processed by "**Export messages from log**" periodic operation, that processes all records with "**To send**" status or can be manually exported by selecting records and using Export records button 
 
-Then we can setup a standard daily batch job that generates a file in our output folder.
+![Export document log periodic](ExportDocumentLogPeriodic.png)
 
-![Onhand SQL result](OnhandSQLResult.png)
+As a result we can see the exported orders on our site
+
+![Exported orders](ExportedOrders.png)
+
+And the **Reference** field will be populated for exported orders.
+
+![Vendor reference](VendorRef.png)
+
+If full logging is enabled, we can also check what message was send in the Export document log form
+
+![](ExportLogLog.png)
+
+After successful export, the **Export Status** field for the **Export document log** table will be changed to **Sent**
+
+![](ExportLogStatus.png)
+
+### Export from the user session
+
+when PO confirms run the export
 
 
+
+## Errors processing 
+
+If an exception occurs during the export, the Export document log record will remain in the To send status, and an additional log will be generated with the workload details and exception text.
+
+![Document log errors](DocumentLogError.png)
+
+In the example below, the Purchase order contains a service Item(without ItemId), but our test web service doesn't accept such data.
+
+Please note that the Export document log has only two statuses(To send and Sent); there is no Error status. From the business perspective, it doesn't matter whether the record was not exported or the export has failed. So the proper setup for the alerting system should be that the record stays in the To send status more than allowed.
 
 ## Troubleshooting and monitoring
 
-Let's discuss how we can support our periodic exports.
+The most common issue with the service call that External 
+
+
+
+![Test web service](TestWebService.png)
+
+
 
 ### Test run parameter
 
@@ -354,5 +383,4 @@ In this post, I have described different types of periodic exports to file from 
 All used classes can be found on [GitHub](https://github.com/TrudAX/XppTools/tree/master/DEVTutorial/DEVExternalIntegrationSamples) and can be used as a starting point for your own integrations.
 
 I hope you find this information useful. As always, if you see any improvements, suggestions, or have questions about this work, don't hesitate to contact me.
-
 
