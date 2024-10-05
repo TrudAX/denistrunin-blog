@@ -1,6 +1,6 @@
 ﻿---
 title: "D365FO Integration: Event-Based Exports to External Web Services"
-date: "2024-10-05T22:12:03.284Z"
+date: "2024-10-07T22:12:03.284Z"
 tags: ["Integration", "XppDEVTutorial"]
 path: "/integration-outboundweb"
 featuredImage: "./logo.png"

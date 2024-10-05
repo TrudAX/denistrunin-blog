@@ -47,3 +47,14 @@ end note
 stop
 
 @enduml
+
+New Blog Post: D365FO Integration: Event-Based Exports to External Web Services
+I'm excited to share my latest blog post on implementing event-based exports from Dynamics 365 Finance and Operations to external Web Services!
+In this comprehensive guide, you'll learn:
+
+How to design robust integrations
+Implementing custom export classes
+Monitoring and troubleshooting techniques
+Performance testing strategies
+
+Check it out here: [Insert Your Blog Post URL]
