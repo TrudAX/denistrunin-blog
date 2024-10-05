@@ -1,94 +1,120 @@
 ﻿---
-title: "Implement Event-based Data Export from D365FO to Web service"
-date: "2024-09-12T22:12:03.284Z"
+title: "D365FO Integration: Event-Based Exports to External Web Services"
+date: "2024-10-05T22:12:03.284Z"
 tags: ["Integration", "XppDEVTutorial"]
 path: "/integration-outboundweb"
 featuredImage: "./logo.png"
-excerpt: "This blog post describes how to implement integration with an external Web service by sending data from D365FO based on events."
+excerpt: "How to implement robust, efficient integrations between Dynamics 365 Finance and Operations and external Web Services. This post covers design, code samples, troubleshooting and performance testing techniques for seamless event-based data synchronization."
 ---
 
 In this blog post, I will describe how to implement event-based data export from Dynamics 365 Finance to the Web service using REST API call. 
 
-I will show it using a simple example, but the used approach is based on real-life integrations, and the provided implementation contains common elements that contain some reusable code for similar tasks.   **External integration** a free and open source [framework](https://github.com/TrudAX/XppTools?tab=readme-ov-file#devexternalintegration-submodel) will be used. 
+I will show it using a simple example, but the approach used is based on real-life integrations.  The provided implementation contains common elements with reusable code for similar tasks. We'll use an a free and open-source External integration [framework](https://github.com/TrudAX/XppTools?tab=readme-ov-file#devexternalintegration-submodel). 
 
 ## Modification description
 
-Let's start with our task definition:
+Let's begin with our task definition:
 
-**We want to implement a Dynamics 365 Finance integration by sending confirmed purchase orders from D365FO to our partner website via the Rest API endpoint.**
+**Our goal is to implement a Dynamics 365 Finance integration that sends confirmed purchase orders from D365FO to our partner website via a REST API endpoint.**
 
-To create a demo for this post, I asked Claude Sonnet 3.5 to generate a simple Purchase Order Management application and deploy it to Azure.
+For this demonstration, I utilized Claude Sonnet 3.5 to generate a simple Purchase Order Management application and deploy it to Azure.
 
-The source code is on [GitHub](https://github.com/TrudAX/TestWebService_PurchaseOrderApp), and the application consists of a frontend displaying orders.
+The source code is available on [GitHub](https://github.com/TrudAX/TestWebService_PurchaseOrderApp). The application comprises two main components:
 
-![Purch management App](PurchManagementAppScreen.png)
+1. A frontend for displaying orders:
 
-And the backend, which contains API for accepting these orders.
+![Purchase Order Management App](PurchManagementAppScreen.png)
+
+2. A backend that includes an API for accepting these orders:
 
 ![API sample](ApiPicture.png)
 
-In our scenario we will send confirmed PO from D365FO to this API. UML diagram for our test process is the following:
+In our scenario, we will send confirmed Purchase Orders (POs) from D365FO to this API. The UML diagram below illustrates our test process:
 
 ![UML Diagram](UMLDiagram.png)
 
-## How to manage such integration task
+## Planning and Scoping Integration Project
 
-To start doing integration like this, I suggest an initial meeting with business users from D365FO and WebService site(3-party team) where you should discuss the following questions:
+To initiate an integration project like this, I recommend organizing a kickoff meeting with key stakeholders from both the D365FO team and the Web Service provider (third-party team). During this meeting, address the following aspects:
 
-#### -Discuss and create a mapping document
+#### 1. Create a Data Mapping document
 
-What data do we want to send, and how to map these data to what 3-party can accept? This is a main question for the whole integration and it often consumes quite a lot of time.
+Discuss and document what data needs to be sent and how it should be mapped to the third-party system's accepted format. This is a fundamental question for the entire integration and often requires significant time and attention.
 
-A template for such document can be found here.
+A template for this document can be found [here](https://github.com/TrudAX/TRUDScripts/blob/master/Documents/Integration/Field%20Mapping%20Sample.xlsx).
 
-In our example, we want to send all confirmed purchase orders for vendors from the specified Vendor group without any mapping to simplify the example.
+In our example, to simplify the process, we're sending all confirmed purchase orders for vendors from a specified Vendor group without any complex mapping.
 
-#### -Define how reference data are managed 
+#### 2. Reference Data Management
 
-The message may contain some reference data (for example, Item or Vendor code), how this will be managed. Typical scenarios here :
+Messages often contain reference data (e.g., Item or Vendor codes). Determine how this data will be managed. Common scenarios include:
 
-1. Web service accepts only a limited set of data. In this case, we probably need to create some tables in D365FO to maintain possible options.
-2. Reference data are stable and will be loaded manually. For example, every month, a user loads a list of items to an external website
-3. Reference data changes quite often, and we need to develop a separate integration for this.
-4. Web service can automatically create reference data from the message. In this case we need include all required fields for this (for example Item name, Vendor name, etc..)
+- a) Limited data acceptance: The Web service may accept only a predefined set of data. In this case, you might need to create additional tables in D365FO to maintain possible options.
 
-#### -Agree on error processing rules
+- b) Stable, manually loaded data: Reference data remains relatively constant and is manually updated. For instance, a user might load an updated list of items to the external website monthly.
 
-How errors will be processed. Typical options here:
+- c) Frequently changing data: If reference data changes often, you may need to develop a separate integration process to keep it synchronized.
 
-1. All Web service business logic validations happen during a call. If the call is successful, that means that the document is accepted. (that is a preferred way)
-2. During the call, the Web service checks only the message format, if it is good, the message is accepted.
+- d) Automatic reference data creation: The Web service might be capable of automatically creating reference data from the incoming message. In this scenario, ensure all required fields (e.g., Item name, Vendor name) are included in the transmission.
 
-Option 1 actually means that there should be someone from the D365FO team who will react to integration errors. Ensure this person has a documented support channel with the Web Service support team. For example, how the returned message "Item AAA can't be purchased" will be processed.
 
-Option 2 is more straightforward from the D365FO side, but it creates some challenges. You need to know the document's current status somehow. This may be implemented as another integration(inbound to D365FO).
+####  3. Error Handling Rules
 
-#### -Data cardinality
+Establish clear protocols for error handling. Consider these common approaches:
 
-The data structure may be different, and what is possible in D365FO may not be possible in other systems. For example, in D365FO, a Purchase order may contain multiple lines with the same itemID; some other systems may not allow this.  
+a) Real-time validation: All business logic validations occur during the API call. A successful call indicates the document has been accepted. This is generally the preferred method.
 
-#### -Update rules
+b) Format-only validation: The Web service only checks the message format during the call. If the format is correct, the message is accepted for further processing.
 
-What happens if the user modifies the same document and sends the updated version? For example, in our case, multiple confirmations can be made for one purchase order, Web service should accepts the updated version.
+Option (a) requires designating a D365FO team member to respond to integration errors. Ensure this person has a documented support channel with the Web Service support team.For example, how the returned message "Item AAA can't be purchased" will be processed.
 
-#### -Can 3-party modify their API for this integration 
+Option (b) is more straightforward from the D365FO side, but it creates some challenges. You need to know the document's current status. This may be implemented as another integration(inbound to D365FO).
 
-Systems may have different rules for data validations, and sometimes they don't match. How flexible is the 3-party team to modify their rules? Usually, there can be the following situations: 
+#### 4. Data Structure and Cardinality
 
-- API is public, used by several clients, and they can't modify it, or 
-- They may be flexible and allocate a developer to work on integration from their side. In this case, discuss the communication channel, developer availability, and how to track bugs.
+Address potential differences in data structure between systems. For example:
 
-#### -Batch or real-time call
+- D365FO might allow multiple lines with the same ItemID in a Purchase Order, while the receiving system may not support this.
 
-Do we want to export the document via a batch job (at least a few minutes delay) or immediately after the action? 
+Identify these discrepancies early to plan appropriate handling mechanisms.
 
-The more complex case is a real-time call that will be implemented in this blog post. 
+#### 5. Document Update Rules
 
-## Export Class Implementation detail 
+Define how modified documents should be handled. For instance:
 
-External integration framework provides a base class to implement an event-based integration, a developer needs to extend this class. To provide an example, I created [DEVIntegTutorialExportPurchOrder]( https://github.com/TrudAX/XppTools/blob/master/DEVTutorial/DEVExternalIntegrationSamples/AxClass/DEVIntegTutorialExportPurchOrder.xml), let's consider methods in this class
+- In our case, multiple confirmations can be made for one purchase order. The Web service should be capable of accepting and processing updated versions of previously sent documents.
 
-**isNeedToCreateLog** - methods define validation rules on whether the record should be exported or not. In our case, the purchase order should be Confirmed and the Vendor group should match the parameters
+####  6. API Flexibility Assessment
+
+Evaluate the flexibility of the third-party team in modifying their API to accommodate integration requirements. Possible scenarios include:
+
+a) Fixed public API: The API is used by multiple clients and cannot be modified.
+b) Flexible API: The third-party team can allocate resources to adjust the API for this integration.
+
+If option (b) is possible, establish clear communication channels, developer availability, and bug tracking procedures.
+
+####  7. Batch vs. Real-time Integration
+
+Decide whether document export should occur:
+
+a) Via a batch job (introducing a delay of at least a few minutes), or
+b) Immediately after a triggering action (real-time).
+
+This blog post will focus on implementing the more complex real-time integration scenario.
+
+## Implementing the Export Functionality
+
+### Key Components of the Export Class
+
+The External integration framework provides a base class for implementing event-based integration. To provide an example, I created [DEVIntegTutorialExportPurchOrder]( https://github.com/TrudAX/XppTools/blob/master/DEVTutorial/DEVExternalIntegrationSamples/AxClass/DEVIntegTutorialExportPurchOrder.xml) class that extends this base class. Let's examine it's key methods and components:
+
+#### 1. Validation Method: isNeedToCreateLog
+
+This method defines the rules for determining whether a record should be exported. In our purchase order scenario, it checks if:
+
+- The purchase order is in a Confirmed state
+- The vendor belongs to the specified Vendor group
+- Other relevant conditions are met
 
 ```csharp
 boolean isNeedToCreateLog(PurchTable  _purchTable)
@@ -113,7 +139,13 @@ boolean isNeedToCreateLog(PurchTable  _purchTable)
 }
 ```
 
-**exportAllData** - Method used to reexport of selected records. It should contain the query dialogue and allow the user to specify which records to re-export. This is needed in 2 cases: when we just started this integration, to mark already existing records or when something changes(for example we added more fields) and we want to reexport existing records. 
+#### 2. Bulk Export Method: exportAllData
+
+This method is used for two scenarios:
+a) Initial data load when starting the integration
+b) Re-exporting data after making changes to the export logic/contract
+
+It allows users to specify which records to export through a query dialog.
 
 ```csharp
 public void exportAllData()
@@ -160,7 +192,12 @@ public boolean insertFromPurchTable(PurchTable  _purchTable)
 }
 ```
 
-**exportWebMessage**: used actually to implement the export call. As we used a custom service, we also need to define a load class [DEVIntegTutorialExportPurchLoad](https://github.com/TrudAX/XppTools/blob/master/DEVTutorial/DEVExternalIntegrationSamples/AxClass/DEVIntegTutorialExportPurchLoad.xml) that implements communication with the service using a **HttpClient** call(In case we integrate using Azure file share or Azure service bus, the External integration framework already has base classes for this). This method is also responsible for processing results, in our case, getting the number from an external Order and linking it to our order.   
+#### 3. Core Export Method: exportWebMessage
+
+This method implements the actual export call to the web service. It handles:
+- Preparing the data for export
+- Making the API call using an HttpClient. As we used a custom service, we also need to define a new load class [DEVIntegTutorialExportPurchLoad](https://github.com/TrudAX/XppTools/blob/master/DEVTutorial/DEVExternalIntegrationSamples/AxClass/DEVIntegTutorialExportPurchLoad.xml) that implements communication with the service, but In case we integrate using Azure file share or Azure service bus, the External integration framework already has base load classes for this
+- Processing the response, in our case, getting the number from an external Web Order and linking it to our PO.   
 
 ```csharp
 public void exportWebMessage(DEVIntegExportDocumentLog    _exportDocumentLog, DEVIntegMessagesLoadBaseType     _loadFileStorageCache)
@@ -177,16 +214,26 @@ public void exportWebMessage(DEVIntegExportDocumentLog    _exportDocumentLog, DE
     ttsbegin;
     purchTable = PurchTable::findRecId(_exportDocumentLog.RefRecId, true);
     purchTable.VendorRef   = externalId;
-    purchTable.update();
+    purchTable.doupdate();
     ttscommit;
 }
 ```
 
-This method uses data contract classes(in our case, a [header](https://github.com/TrudAX/XppTools/blob/master/DEVTutorial/DEVExternalIntegrationSamples/AxClass/DEVIntegTutorialExportPurchContractHeader.xml) and [lines](https://github.com/TrudAX/XppTools/blob/master/DEVTutorial/DEVExternalIntegrationSamples/AxClass/DEVIntegTutorialExportPurchContractLine.xml)). What I found is that the "**X++ Dev Helper for Dynamics 365 F&O**" custom [GPT](https://chatgpt.com/g/g-F7D3IGTqo-x-dev-helper-for-dynamics-365-f-o) for ChatGPT is quite good at creating these classes based on just the sample JSON. 
+#### 4. Data Contract Classes
 
-![](chatGPTGenerateClasses.png)
+To structure the JSON data for export, we use data contract classes. In our case, we have:
+- A [header](https://github.com/TrudAX/XppTools/blob/master/DEVTutorial/DEVExternalIntegrationSamples/AxClass/DEVIntegTutorialExportPurchContractHeader.xml) class for purchase order header
+- A [lines](https://github.com/TrudAX/XppTools/blob/master/DEVTutorial/DEVExternalIntegrationSamples/AxClass/DEVIntegTutorialExportPurchContractLine.xml) class for line items
 
-**Methods to mark the record to export**: Usually it is some event handlers to the standard insert/update calls. It can be multiple such methods, if there are several ways the document is modified. These methods should be executed in the posting transaction and just update or insert a reference in **DEVIntegExportDocumentLog**, with a status = "To send", they don't do the export. In our case it is just one method
+What I found is that the "**X++ Dev Helper for Dynamics 365 F&O**" custom [GPT](https://chatgpt.com/g/g-F7D3IGTqo-x-dev-helper-for-dynamics-365-f-o) for ChatGPT is quite good at creating these classes based on just the sample JSON. 
+
+![Chat GPT X++](chatGPTGenerateClasses.png)
+
+#### 5. Event Handlers for Export Triggers
+
+These methods mark records for export when certain events occur, such as confirming a purchase order. They should:
+- Execute within the posting transaction
+- Update or insert a reference in the **DEVIntegExportDocumentLog** table with Export status to "To send"
 
 ```csharp
 [DataEventHandler(tableStr(PurchTable), DataEventType::Updated)]
@@ -202,11 +249,18 @@ public static void PurchTable_onUpdated(Common sender, DataEventArgs e)
 }
 ```
 
-**Methods to export the data after the operation:** These methods should be executed after the main operation, outside transactions, so any failure in export should not block the document posting, or export itself do not increase the posting transaction time. The export sequence is presented on the following diagram:
+#### 6. Post-Operation Export Methods
 
-![](ExportSequence.png)
+These methods run after the main operation (e.g., purchase order confirmation) to initiate the actual export process. They:
+- Execute outside the main transaction, so any failure in export should not block the document posting
+- Check for records marked for export
+- Trigger the export process for those records
 
-In our case, we want to check at the end of purch confirmation whether any export records have been created and, if so, run an export operation for these records. 
+The export sequence is presented on the following diagram:
+
+![Export Sequence](ExportSequence.png)
+
+In our case, we want to check at the end of Purch confirmation whether any export records have been created and, if so, run an export operation for these records. 
 
 ```csharp
 [PostHandlerFor(classStr(FormletterService), methodStr(FormletterService, postPurchaseOrderConfirmation))]
@@ -252,166 +306,220 @@ public static void FormletterService_Post_postPurchaseOrderConfirmation(XppPrePo
 }
 ```
 
-### Comparing export class with standard Business events 
+### Comparing Custom Export Class vs. Standard Business Events
 
-On the first sign, Microsoft provides a very similar concept to External Integration with [Business events](https://learn.microsoft.com/en-us/dynamics365/fin-ops-core/dev-itpro/business-events/home-page), although there are conceptual differences related to integration tasks:
+While Microsoft provides a seemingly similar concept with [Business events](https://learn.microsoft.com/en-us/dynamics365/fin-ops-core/dev-itpro/business-events/home-page) for Dynamics 365 Finance and Operations, there are significant differences when compared to our custom Export class approach. Let's examine these differences in detail:
 
-- A Business event is created and gets all data at the time of the event. In External Integration, the message data is created during the export. This is quite important when you use mapping. For example, an export may fail due to incorrect or missing mapping. For External integration, you just need to fix this mapping; it will be automatically applied at the time of the next export.
-- A business event is created per event. You get two business events if you do two confirmations for the same purchase order. And the sequence of delivering these events is not guaranteed. For documents that can't be modified after the export(e.g. Invoices), this difference is probably not critical, but in case exporting some documents that can be modified, you need to make sure that the consuming side [can handle](https://learn.microsoft.com/en-us/dynamics365/fin-ops-core/dev-itpro/business-events/home-page#idempotency) the message sequence correctly in case a business event usage, that may add some complexity. In External integration, the Export log is unique per document, so only one record will be created/updated. And the consumer can just take the last message. 
-- The Business event export procedure is universal and not linked to the document. The External Integration export class should implement the export method. This can be useful when processing the response, e.g. in our case we can to link our PO with the external PO.
+#### 1. Data Creation Timing
 
-## Integration setup and validation
+With Business events, data is captured at the moment the event occurs, creating a fixed event payload. In contrast, Export class gathers data at the time of export execution. This allows for real-time data retrieval, including any updates made after the initial trigger. For example, an export may fail due to incorrect or missing mapping. For External integration, you just need to fix this mapping; it will be automatically applied at the time of the next export.
 
-In this section I describe how to setup this integration scenario 
+#### 2. Event Frequency and Uniqueness
 
-### Connection types
+Business events are generated for each occurrence, potentially creating multiple events for the same document (e.g., two events for two confirmations of the same purchase order). There's also no guaranteed sequence for event delivery. For documents that can't be modified after the export(e.g. Invoices), this difference is probably not critical, but in case exporting  documents that can be modified, you need to make sure that the consuming side [can handle](https://learn.microsoft.com/en-us/dynamics365/fin-ops-core/dev-itpro/business-events/home-page#idempotency) the message sequence correctly.
 
-The first form to set up a Web service connection is **External integration – Connection types**.
+Export class, however, maintains a unique Export log entry per document, updating existing entries for repeat actions on the same document. This ensures the most recent state is always exported.
 
-It requires the hostname(will be https://purchaseorderapp20240916.azurewebsites.net/api/purchaseorder) and allows to set a user/password credentials to access this host(in our case they will be empty)
+#### 3. Response Processing
+
+Business events are generally designed for one-way communication with limited built-in capabilities for processing responses from external systems. Our Export class easily incorporates logic to handle responses, allowing for updating local records based on the external system's response (e.g., linking local PO with external PO number).
+
+## Setting Up and Validating Integration
+
+Let's walk through the process of setting up and validating our integration solution.
+
+### Configuring Connection Types
+
+First, we need to set up the connection to our web service. Navigate to the **External integration – Connection types**.
+
+It requires the hostname(will be https://purchaseorderapp20240916.azurewebsites.net/api/purchaseorder) and allows to set a user/password credentials to access this host(in our example, we're leaving these empty)
 
 ![Connection types](ConnectionTypes.png)
 
-The password can be stored in several ways:
+The system offers several options for storing passwords:
+1. Manual entry: An unencrypted string, suitable for development. It will persist even after database restores.
+2. Encrypted: A secure option that encrypts the password value.
+3. Azure Key Vault: Links to the standard D365FO key vault for the most secure password storage.
 
-- Manual entry - An unencrypted string suitable for development testing. It will remain after DB restores.
-- Encrypted - An encrypted value.
-- Azure Key Vault - A link to the standard D365FO key vault that stores the password.
+### Defining Outbound Message Types
 
-### Outbound message types
-
-In Outbound message types, we set parameters for our data export.
+Next, we'll configure the parameters for our data export in the **Outbound message types** form.
 
 ![Outbound message types](MessageTypeForm.png)
 
-The "Export type" should be "Document on event" and we should select our export class and specify a connection ID.
+Key settings:
+- Set "Export type" to "Document on event"
+- Select our custom export class
+- Specify the connection ID we just created
 
-### Parameters setup
+### Setting Up Integration Parameters
 
 For our integration, we also created the following parameters
 
 ![Parameters setup](IntegrationParameters.png)
 
-**Vendor Group**: defines a filter for exported PO.
+For our specific integration, we've created some additional parameters. You can find these in the integration parameters form:
 
-**Export on confirmation** option: Specify whether we want to run the actual export(do web service call) in the user session after the confirmation or if the export should be performed via periodic batch.
+1. **Vendor Group**: This defines the filter for exported Purchase Orders.
+2. **Export on confirmation** option: This determines when the actual export (web service call) happens:
+   - In the user session immediately after confirmation
+   - Via a periodic batch job
 
 ## Export scenarios
 
-Initial export of the data 
+### Initial Export of the Data 
 
-Some POs already exist in the database; let's just export them using the "Export all" button on the "Outbound message types" form. You will get the standard query dialog 
+Some Purchase Orders (POs) may already exist in the database when setting up the integration. To export these, use the "Export all" button on the "Outbound message types" form. You'll see a standard query dialog like this:
 
 ![Initial query dialog](InitialQueryDialog.png)
 
-After that, all Purch orders from this query will be processed and the record with order reference will be added to the Export document log table with **To send** status
+After running the query, all Purchase Orders matching your criteria will be processed. The system will add a record with the PO reference to the Export document log table, setting its status to **To send**.
 
 ![](ExportLogInitial.png)
 
-After that, they will be processed by "**Export messages from log**" periodic operation, that processes all records with "**To send**" status or can be manually exported by selecting records and using Export records button 
+### Periodic Batch Export
+
+The "Export messages from log" periodic operation processes all records with "To send" status. You can also manually export by selecting records and using the Export records button:
 
 ![Export document log periodic](ExportDocumentLogPeriodic.png)
 
-As a result we can see the exported orders on our site
+After processing, you should see the exported orders on our site:
 
 ![Exported orders](ExportedOrders.png)
 
-And the **Reference** field will be populated for exported orders.
+The **Reference** field will be populated for exported orders in D365FO:
 
 ![Vendor reference](VendorRef.png)
 
-If full logging is enabled, we can also check what message was send in the Export document log form
+If you've enabled full logging, you can check the exact message sent in the Export document log form:
 
 ![](ExportLogLog.png)
 
-After successful export, the **Export Status** field for the **Export document log** table will be changed to **Sent**
+After a successful export, the **Export Status** field for the **Export document log** table will change to **Sent**:
 
 ![](ExportLogStatus.png)
 
-### Export from the user session
+### Export from the User Session
 
-When a user run a Purch order confirmation if any export Document log records were created during this the system runs the export after the main operation. The status will be displayed to the user. 
+When a user runs a Purchase order confirmation, if any export Document log records were created during this process, the system runs the export immediately after the main operation. The status will be displayed to the user. 
 
 ![Confirm button](ConfirmButton.png)
 
-If an error occurs during the export, it will be displayed to the user, but the Confirmation process will not be affected.
+If an error occurs during the export, it will be displayed to the user, but the Confirmation process will not be affected. This allows for real-time feedback while ensuring the main business process isn't disrupted.
 
-## How to handle export errors 
+## Handling Export Errors
 
-If an exception occurs during the export, the Export document log record will remain in the To send status, and an additional log will be generated with the workload details and exception text.
+If an exception occurs during the export, the Export document log record will remain in the To send status. An additional log will be generated with the workload details and exception text.
 
 ![Document log errors](DocumentLogError.png)
 
-In the example below, the Purchase order contains a service Item(without ItemId), but our test web service doesn't accept such data.
+For example, if a Purchase order contains a service Item (without ItemId), but our test web service doesn't accept such data, you'll see an error logged.
 
-Please note that the Export document log has only two statuses(To send and Sent); there is no Error status. From the business perspective, it doesn't matter whether the record was not exported or the export has failed. So the proper setup for the alerting system should be that the record stays in the To send status more than allowed.
+It's important to note that the Export document log has only two statuses (To send and Sent); there's no specific Error status. From a business perspective, it doesn't matter whether the record wasn't exported or if the export failed. The key is that the record needs attention. For effective monitoring, set up your alerting system to flag records that stay in the To send status longer than your defined threshold.
 
-## Troubleshooting and monitoring
+## Troubleshooting and Monitoring
 
-Integration may be complex and proper tracing that allows identifying the issues is vital for the whole process. Let's see the different options that the External integration framework provides
+Integration can be complex, and proper tracing to identify issues is vital for the whole process. Let's explore the different options that the External integration framework provides for troubleshooting and monitoring:
 
 ### Tracing the call 
 
-The most common issue with the service call is that Web service may not process the call properly, but it returns the success code. E.g. when we send an update to the existing PO, the update fails for some reason, but no error code is returned. In this case, you get mismatched data in both systems. To trace this error, we need to use Full logging, use the external PO ID to find an export record using Document ID and see the full history of exports. 
+One of the most common issues with service calls is when the Web service doesn't process the call properly but returns a success code. For example, when we send an update to an existing PO, the update might fail for some reason, but no error code is returned. This results in mismatched data between the systems.
+
+To trace this error, we need to use the external PO ID to find an export record using Document ID and see the full history of exports. 
 
 ![Document log trace](DocumentLogTracing.png)
 
-Using such information, we can find out on what side the error happened and fix it.
+Using this information, we can determine on which side the error occurred and take steps to fix it.
 
-### Manual Test form
+### Manual Test Form
 
-Another very useful option is a Manual test form. This form has several options:
+Another useful tool for troubleshooting is the Manual test form. This form offers several  options:
 
-**"Init from document"** button: Allows select a Purch order number, and see how this document will be represented in the data. This ignores any existing validations and allow to display the workload without sending it.
+#### "Init from document" button
+
+This button allows you to:
+- Select a Purchase order number ignoring existing validations.
+- See how this document will be represented in the data.
+- Display the workload without actually sending it
+
+#### "Call Create" button
+
+- Take input data (which can be previously generated by the "Init from document" button and then modified by the user)
+- Perform a call with this data.
+- Display the results
 
 ![Test web service](TestWebService.png)
 
-**"Call Create"** button: Takes the input data(it can be previously generated by Init from document button and then modified by user) and to a call with this data and display the results. This allows to avoid any external tool usage(e.g Postman) to test the webservice, which is quite useful in troubleshooting scenarios. 
+The advantage of this approach is that it allows you to test the webservice without using any external tools like Postman. This can be very helpful in troubleshooting scenarios.
 
 ### Monitoring 
 
-Monitoring can be done using External Integration workspace that displays statistics for a given period and number of not exported records
+Monitoring can be done using External Integration workspace that displays statistics for a given period and number of not exported records.
 
 ![Monitoring](ExternalIntegrationWorkspace.png)
 
+This dashboard gives you a quick overview of your integration's health and performance, allowing you to spot issues early and take action.
+
 ## Performance testing
 
-To test how fast our integration may work, External integration provides a simple performance test operation
+The External integration framework provides a simple performance test operation to assess the speed of our integration. Let's explore how this works and what insights we can gain from it.
 
-How it works:
+### How It Works
 
-Initially, you need to create a set of documents ready to export 
+The performance testing process involves several steps:
 
-Then run the Performance test operation where you can specify a standard query filter to the Document log table(so you can create a multiple clients) and run processing of these records in a loop for a sertain period(Duration parameter). There can be two test modes, when we reuse the same connections to export documents or when on every export line a new connection(instance of HttpClient class) is created  
+1. First, you need to create a set of documents that are ready for export. These will serve as your test data.
+
+2. Next, run the Performance test operation. This operation allows you to:
+   - Specify a standard query filter for the Document log table (this means you can create multiple clients if needed)
+   - Run processing of these records in a loop for a specified period (set by the Duration parameter)
+
+3. The test can be run in two modes:
+   - Reusing the same connections to export documents
+   - Creating a new connection (instance of HttpClient class) for every export line
+
+Here's what the Performance test operation form looks like:
 
 ![Performance test operation](PerformanceTest.png) 
 
-For our webservice, I got the following results when I ran it for 60 seconds:
+For our webservice, I ran the performance test for 60 seconds and got the following results:
 
-- 350 exports/minute when, for every line, a new connection is created
-- 700 exports/minute when the connection is cached
+- When creating a new connection for every line: 350 exports/minute
+- When reusing the same connection (cached): 700 exports/minute
 
-So, creating a new connection is quite a complex operation, that may be even more complex if an authentication is used
+These results highlight an important point: creating a new connection is quite a complex operation. It can be even more time-consuming if authentication is involved.
 
-## Resources for this blog post 
+## Resources for This Blog Post
 
-All resources used in this blog are available at [GitHub](https://github.com/TrudAX/XppTools/tree/master/DEVTutorial/DEVExternalIntegrationSamples), the project structure is below
+All resources used in this blog are available on [GitHub](https://github.com/TrudAX/XppTools/tree/master/DEVTutorial/DEVExternalIntegrationSamples). Let's take a look at what's included and how you can use these resources for your own integration projects.
 
 ![Project structure](ProjectStructure.png)
 
-To implement your own D365FO integration with a webservice, you need to create two classes similar to [DEVIntegTutorialExportPurchLoad](https://github.com/TrudAX/XppTools/blob/master/DEVTutorial/DEVExternalIntegrationSamples/AxClass/DEVIntegTutorialExportPurchLoad.xml) (that interacts with a webservice) and [DEVIntegTutorialExportPurchOrder](https://github.com/TrudAX/XppTools/blob/master/DEVTutorial/DEVExternalIntegrationSamples/AxClass/DEVIntegTutorialExportPurchOrder.xml) (that defines the export document structure) and create a form for manual testing of these classes similar to [DEVIntegTutorialTestWebCall](https://github.com/TrudAX/XppTools/blob/master/DEVTutorial/DEVExternalIntegrationSamples/AxForm/DEVIntegTutorialTestWebCall.xml). All other actions will be handled by the External integration framework
+To implement your own D365FO integration with a webservice, you'll need to create two main classes:
 
-The test webservice is located [here](https://github.com/TrudAX/TestWebService_PurchaseOrderApp). At the time of publishing this post, it will be deployed to the following address https://purchaseorderapp20240916.azurewebsites.net/ 
+1. A class similar to [DEVIntegTutorialExportPurchLoad](https://github.com/TrudAX/XppTools/blob/master/DEVTutorial/DEVExternalIntegrationSamples/AxClass/DEVIntegTutorialExportPurchLoad.xml)
+   - This class handles the interaction with the webservice
 
+2. A class similar to [DEVIntegTutorialExportPurchOrder](https://github.com/TrudAX/XppTools/blob/master/DEVTutorial/DEVExternalIntegrationSamples/AxClass/DEVIntegTutorialExportPurchOrder.xml)
+   - This class defines the export document structure.
 
+Additionally, you should create a form for manual testing of these classes, similar to [DEVIntegTutorialTestWebCall](https://github.com/TrudAX/XppTools/blob/master/DEVTutorial/DEVExternalIntegrationSamples/AxForm/DEVIntegTutorialTestWebCall.xml).
+
+Once these components are in place, the External integration framework will handle all other aspects of the integration process.
+
+### Test Web Service
+
+For testing purposes, I've set up a sample web service. At the time of publishing this post, it is deployed at the following address: [https://purchaseorderapp20240916.azurewebsites.net/](https://purchaseorderapp20240916.azurewebsites.net/)
+
+The source code for this test web service is also available on [GitHub] (https://github.com/TrudAX/TestWebService_PurchaseOrderApp)
 
 ## Summary
 
-In this post, I have described how to implement event-based exports from Dynamics 365 Finance and Operations to Web Service using the **External Integration** framework. We discussed the following topics:
+In this post, I have described how to implement event-based exports from Dynamics 365 Finance and Operations to Web Service using the **External Integration** framework. We discussed the following key topics:
 
 - How to design such integration 
-- Provide sample implementations of how to call a web service and how to describe a document class
-- How do we monitor typical issues with such integration 
-- How to do performance testing
+- Sample implementations of how to call a web service and how to create a document class
+- How to monitor typical issues with such integration 
+- How to perform performance testing
 
 I hope you find this information useful. As always, if you see any improvements or suggestions or have questions about this work, don't hesitate to contact me.
