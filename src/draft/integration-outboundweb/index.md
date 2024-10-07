@@ -9,15 +9,15 @@ excerpt: "How to implement robust, efficient integrations between Dynamics 365 F
 
 In this blog post, I will describe how to implement event-based data export from Dynamics 365 Finance to the Web service using REST API call. 
 
-I will show it using a simple example, but the approach used is based on real-life integrations.  The provided implementation contains common elements with reusable code for similar tasks. We'll use an a free and open-source External integration [framework](https://github.com/TrudAX/XppTools?tab=readme-ov-file#devexternalintegration-submodel). 
+While a simplified example illustrates the core concepts, the approach and code samples are rooted in real-world integration scenarios, making them easily adaptable for similar tasks. We'll leverage a free and open-source External integration [framework](https://github.com/TrudAX/XppTools?tab=readme-ov-file#devexternalintegration-submodel), offering reusable components for building robust integrations. 
 
 ## Modification description
 
-Let's begin with our task definition:
+Let's begin with our task sample definition:
 
-**Our goal is to implement a Dynamics 365 Finance integration that sends confirmed purchase orders from D365FO to our partner website via a REST API endpoint.**
+**Goal: Design and develop a Dynamics 365 Finance integration solution that automatically sends confirmed purchase orders from D365FO to a partner website via REST API endpoint.**
 
-For this demonstration, I utilized Claude Sonnet 3.5 to generate a simple Purchase Order Management application and deploy it to Azure.
+To illustrate this process, I utilized Claude Sonnet 3.5 to generate a simple Purchase Order Management application and deploy it to Azure.
 
 The source code is available on [GitHub](https://github.com/TrudAX/TestWebService_PurchaseOrderApp). The application comprises two main components:
 
@@ -47,16 +47,15 @@ In our example, to simplify the process, we're sending all confirmed purchase or
 
 #### 2. Reference Data Management
 
-Messages often contain reference data (e.g., Item or Vendor codes). Determine how this data will be managed. Common scenarios include:
+Data exchange often involves 'reference data' such as Item codes or Vendor IDs. Aligning how both systems manage this data is crucial. Let's explore some common scenarios:
 
 - a) Limited data acceptance: The Web service may accept only a predefined set of data. In this case, you might need to create additional tables in D365FO to maintain possible options.
 
-- b) Stable, manually loaded data: Reference data remains relatively constant and is manually updated. For instance, a user might load an updated list of items to the external website monthly.
+- b) Stable, manually loaded data: When reference data is relatively static, manual updates might suffice. For instance, a user could periodically(e.g. monthly) upload an updated item list to the external system
 
 - c) Frequently changing data: If reference data changes often, you may need to develop a separate integration process to keep it synchronized.
 
-- d) Automatic reference data creation: The Web service might be capable of automatically creating reference data from the incoming message. In this scenario, ensure all required fields (e.g., Item name, Vendor name) are included in the transmission.
-
+- d) Automatic reference data creation: Some web services can automatically create reference data entries based on the incoming message. In this scenario, ensure all required fields (e.g., Item name, Vendor name) are included in the transmission.
 
 ####  3. Error Handling Rules
 
@@ -66,7 +65,7 @@ a) Real-time validation: All business logic validations occur during the API cal
 
 b) Format-only validation: The Web service only checks the message format during the call. If the format is correct, the message is accepted for further processing.
 
-Option (a) requires designating a D365FO team member to respond to integration errors. Ensure this person has a documented support channel with the Web Service support team.For example, how the returned message "Item AAA can't be purchased" will be processed.
+Option (a) requires designating a D365FO team member to respond to integration errors. Ensure this person has a documented support channel with the Web Service support team. For example, how will the returned message "Item AAA can't be purchased" be processed?
 
 Option (b) is more straightforward from the D365FO side, but it creates some challenges. You need to know the document's current status. This may be implemented as another integration(inbound to D365FO).
 
@@ -78,15 +77,15 @@ Address potential differences in data structure between systems. For example:
 
 Identify these discrepancies early to plan appropriate handling mechanisms.
 
-#### 5. Document Update Rules
+#### 5. Handling Document Updates
 
 Define how modified documents should be handled. For instance:
 
 - In our case, multiple confirmations can be made for one purchase order. The Web service should be capable of accepting and processing updated versions of previously sent documents.
 
-####  6. API Flexibility Assessment
+####  6. API Flexibility
 
-Evaluate the flexibility of the third-party team in modifying their API to accommodate integration requirements. Possible scenarios include:
+Understand the web service provider's constraints regarding API modifications. Possible scenarios include:
 
 a) Fixed public API: The API is used by multiple clients and cannot be modified.
 b) Flexible API: The third-party team can allocate resources to adjust the API for this integration.
@@ -112,9 +111,9 @@ The External integration framework provides a base class for implementing event-
 
 This method defines the rules for determining whether a record should be exported. In our purchase order scenario, it checks if:
 
-- The purchase order is in a Confirmed state
-- The vendor belongs to the specified Vendor group
-- Other relevant conditions are met
+- The purchase order is in a Confirmed state.
+- The vendor belongs to the specified Vendor Group
+- Other relevant conditions are met.
 
 ```csharp
 boolean isNeedToCreateLog(PurchTable  _purchTable)
@@ -369,7 +368,7 @@ For our specific integration, we've created some additional parameters. You can 
 
 ### Initial Export of the Data 
 
-Some Purchase Orders (POs) may already exist in the database when setting up the integration. To export these, use the "Export all" button on the "Outbound message types" form. You'll see a standard query dialog like this:
+Some Purchase Orders (POs) may already exist in the database when setting up the integration. To export these, use the "**Export all**" button on the "**Outbound message types**" form. You'll see a standard query dialog like this:
 
 ![Initial query dialog](InitialQueryDialog.png)
 
@@ -379,7 +378,7 @@ After running the query, all Purchase Orders matching your criteria will be proc
 
 ### Periodic Batch Export
 
-The "Export messages from log" periodic operation processes all records with "To send" status. You can also manually export by selecting records and using the Export records button:
+The **Export messages from log** periodic operation in D365FO process all records in the **Export document log** table with a **Status** = **To send**. You can also manually export by selecting records and using the **Export records** button:
 
 ![Export document log periodic](ExportDocumentLogPeriodic.png)
 
@@ -391,7 +390,7 @@ The **Reference** field will be populated for exported orders in D365FO:
 
 ![Vendor reference](VendorRef.png)
 
-If you've enabled full logging, you can check the exact message sent in the Export document log form:
+If you've enabled full logging, you can check the exact message sent in the **Export document log** form:
 
 ![](ExportLogLog.png)
 
@@ -401,7 +400,7 @@ After a successful export, the **Export Status** field for the **Export document
 
 ### Export from the User Session
 
-When a user runs a Purchase order confirmation, if any export Document log records were created during this process, the system runs the export immediately after the main operation. The status will be displayed to the user. 
+When a user runs a Purchase order confirmation, if any **Export document log** records were created during this process, the system runs the export immediately after the main operation. The status will be displayed to the user. 
 
 ![Confirm button](ConfirmButton.png)
 
@@ -409,13 +408,13 @@ If an error occurs during the export, it will be displayed to the user, but the 
 
 ## Handling Export Errors
 
-If an exception occurs during the export, the Export document log record will remain in the To send status. An additional log will be generated with the workload details and exception text.
+If an exception occurs during the export, the **Export document log** record will remain in the **To send** status. An additional log will be generated with the workload details and exception text.
 
 ![Document log errors](DocumentLogError.png)
 
 For example, if a Purchase order contains a service Item (without ItemId), but our test web service doesn't accept such data, you'll see an error logged.
 
-It's important to note that the Export document log has only two statuses (To send and Sent); there's no specific Error status. From a business perspective, it doesn't matter whether the record wasn't exported or if the export failed. The key is that the record needs attention. For effective monitoring, set up your alerting system to flag records that stay in the To send status longer than your defined threshold.
+It's important to note that the **Export document log** has only two statuses (**To send** and **Sent**); there's no specific Error status. From a business perspective, it doesn't matter whether the record wasn't exported or if the export failed. The key is that the record needs attention. For effective monitoring, set up your alerting system to flag records that stay in the **To send** status longer than your defined threshold.
 
 ## Troubleshooting and Monitoring
 
@@ -425,7 +424,7 @@ Integration can be complex, and proper tracing to identify issues is vital for t
 
 One of the most common issues with service calls is when the Web service doesn't process the call properly but returns a success code. For example, when we send an update to an existing PO, the update might fail for some reason, but no error code is returned. This results in mismatched data between the systems.
 
-To trace this error, we need to use the external PO ID to find an export record using Document ID and see the full history of exports. 
+To trace this error, we need to use the external PO ID to find an export record using **Document ID** and see the full history of exports. 
 
 ![Document log trace](DocumentLogTracing.png)
 
@@ -433,7 +432,7 @@ Using this information, we can determine on which side the error occurred and ta
 
 ### Manual Test Form
 
-Another useful tool for troubleshooting is the Manual test form. This form offers several  options:
+Another useful tool for troubleshooting is the **Manual test** form. This form offers several  options:
 
 #### "Init from document" button
 
@@ -470,15 +469,15 @@ The performance testing process involves several steps:
 
 1. First, you need to create a set of documents that are ready for export. These will serve as your test data.
 
-2. Next, run the Performance test operation. This operation allows you to:
-   - Specify a standard query filter for the Document log table (this means you can create multiple clients if needed)
-   - Run processing of these records in a loop for a specified period (set by the Duration parameter)
+2. Next, run the **Performance test** operation. This operation allows you to:
+   - Specify a standard query filter for the **Export document log** table (this means you can create multiple clients if needed)
+   - Run processing of these records in a loop for a specified period (set by the **Duration** parameter)
 
 3. The test can be run in two modes:
    - Reusing the same connections to export documents
    - Creating a new connection (instance of HttpClient class) for every export line
 
-Here's what the Performance test operation form looks like:
+Here's what the **Performance test** operation form looks like:
 
 ![Performance test operation](PerformanceTest.png) 
 
@@ -487,7 +486,7 @@ For our webservice, I ran the performance test for 60 seconds and got the follow
 - When creating a new connection for every line: 350 exports/minute
 - When reusing the same connection (cached): 700 exports/minute
 
-These results highlight an important point: creating a new connection is quite a complex operation. It can be even more time-consuming if authentication is involved.
+These results highlight an important point: creating a new connection is a complex operation. It can be even more time-consuming if authentication is involved.
 
 ## Resources for This Blog Post
 
@@ -498,7 +497,7 @@ All resources used in this blog are available on [GitHub](https://github.com/Tru
 To implement your own D365FO integration with a webservice, you'll need to create two main classes:
 
 1. A class similar to [DEVIntegTutorialExportPurchLoad](https://github.com/TrudAX/XppTools/blob/master/DEVTutorial/DEVExternalIntegrationSamples/AxClass/DEVIntegTutorialExportPurchLoad.xml)
-   - This class handles the interaction with the webservice
+   - This class handles the interaction with the custom Webservice(if we use Azure service bus or File share, it is not needed)
 
 2. A class similar to [DEVIntegTutorialExportPurchOrder](https://github.com/TrudAX/XppTools/blob/master/DEVTutorial/DEVExternalIntegrationSamples/AxClass/DEVIntegTutorialExportPurchOrder.xml)
    - This class defines the export document structure.
@@ -507,9 +506,9 @@ Additionally, you should create a form for manual testing of these classes, simi
 
 Once these components are in place, the External integration framework will handle all other aspects of the integration process.
 
-### Test Web Service
+### Sample Web App
 
-For testing purposes, I've set up a sample web service. At the time of publishing this post, it is deployed at the following address: [https://purchaseorderapp20240916.azurewebsites.net/](https://purchaseorderapp20240916.azurewebsites.net/)
+For testing purposes, I've set up a sample web app. At the time of publishing this post, it is deployed at the following address: [https://purchaseorderapp20240916.azurewebsites.net/](https://purchaseorderapp20240916.azurewebsites.net/)
 
 The source code for this test web service is also available on [GitHub] (https://github.com/TrudAX/TestWebService_PurchaseOrderApp)
 
