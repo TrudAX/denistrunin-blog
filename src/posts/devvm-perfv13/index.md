@@ -125,7 +125,13 @@ I upgraded to a Ryzen 7 7700X CPU(not the fastest, but close to the top CPU http
 
 Local VMs may not be the most convenient options, but if you write a lot of X++ code(with change/test/fix cycles), they are worth considering.
 
-To increase responce time even more enable Preload feature https://abhimantiwari.github.io/blog/Application-Initialization/ (thanks **Huber Gomez Hernandez** for this advice)
+To increase response time even more, enable Preload feature https://abhimantiwari.github.io/blog/Application-Initialization/ (thanks **Huber Gomez Hernandez** for this advice)
+
+### Update 2024-10-17
+
+Make sure you disable the "Build metadata cache when AOS starts" parameter in the  **System parameters** form(System administrator → Setup → System parameters)
+
+https://www.linkedin.com/pulse/boost-your-x-development-vm-performance-2x-denis-trunin-krowc/
 
 ## Conclusion
 
