@@ -1,2 +1,53 @@
 
 Looking forward to hearing the response on this one.. do let me know what you think, if you have thoughts on it. ☺️ 
+
+
+@startuml
+
+skin rose
+
+title D365FO Data export diagram
+
+database  "PROD DB" as PRODDB
+database  "PRE-PROD" as PrePROD
+
+
+PRODDB -right-> PrePROD :" Refresh data from PROD"
+
+cloud  "LCS BACPAC " as ex1
+
+database  "TIER2.. TEST/UAT" as Tier2
+PrePROD -down-> Tier2: restore
+
+PrePROD -> ex1 : Export DB file to LCS
+
+database "Development VM" as DEVDB
+ex1 -down->  DEVDB : "Restore SQL package"
+
+
+@enduml
+
+
+@startuml
+
+skin rose
+
+title D365FO Code deployment diagram
+
+cloud  "X++ code" <<Azure DEV OPS>> as ex1
+
+  card PrePROD {
+   package "Release Candidate"
+  }
+  
+ex1 -> PrePROD : Build code package
+
+card PROD {
+ package "Production             "
+}
+
+  PrePROD --> PROD :" Release - Full copy"
+
+
+
+@enduml
