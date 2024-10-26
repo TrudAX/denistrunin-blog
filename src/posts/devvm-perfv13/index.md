@@ -4,7 +4,7 @@ date: "2020-10-21T20:12:03.284Z"
 tags: ["Development", "Performance"]
 path: "/devvm-perfv13"
 featuredImage: "./logo.png"
-excerpt: "Comparing the performance of 4 D365FO development VM configurations with Visual studio 2017"
+excerpt: "Comparing the performance of 4 D365FO development VM configurations with Visual studio"
 ---
 
 Starting from PU37 Microsoft has changed Dynamics 365 Finance and Operation development environment from Visual Studio 2015 to VS2017. This post is an updated version of my [previous one for VS2015](https://denistrunin.com/devvm-perfv10/), where I try to compare the performance of 4 development configurations with the new VS2017 version.
@@ -133,6 +133,10 @@ Make sure you disable the "Build metadata cache when AOS starts" parameter in th
 
 https://www.linkedin.com/pulse/boost-your-x-development-vm-performance-2x-denis-trunin-krowc/
 
+Enabling disk cache also adds some improvements. With Read it takes about 60 seconds to refresh the browser after rebuild 
+
+![](DiskCache.png)
+
 ## Conclusion
 
 Let's summarize the current recommendations based on these tests for Visual Studio 2017 D365FO development environment and what to do if it is slow:
@@ -141,6 +145,6 @@ Let's summarize the current recommendations based on these tests for Visual Stud
 
 - Standard Development Environment from LCS(with the default of 3 HHD disks) is the slowest and constantly hangs. If you can control the Environment creation, never use it and always change the number of disks(15 32GB HDD are cheaper and faster).
 
-- HDD15 VM is the best choice in terms of price/performance. It is a little bit slower than SSD based VM, but the storage price(that should be paid even if VM is deallocated) is almost 10 times cheaper(24 vs 220 USD)
+- HDD15 VM with ..V5 CPUs is the best choice in terms of price/performance. It is a little bit slower than SSD based VM, but the storage price(that should be paid even if VM is deallocated) is almost 10 times cheaper(24 vs 220 USD)
 
 I will also try to repeat the same tests after the next D365FO release, it will be interesting to compare the progress in this area. Any comments are welcome.
