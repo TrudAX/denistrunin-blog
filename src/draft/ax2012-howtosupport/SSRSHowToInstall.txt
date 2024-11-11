@@ -1,0 +1,32 @@
+
+How to install AX 2012 R3 SSRS extensions on SQL 2022 if you really want to.
+Vasily Nosov
+Vasily Nosov
+Software Engineer .NET/Dynamics AX/365 F&O/Retail
+October 28, 2024
+
+The latest version of MS SQL Server that is officially supported by AX 2012 R3 was SQL 2016. It's already 8 years old and went out of mainstream support. So what one could do if the AX 2012 R3 is still have to run on something? Maybe use the newer version, like SQL 2022? But the problem is the SSRS service suffered a considerable change that's not supported by the ancient ERP. 
+
+First of all the Windows service for the SSRS has changed it's name, and the installer is looking for the name it used to see and fails if it doesn't see it. What can be done? Right, let's create a fake service with the old name and point it to the SSRS executable:
+
+$params = @{
+  Name = "ReportServer"
+  BinaryPathName = 'C:\Program Files\Microsoft SQL Server Reporting Services\SSRS\RSHostingService\RSHostingService.exe'
+  DisplayName = "Report Server DUMMY (SSRS)"
+  StartupType = "Manual"
+  Description = "This is a dummy SSRS service."
+}
+New-Service @params
+
+Display name field must contain the actual instance name in braces.
+
+The SQL 2022 service "SQL Server Reporting Services" must be changed to manual start and stopped for the duration of the install.
+
+The next thing the install will look for is the SSRS version in the registry so we must create this entry as well, since the new SSRS have it elsewhere:
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Microsoft SQL Server\MSRS16.SSRS\MSSQLServer\CurrentVersion]
+"CurrentVersion"="16.0.1116.12"
+
+And the last but not least is to use the latest version of the AX 2012 R3 setup files. I used 6.3.6000.10682. Not sure which older build would still work but my original 6.3.4000.* didn't work.
+
+Don't forget to to disable the dummy service after the install. 
