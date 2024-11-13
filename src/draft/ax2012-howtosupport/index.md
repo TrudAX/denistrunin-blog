@@ -1,42 +1,42 @@
-How to support your legacy Dynamics AX system(AX2012, AX2009, AX40)
+Optimizing Your Legacy Dynamics AX System(AX2012, AX2009, AX40)
 
-If you inherit or using a legacy Dynamics AX system and upgrade is not coming you probably need a find a way to maintain this system in efficient way. In this post I will try to provide a detailed step by step instruction how to do this. Most of the topics refer to my previous articles, this is just all-in-one guide.
+If you’re still running Dynamics AX 2012, AX 2009, or AX 4.0, maintaining efficiency is essential, especially if an upgrade isn’t planned. This post compiles proven methods and actionable steps to help you manage your system efficiently.
 
+## Perform a technical audit
 
+The technical audit process includes two primary steps. First, gather user feedback about their main pain points using a [structured format](https://github.com/TrudAX/TRUDScripts/blob/master/Performance/Jobs/PerformanceProblemsTemplate.xlsx) and resolve the issues.
 
-## Perform technical audit
+Next, validate the system’s configuration against best practices and make necessary adjustments. These steps are covered in more detail in my articles  [Dynamics AX performance audit](https://denistrunin.com/performance-audit/) regarding what should be checked and  [How to manage a Dynamics AX performance optimization project](https://denistrunin.com/performance-projmanage/) about how to organize this projects. 
 
-Technical audit consists of two main parts. First you ask your users their main pain points in a [certain format](https://github.com/TrudAX/TRUDScripts/blob/master/Performance/Jobs/PerformanceProblemsTemplate.xlsx) and try to resolve 
+It’s important to involve upper management, as changes in legacy systems often come with risks that need approval.
 
-Then there are Best practices how the system should be configured, you validate all this and make adjustments
-
-I wrote many articles about this, the mains are [Dynamics AX performance audit](https://denistrunin.com/performance-audit/) regarding what should be checked and how and  [How to manage a Dynamics AX performance optimization project](https://denistrunin.com/performance-projmanage/) how to organize this projects. The key factor - upper management should be involved, as you need to do changes, and for legacy systems someone should accept the risk of doing that.
+The goal of the technical audit is to achieve a stable and well-configured system that meets best practice standards. This will provide users with a smoother experience and ensure the system operates within acceptable performance parameters.
 
 ![Perf results](PerfResults.png)
 
-As the end result you should have a properly functional system with some acceptable parameters for users that configures according to best practices.
-
 ## Perform periodic system monitoring
 
-After system enters a stable state it is quite important to perform a periodic system monitoring to quickly identify and fix potential problems. In Windows there are huge number of counters to monitor, but it is important that monitoring leads to some actions, rather than monitoring itself. Take for example most typical counter - CPU load. Monitoring just this counter doesn't leads to any action, for example you faced that during some period this counter is above 90%. There is no action to do, the only thing you can do is to do additional analysis by analyzing server workload during this time. In this part I try to describe what parameters can be monitored that can leads to some actions
+After stabilizing your system, it’s vital to conduct regular monitoring to catch and resolve issues early. Windows provides numerous counters for monitoring, but it’s crucial to focus on actionable insights rather than simply tracking metrics.
+
+For example, simply tracking CPU load isn't enough - seeing 90% CPU usage doesn't tell you what to do next. In this section, I’ll outline key parameters that not only indicate system health but also guide corrective actions.
 
 ### Database size monitoring
 
-One way to perform a database size monitoring to [copy](https://github.com/TrudAX/TRUDScripts/blob/master/Performance/AX%20Technical%20Audit.md#database-size) the size of TOP20 tables to Excel and then use VLOOKUP function to compare monthly grow. 
+To monitor database size effectively, [export the top 20 tables by size](https://github.com/TrudAX/TRUDScripts/blob/master/Performance/AX Technical Audit.md#database-size) into Excel and use VLOOKUP to track monthly changes.
 
-In Excel it looks like this
+In Excel it looks like this:
 
 ![DB size](DBSizeCompare.png)
 
-**Grow** column show the difference for the current table between the current and previous month size. It quicky shows anomalies like situations where someone enabled a log and forget to disable it. You will see the table changes it's position in the TOP with a unusual grow.
+The “Growth” column in Excel sheet will highlight any anomalies. This makes it easy to spot cases like unintended "log" activations, where a table may grow unusually and climb in the rankings.
 
 ### Long queries and parameters sniffing monitoring
 
-This monitoring allows detects critical performance problem before users reports them. Parameters sniffing visually can be illustrated by this picture where operation that usually takes 1-2 seconds starts to execute minutes due to wrong plan SQL plan selection. This often slow down users. 
+This type of monitoring helps identify critical performance issues before users report them. Parameters sniffing visually can be illustrated by this picture where operations that typically take 1-2 seconds to execute suddenly take minutes due to a poorly chosen SQL execution plan. 
 
 ![Parameters Sniffing](ParametersSniffing.png)
 
-Technically monitoring consists of the following components:
+The monitoring process involves:
 
 - SQL Agent job that runs every hour and detects new TOP SQL queries
 - Provides an alert when detects a new query in TOP3 statements
@@ -64,7 +64,7 @@ Full description is here: [Dynamics AX performance monitoring: missing indexes](
 
 ### Business operations performance monitoring
 
-This monitoring includes Dynamics AX setup form and a PowerBI dashboard 
+This monitoring is used when you have critical business operations, it includes Dynamics AX setup form and a PowerBI dashboard.
 
 The Dynamics AX form:
 
@@ -94,17 +94,17 @@ Additionally tasks can be analysed by time of the day
 
 This analysis may not work for every client, as there may no be stable load patters, but is some cases can give a valuable information about Dynamics AX batch performance. Full description is here: [Analysing Dynamics AX / Dynamics 365FO batch performance using Power BI](https://denistrunin.com/performance-powerbibatch)
 
-## Developing new integrations
+## Develop new AX integrations
 
- It may happen that you need to develop a new integration with some systems. Most of the in-build AX modules (like AIF) become obsolete, so I suggest using the  [External integration](https://github.com/TrudAX/XppTools?tab=readme-ov-file#devexternalintegration-submodel) module. I shared code for D365FO, but it is X++ based, so can be with some restrictions reused on lower versions
+It may happen that you need to develop a new integration with some systems. Most of the in-build AX modules (like AIF) become obsolete, so I suggest using the  [External integration](https://github.com/TrudAX/XppTools?tab=readme-ov-file#devexternalintegration-submodel) module. I shared code for D365FO, but it is X++ based, so can be with some restrictions reused on lower versions
 
 For inbound flow it will be something like importing files from the shared directory, for outbound: a periodic or event based exports to the files. It may be also combined with some No-Code tools, setup to take files from the directory and send to external services. 
 
 ## Maintaining Windows and SQL Server versions
 
-Keeping the legacy Windows may be a challenging task. A common Dynamics AX components includes an AX client and Application server(AOS) that may work only on specific Windows versions(the best way to find this is a google Dynamics AX xx system requirements). As a starting point for at least for Dynamics 4.0 a Windows 2012R2 can be used.
+Keeping the legacy Windows may be a challenging task. A common Dynamics AX components includes an AX client and Application server(AOS) that may work only on specific Windows versions(the best way to find this is a google "Dynamics AX xx system requirements"). As a starting point for at least for Dynamics 4.0 a Windows 2012R2 can be used.
 
-For SQL Server situation is much better, you can install latest SQL Server (e.g. SQL2022 or SQL2019) and use a compatibility mode to a maximum supported version, it works quite well with all Dynamics versions. Also recently Vasily Nosov published an article regarding SSRS installation: [How to install AX 2012 R3 SSRS extensions on SQL 2022 if you really want to](https://www.linkedin.com/pulse/how-install-ax-2012-r3-ssrs-extensions-sql-2022-you-really-nosov-dcvzc/)
+For SQL Server situation is much better, you can install latest SQL Server (e.g. SQL2022 or SQL2019) and use a compatibility mode to a maximum supported version, it works quite well with all Dynamics versions. Also recently Vasily Nosov published an article regarding SSRS installation: [How to install AX 2012 R3 SSRS extensions on SQL 2022 if you really want to](https://www.linkedin.com/pulse/how-install-ax-2012-r3-ssrs-extensions-sql-2022-you-really-nosov-dcvzc/).
 
 
 ## Performing data cleanup
