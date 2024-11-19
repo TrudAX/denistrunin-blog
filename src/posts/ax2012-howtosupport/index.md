@@ -29,7 +29,7 @@ For example, simply tracking CPU load isn't enough - seeing CPU usage at 90% doe
 
 ### -Database size monitoring
 
-To effectively monitor database size, [export the top 20 tables by size](https://github.com/TrudAX/TRUDScripts/blob/master/Performance/AX Technical Audit.md#database-size) into Excel and use VLOOKUP to track monthly changes.
+To effectively monitor database size, [export the top 20 tables by size](https://github.com/TrudAX/TRUDScripts/blob/master/Performance/AX%20Technical%20Audit.md#database-size) into Excel and use VLOOKUP to track monthly changes.
 
 In Excel, it looks like this:
 
