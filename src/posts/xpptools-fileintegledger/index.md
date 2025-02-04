@@ -7,6 +7,8 @@ featuredImage: "./logo.png"
 excerpt: "The blog post describes a sample approach to implement recurring file-based integration in D365FO using X++"
 ---
 
+**Update 2025-02-04: The integration was updated to a new Azure Storage DLL [A new way of working with Azure File Share from X++](https://www.linkedin.com/pulse/new-way-working-azure-file-share-from-x-denis-trunin-okmcc/)**
+
 There are many ways to implement integration with Dynamics 365 for Finance and Operations. One of the comprehensive descriptions of possible options can be found in this great post by Tayfun Sertan Yaman: [How to integrate with Dynamics 365 for Finance and Operations](https://devblog.sertanyaman.com/2020/08/21/how-to-integrate-with-d365-for-finance-and-operations/).
 
 The file-based approach is probably the oldest and commonly used integration type. Using this approach, an external system and D365FO send messages by reading/writing files into some shared network folder.

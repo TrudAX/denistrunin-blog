@@ -1,0 +1,22 @@
+{
+    "CompanyId": "USMF",
+    "customerId": "US-002",
+    "externalOrderNumber": "SalesExt_1",
+    "lines": [
+        {
+            "lineQuantity": 1,
+            "linePrice": 11,
+            "lineItemBarcode": "M0001"
+        },
+        {
+            "lineQuantity": 2,
+            "linePrice": 22,
+            "lineItemBarcode": "M0004"
+        },
+        {
+            "lineQuantity": 3,
+            "linePrice": 33,
+            "lineItemBarcode": "M0007"
+        }
+    ]
+}
