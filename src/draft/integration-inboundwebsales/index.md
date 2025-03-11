@@ -1,6 +1,6 @@
 ﻿---
 title: "D365FO Integration: Import Sales orders from External Web Application"
-date: "2025-03-07T22:12:03.284Z"
+date: "2025-03-17T22:12:03.284Z"
 tags: ["Integration", "XppDEVTutorial"]
 path: "/integration-inboundwebsales"
 featuredImage: "./logo.png"
@@ -61,9 +61,9 @@ In this post, I just delete an open order and generate an error if the status is
 
 ### Discuss TEST endpoint
 
-Ask about do they have test application and what data it contains. Usually TEST application exists, but it may contain fake data, not relevant to real values. That will become a problem as for D365FO projects we try to use more or less closed to original data, so you will not be able to import these values. In this case some testing should be done using production endpoint.
+Ask about do they have test application and what data it contains. Usually TEST application exists, but it may contain fake data, not relevant to real values. That will become a problem as for D365FO projects we try to use more or less closed to production data, so you will not be able to import these values. In this case some testing should be done using production endpoint.
 
-### Ask for a guide how to create a document from UI
+### Ask for a guide on how to create a document from UI
 
 You need to have someone from D365FO team who can generate a document using a User Interface in the external Web Application that later appear in integration(for example create a Sales order that should be passed to D365FO). This is an important step for testing, ask for a training how to do this
 
@@ -81,9 +81,9 @@ In our case it will look like [this](https://github.com/TrudAX/TRUDScripts/blob/
 
 ![Mapping SO Sample](MappingSOSample.png)
 
-## High level design description
+## High-level design description
 
-Implementing web call processing is slightly different from other integration methods, as one web service call may return multiple not linked orders, but our aim is still to have full traceability from individual orders to the original web request. To handle this the concept of parent message was introduced on the message field. The following processing logic was implemented:
+Implementing web call processing is slightly different from other integration methods, as one web service call may return multiple not linked orders, but our aim is still to have full traceability from individual orders to the original web request. To handle this, the concept of parent message was introduced on the message field. The following processing logic was implemented:
 
 - Load class make a request to a webservice with the current message **UpdatedAt** date
 
@@ -92,10 +92,7 @@ Implementing web call processing is slightly different from other integration me
 - To process a parent message we need to parse the attached JSON and create multiple child messages with attached parsed data(one message per order, as stading table data). Also perform some basic actions based on unique fields, for example delete previously messages with Error status with the same ID. This is done as one transaction and in a single thread.
 - If parent message processing is successful, we update a message **UpdatedAt** date to a new value(or if paging is used, update to a next page)
 
-- Then for all child messages a separate batch task created that may work in multithreaded mode that based on the staging data create final D365FO documents. Errors on this stage do not influence on the parent document
-
-
-
+- Then, for all child messages, a separate batch task is created that may work in multithreaded mode based on the staging data to create final D365FO documents. Errors on this stage do not influence on the parent document
 
 ## Setting Up Integration
 
@@ -185,25 +182,118 @@ After running **Load messages** again, we see 2 new records in Web staging data,
 
 ## Monitoring and error processing 
 
+For any integrations is very critical to to be able to monitor every step of the integration and have a plan to resolve possible issues.
+
+### Connection errors 
+
+If D365FO can't connect to a specified API an exception will be generated, it will stop the Load messages job, batch job will get Error status.
+
+Another issue to monitor, Load batch job will not be running at all
+
+Both these cases can be identified by setting the alert to Last Date time field, if this is old something is wrong.
+
+![Last update date](LastDateTimeIssue.png) 
+
+### Parsing errors
+
+Next type of errors is when Load messages get some data but can't parse it properly.
+
+To monitor this an alert to Messages table  Incoming messages table with Status = Error may be created
+
+In this case, a parent message with the attached data will be created; this data can be analysed and send to developer to run using a Manual load function. 
+
+### Manual load function
+
+To run message processing without connecting to Web application is a great advantage of External Integration Framework is a Manual load function. Using this function we can provide JSON as a text and run exactly the same process as during the API call.
+
+![Manual load function](ManualLoad.png)
+
+For example by providing this JSON data 
+
+```json
+[  {
+    "id": 96,
+    "purchId": "PO-002",
+    "orderAccount": "ACCT-002",
+    "updatedAt": "2025-03-12T02:58:18.641909",
+    "lines": [
+      {
+        "id": 172,
+        "purchId": "PO-002",
+        "itemId": "M0004",
+        "quantity": 8,
+        "lineAmount": 120
+      }
+    ]
+  } ]
+```
+
+we can process a new Sales order, that will be marked as Manual in Messages table
+
+![Manual load result](ManualLoadResult.png)
+
+This function is also great for testing different processing options
+
+### New load function
+
+User may initiate a Load orders function from the UI by pressing the "New load" button.
+
+![New load function](NewLoadFunction.png)
+
+In the load dialog "Transaction time" will be automatically populated as last loaded time, but it may be overrided if needed. A typical use case for this - we need to reload previously loaded data for certain period
+
+### Repetitive error handling
+
+Every time system tries to process a message and the processing is failed it increases the **Processing attempts** counter for this Message
+
+![Processing attempts](ProcessingAttempts.png)
+
+While running Process incoming messages batch job we can specify a filter for this field and process Errors only several times
+
+![Process messages dialog](ProcessMessageDialog.png)
 
 
 
+This may be useful to prevent situations where no one reacts to errors and the system slows down by trying to process multiple errors. A reasonable value for this filter may be something that still tries to process Errors several times to automatically resolve situations when, for example, an order can't be created due to a missing customer, but later the customer is created, and we want the message processed automatically.
+
+### Cancel function
+
+If the message can't be processed because it is invalid, a user may desided to Cancel it. 
+
+![Cancel message](CancelFunction.png)
+
+The main purpose of this function is that we should not have messages with Error status, they should be either Processed or Cancelled.
+
+### Full traceability
+
+The system provides full traceability from the initial message with JSON workload to a resulting Sales order and from the Sales order to the individual web call that initiated this Sales order creation.
+
+From Sales order 
+
+![Sales order step1](SOStep1.png)
+
+we can view the Staging data with parsed values
+
+![Sales staging](SOStep2.png)
+
+and the original message with attached JSON text
+
+![Sales message step](SOStep3.png)
+
+Every step may be executed without Web API access in the Development environment(either using a Manual load function or changing the Status of individual message)
 
 ## Resources for This Blog Post
 
-All resources used in this blog are available on [GitHub](https://github.com/TrudAX/XppTools/tree/master/DEVTutorial/DEVExternalIntegrationSamples). Let's take a look at what's included and how you can use these resources for your own integration projects.
+All resources used in this blog are available on [GitHub](https://github.com/TrudAX/XppTools/tree/master/DEVTutorial/DEVExternalIntegrationSamples). Let's take a look at what's included and how you can use these resources as a starting template for your integration projects.
 
 ![Project structure](ProjectStructure.png)
 
-To implement your own D365FO integration with a webservice, you'll need to create two main classes:
+Main components here:
 
-1. A class similar to [DEVIntegTutorialExportPurchLoad](https://github.com/TrudAX/XppTools/blob/master/DEVTutorial/DEVExternalIntegrationSamples/AxClass/DEVIntegTutorialExportPurchLoad.xml)
-   - This class handles the interaction with the custom Webservice(if we use Azure service bus or File share, it is not needed)
-
-2. A class similar to [DEVIntegTutorialExportPurchOrder](https://github.com/TrudAX/XppTools/blob/master/DEVTutorial/DEVExternalIntegrationSamples/AxClass/DEVIntegTutorialExportPurchOrder.xml)
-   - This class defines the export document structure.
-
-Additionally, you should create a form for manual testing of these classes, similar to [DEVIntegTutorialTestWebCall](https://github.com/TrudAX/XppTools/blob/master/DEVTutorial/DEVExternalIntegrationSamples/AxForm/DEVIntegTutorialTestWebCall.xml).
+1. A Load class similar to [DEVIntegTutorialWebSalesLoad](https://github.com/TrudAX/XppTools/blob/master/DEVTutorial/DEVExternalIntegrationSamples/AxClass/DEVIntegTutorialWebSalesLoad.xml) that implements connection to a custom API
+2. A processing class [DEVIntegTutorialWebSalesProcess](https://github.com/TrudAX/XppTools/blob/master/DEVTutorial/DEVExternalIntegrationSamples/AxClass/DEVIntegTutorialWebSalesProcess.xml) that implements processing logic
+3. Tables and forms to handle Staging data
+4. Mapping extension
 
 Once these components are in place, the External integration framework will handle all other aspects of the integration process.
 
@@ -215,11 +305,11 @@ The source code for this test web service is also available on [GitHub] (https:/
 
 ## Summary
 
-In this post, I have described how to implement event-based exports from Dynamics 365 Finance and Operations to Web Service using the **External Integration** framework. We discussed the following key topics:
+In this post, I have described implementing a complex document load to Dynamics 365 Finance and Operations from REST API Web Service using the **External Integration** framework. We discussed the following key topics:
 
 - How to design such integration 
-- Sample implementations of how to call a web service and how to create a document class
-- How to monitor typical issues with such integration 
-- How to perform performance testing
+- Sample implementations of how to query create Web Application and create Sales orders in D365FO
+- How to monitor typical issues with such integrations
 
 I hope you find this information useful. As always, if you see any improvements or suggestions or have questions about this work, don't hesitate to contact me.
+
