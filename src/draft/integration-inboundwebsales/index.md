@@ -9,7 +9,7 @@ excerpt: "How to implement robust, efficient integrations between Dynamics 365 F
 
 In this blog post, I will describe how to import sales orders to Dynamics 365 Finance from the Web service using a REST API call. 
 
-While a simplified example illustrates the core concepts, the approach and code samples are rooted in real-world integration scenarios, making them easily adaptable for similar tasks. We'll leverage a free and open-source External integration [framework](https://github.com/TrudAX/XppTools?tab=readme-ov-file#devexternalintegration-submodel), offering reusable components for building robust X++ integrations. 
+While a simplified example illustrates the core concepts, the approach and code samples are rooted in real-world integration scenarios, making them easily adaptable for similar tasks. We'll leverage a free and open-source the External integration [framework](https://github.com/TrudAX/XppTools?tab=readme-ov-file#devexternalintegration-submodel), offering reusable components for building robust X++ integrations. 
 
 ## Modification description
 
@@ -17,7 +17,7 @@ Let's begin with our task sample definition:
 
 **Goal: Design and develop a Dynamics 365 Finance integration solution that imports sales orders into D365FO from a partner website via REST API endpoint.**
 
-To illustrate this process, I will use the Purchase Order Management application created in the previous [post](https://denistrunin.com/integration-outboundweb/), which provides an API to retrieve the created orders.
+To illustrate this process, I will use the Purchase Order Management application created in the previous [post](https://denistrunin.com/integration-outboundweb/), which provides an API to retrieve the created orders. The example is simplified, but you can find a similar API in other systems(e.g. [Shopify](https://shopify.dev/docs/api/admin-rest/2025-01/resources/order#get-orders?status=any))
 
 The source code is available on [GitHub](https://github.com/TrudAX/TestWebService_PurchaseOrderApp). The application comprises two main components:
 
@@ -97,11 +97,11 @@ Implementing web call processing is slightly different from other integration me
 
 
 
-## Setting Up and Validating Integration
+## Setting Up Integration
 
 Let's walk through the process of setting up and validating our integration solution.
 
-#### Configuring Connection Types
+### Configuring Connection Types
 
 First, we need to set up the connection to our web service. Navigate to the **External integration – Connection types**.
 
@@ -125,15 +125,65 @@ This form defines the following key components:
 
 **CONNECTION DETAILS** 
 
-Link to a previously created Connection and link to a processing class **DEVIntegTutorialWebSalesProcess**
+Link to a previously created Connection and to the processing class **DEVIntegTutorialWebSalesProcess**
 
 **INCREMENTAL LOAD**
 
 - **Last date time**: Indicates the date-time to perform the next load. This value(adjusted with Overlap) will be used in the next call  for  **UpdatedAt** parameter. After the load this value will be updated to the current time.
 - **Overlap(seconds)**: This is the number of seconds that will be subtracted from the Last date time when doing a request. The purpose of this field is that we are doing a query to some database data, and there will always be a delay between data being written and the transaction being committed. So to cover this, we fetch some existing data
 - **Offset**: A current page indication(if paging is used), it will be updated during the load
-- **Limit**: A page size, maximum number of returned records (if paging is used).If during a load we get 
+- **Limit**: A page size, maximum number of returned records (if paging is used).If during a load we get this number of records, the system change Offset parameter to +1 and do not update Last date time
 - **Do not process on load**: Set to `No`, meaning messages will be processed upon import/load.
+
+### Mapping setup 
+
+For the real-life integration scenario, you probably need to create a mapping for some fields. The **External Integration** module provides a form and a table to create a mapping for simple cases, and I will show how to use it in this example.
+
+We will map the **Order account** from the Web service to a D365FO **Customer account** for Sales order creation. The setting can be made in External integration—Setup—Mapping setup.  
+
+![Mapping codes setup](MappingCodesSetup.png)
+
+### Generating test data 
+
+We also need to generate some test data, to do this, you can enter 3 or more items(M0001;M0004;M0007) and press "Load initial data". 
+
+![Load initial data](LoadInitialData.png)
+
+The Web application generates 3 orders that will be available in API
+
+## Run the Integration
+
+After all settings are done we can run a Load messages batch job 
+
+![Load messages](LoadIncomingMessages.png)
+
+It will execute a processing class linked to the specified message, as the result 4 initial message will be created and processed. The first message will be the main message with the linked API data. 3 other will be a result of processing these data to from a staging data.
+
+![Initial messages](4InitialMessages.png)
+
+From this form we can view an original data by pressing Download file button, it will return the initial data from the Web application
+
+![](DownloadFile.png)
+
+Also we can view the Staging data linked to an individual message
+
+![Staging data initial](StadingDataInitial.png)
+
+From this form, we can also view infolog for a selected record, reprocess the message or Open a created Sales order.
+
+![Created sales order](CreatedSalesOrder.png)
+
+### Run an incremental run 
+
+To test how incremental run works, I will create a new Order in my Web Application(I will use a new account  ACCT-004 that doesn't exists) and edit the previous order 95.
+
+![](CreatePOnew.png)
+
+After running **Load messages** again, we see 2 new records in Web staging data, one will be an in Error state (as we don't have mapping setup for this account) and a new record for order 95. System also deletes the previous order 001035 that was linked to the original message
+
+![Incremental run](SecondRunIncremental.png)
+
+## Monitoring and error processing 
 
 
 
