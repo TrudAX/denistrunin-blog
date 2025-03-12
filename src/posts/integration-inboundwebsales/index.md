@@ -1,23 +1,23 @@
 ﻿---
 title: "D365FO Integration: Import Sales Orders from an External Web Application"
-date: "2025-03-17T22:12:03.284Z"
+date: "2025-03-12T22:12:03.284Z"
 tags: ["Integration", "XppDEVTutorial"]
 path: "/integration-inboundwebsales"
 featuredImage: "./logo.png"
-excerpt: "Learn how to implement robust and efficient integrations between Dynamics 365 Finance and Operations and external web services. This post covers integration design, practical code examples, troubleshooting strategies, and performance testing techniques for seamless event-based data synchronization."
+excerpt: "Learn how to implement robust and efficient process to import complex documents into Dynamics 365 Finance and Operations from external Web services. This post covers integration design, practical code examples and troubleshooting strategies."
 ---
 
 In this blog post, I'll walk you through the process of importing sales orders into Dynamics 365 Finance from an external web service using REST API calls.
 
-Although the example provided here is simplified to clearly illustrate core integration concepts, the approach and code samples are based on real-world scenarios. This makes them highly adaptable for similar integration tasks you might encounter. We'll utilize the free and open-source External Integration [Framework](https://github.com/TrudAX/XppTools?tab=readme-ov-file#devexternalintegration-submodel), which provides reusable components designed specifically for building robust integrations in X++.
+Although the example provided here is simplified to illustrate core integration concepts, the approach and code samples are based on real-world scenarios. This makes them highly adaptable for similar integration tasks you might encounter. We'll utilize the free and open-source External Integration [Framework](https://github.com/TrudAX/XppTools?tab=readme-ov-file#devexternalintegration-submodel), which provides reusable components explicitly designed for building robust integrations in X++.
 
 ## Integration Scenario Overview
 
-Let's start by clearly defining our integration scenario:
+Let's start by defining our integration scenario:
 
-**Goal:** Design and implement an integration solution that imports sales orders into Dynamics 365 Finance from a partner's website via a REST API endpoint.
+**Goal: Design and implement an integration solution that imports sales orders into Dynamics 365 Finance from a partner's website via a REST API endpoint.**
 
-To demonstrate this integration, I'll use the Purchase Order Management application introduced in my previous [post](https://denistrunin.com/integration-outboundweb/). This application exposes an API endpoint that allows retrieval of created or updated orders. While the example here is simplified, similar APIs are commonly found in other systems, such as [Shopify](https://shopify.dev/docs/api/admin-rest/2025-01/resources/order#get-orders?status=any).
+To illustrate this integration, I will refer to the Purchase Order Management application mentioned in my previous [post](https://denistrunin.com/integration-outboundweb/). This application offers an API endpoint that retrieves created or updated orders. Although the example provided is simplified, similar APIs are frequently found in other systems, such as [Shopify](https://shopify.dev/docs/api/admin-rest/2025-01/resources/order#get-orders?status=any).
 
 You can access the complete source code for the Purchase Order Management application on [GitHub](https://github.com/TrudAX/TestWebService_PurchaseOrderApp). The application consists of two primary components:
 
@@ -33,7 +33,7 @@ The API requires an **UpdatedAt** date parameter and returns all orders created 
 
 ## Planning and Scoping Integration Project
 
-Before diving into the technical implementation, I recommend organizing a kickoff meeting involving key stakeholders from both the Dynamics 365 Finance and Operations (D365FO) team and the external web application provider. During this meeting, ensure you cover the following critical points:
+Before diving into the technical implementation, I recommend organising a kickoff meeting involving key stakeholders from both the Dynamics 365 Finance and Operations (D365FO) team and the external Web application provider. During this meeting, ensure you cover the following critical points:
 
 ### Define the Web API Endpoint and Parameters
 
@@ -43,41 +43,41 @@ Most web applications have well-defined endpoints that accept multiple parameter
 https://purchaseorderapp20240916.azurewebsites.net/api/PurchaseOrder?updatedAt=2025-02-07T16:00:00Z
 ```
 
-Discuss what authentication should be used, a typical scenario here a token based approach.
+Discuss what authentication should be used; in a typical scenario, a token-based approach is used.
 
 ### Confirm the Scope of Returned Documents
 
-At this stage, it's essential to clearly define and document exactly which documents the API will return based on the provided parameters. In my experience, integrations sometimes include internal or irrelevant documents—such as orders destined for locations not managed in D365FO or internal transfer documents. This can significantly complicate integration logic and data validation processes. To avoid these issues, ensure you obtain a  confirmation from the external Web application team that only documents relevant to Dynamics 365 Finance will be returned by the API.
+At this stage, it's essential to clearly define and document exactly which documents the API will return based on the provided parameters. In my experience, API sometimes may also return internal or irrelevant documents—such as orders for locations not managed in D365FO or internal transfer documents. This can significantly complicate integration logic and data validation processes. To avoid these issues, ensure you obtain a confirmation from the external Web application team that only documents relevant to Dynamics 365 Finance will be returned by the API.
 
 ### Establish Rules for Handling Updated Documents
 
-A document may be modified after it is retrieved via an API. Typically, when a document is updated, the **updatedAt** timestamp changes, while the document's unique **ID** remains constant. Clearly defining the scenarios under which these updates occur—and understanding their frequency—is crucial. Ideally, updates after initial retrieval should be minimized or avoided altogether, but it may be a business requirement.
+A document may be modified after it is retrieved via an API. Typically, when a document is updated, the **updatedAt** timestamp changes, while the document's unique **ID** remains constant. It's important to define when these updates happen and to understand how often they occur. Ideally, updates after initial retrieval should be minimized or avoided altogether, but this may be a business requirement.
 
 To manage document updates effectively, consider requesting the external Web application team to implement a clear status indicator. This indicator should explicitly mark when a document has been finalized and exposed via the API. For example, users might initially create an order, add necessary details, and then explicitly mark it as "Confirmed" or "Completed." Only after this explicit action the order should become available through the API.
 
-On the Dynamics 365 Finance side, you must establish clear rules for processing updated documents. For sales orders, common approaches include reversing or deleting the original order and creating a new one. Keep in mind that reversing transactions can introduce complexities, e.g. the ledger period for the original order be closed. In such cases, you might need to use the nearest available open date or implement alternative business logic to handle these scenarios.
+On the Dynamics 365 Finance side, you must establish clear rules for processing updated documents. For sales orders, common approaches include reversing or deleting the original order and creating a new one. Keep in mind that reversing transactions can introduce complexities, e.g. the ledger period for the original order may be closed. In such cases, you might need to use the nearest available open date or implement alternative business logic to handle these scenarios.
 
-In this blog post, I use a simplified approach: deleting the original order if it remains open and generating an error if the order status is no longer open.
+In this blog post, I use a simplified approach: I delete the original order if it remains open and generate an error if the order status is no longer open.
 
 ### Discuss the TEST Endpoint
 
-Confirm whether a test version of the Web application is available and clarify what kind of data it contains. Typically, a test environment exists but may include artificial or unrealistic data. This can cause issues because Dynamics 365 Finance integrations usually require data that closely matches real-world scenarios. If the test data isn't suitable, you might need to perform some integration testing directly against the production endpoint.
+Confirm whether a test version of the Web application is available and clarify what kind of data it contains. Typically, a test environment exists, but may include dummy data. This can cause issues because Dynamics 365 Finance integrations usually require close to production data. If the test data isn't suitable, you might need to perform some integration testing directly against the production endpoint.
 
 ### Request a Guide for Creating Documents via the User Interface
 
-Make sure someone from the D365FO team knows how to create documents using the external web application's user interface. These documents should then appear in the integration—for example, creating a sales order that will be imported into D365FO. This step is essential for testing, so request clear instructions or training on how to perform this task.
+Ensure someone from the D365FO team knows how to create documents using the external Web application's user interface. These documents should then appear in the API—for example, creating a sales order that will be imported into D365FO. This step is essential for testing, so request clear instructions on how to perform this task.
 
 ### Resolving Mapping Errors
 
-It's common for certain entity codes to need mapping between systems. Clearly define which system will handle this mapping and discuss the steps for adding new mappings.
+It's common for certain entity codes to need mapping between systems. Define which system will handle this mapping and discuss the steps for adding new mappings values.
 
-In our example, I'll store the order account mappings in a separate table.
+In our example, I'll store the Customer account mappings in a separate table.
 
 ### Create a Data Mapping document
 
-Mapping documents is a key integration document that defines how fields from the Web site API will be mapped to D365FO fields.
+Mapping documents is a key integration document that defines how fields from the Web application API will be mapped to D365FO fields.
 
-In our case it will look like [this](https://github.com/TrudAX/TRUDScripts/blob/master/Documents/Integration/Field%20Mapping%20Sample.xlsx):
+In our case, it will look like [this](https://denistrunin.com/integration-inboundwebsales/FieldMappingWebAPI.xlsx):
 
 ![Mapping SO Sample](MappingSOSample.png)
 
@@ -85,13 +85,13 @@ In our case it will look like [this](https://github.com/TrudAX/TRUDScripts/blob/
 
 A single web service call might return multiple unrelated orders, but we still need clear traceability from each individual order back to the original web request. To achieve this, I introduced the concept of a **parent message**. Here's how the processing logic works:
 
-- The load class sends a request to the web service using the current message's **UpdatedAt** date.
+- The load class sends a request to the Web service using the current message's **UpdatedAt** date.
 
 - The response from the web service creates a parent message. The returned JSON data is attached to this parent message, and processing begins.
 
-- To process the parent message, we parse the attached JSON data and create multiple child messages—one for each order. Each child message contains parsed data stored in staging tables. During this step, we also perform basic cleanup actions based on unique identifiers, such as deleting previous messages with an "Error" status that share the same ID. This entire step is executed as a single transaction in a single thread.
+- To process the parent message, we parse the attached JSON data and create multiple child messages—one for each order. Each child message contains parsed data stored in staging tables. During this step, we also perform basic cleanup actions based on unique identifiers, such as deleting previous messages with an "Error" status that share the same ID. This step is executed as a single transaction in a single thread.
 
-- If the parent message processing completes successfully, we update the message's **UpdatedAt** date to the new value. If paging is used, we update the paging information instead.
+- If the parent message processing completes successfully, we update the message's **UpdatedAt** date to the new value. (If paging is used, we update the paging information instead).
 
 - Finally, each child message is processed separately in batch tasks. These tasks can run in parallel (multithreaded mode) and use the staged data to create the final documents in Dynamics 365 Finance and Operations. Errors encountered during this stage do not affect the parent message.
 
@@ -133,11 +133,11 @@ Here, you link the message type to the previously created connection and specify
 
 **INCREMENTAL LOAD**
 
-- **Last date time**: The date and time used for the next data load. This value (adjusted by the Overlap setting) is passed as the **UpdatedAt** parameter in the next request. After each successful load, this value updates to the current time.
-- **Overlap (seconds)**: The number of seconds subtracted from the Last date time when making a request. This helps account for delays between data being written and committed in the source database, ensuring no data is missed.
+- **Last date time**: The date and time used for the data load. This value (adjusted by the Overlap setting) is passed as the **UpdatedAt** parameter in the next request. After each successful load, this value updates to the current time.
+- **Overlap (seconds)**: The number of seconds subtracted from the **Last date time** when making a request. This helps account for delays between data being written and the transaction being committed in the source database, ensuring no data is missed.
 - **Offset**: Indicates the current page number if paging is enabled. This value updates automatically during the load process.
 - **Limit**: Defines the maximum number of records returned per page if paging is used. If the number of records returned equals this limit, the system increments the Offset by one(goes to the next page) and does not update the Last date time.
-- **Do not process on load**: A debug option to prevent processing of messages immediately after import.
+- **Do not process on load**: This is a debug option that prevents messages from being processed immediately after import.
 
 ### Mapping Setup
 
@@ -145,9 +145,9 @@ In real-world integration scenarios, you'll likely need to map certain fields be
 
 We'll map the **Order account** from the Web service to the corresponding **Customer account** in D365FO. You can configure this mapping under **External integration > Setup > Mapping setup**.
 
-## Running the Integration
-
 ![Mapping codes setup](MappingCodesSetup.png)
+
+## Running the Integration
 
 ### Generating Test Data
 
@@ -221,7 +221,7 @@ When a parsing error occurs, the system creates a parent message containing the 
 
 ### Manual Load Function
 
-The **Manual load** function is a valuable feature of the External Integration Framework. It allows you to process messages without connecting directly to the web application. You simply provide JSON data as text, and the system processes it exactly as if it came from the API.
+The **Manual load** function is a valuable feature of the External Integration Framework. It allows you to process messages without connecting to the Web application. You simply provide JSON data as text, and the system processes it exactly as if it came from the API.
 
 ![Manual load function](ManualLoad.png)
 
@@ -245,7 +245,7 @@ For example by providing the following JSON data
   } ]
 ```
 
-We can process a new sales order, which will be marked as **Manual** in the Messages table.
+We can create a new sales order, which will be marked as **Manual** in the Messages table.
 
 ![Manual load result](ManualLoadResult.png)
 
@@ -257,19 +257,19 @@ You can manually start loading orders from the user interface by clicking the **
 
 ![New load function](NewLoadFunction.png)
 
-In the load dialog, the **Transaction time** field is automatically filled with the last loaded timestamp. However, you can change this value if needed. A common scenario for changing this timestamp is when you need to reload data from a specific period.
+In the load dialog, the **Transaction time** field is automatically populated with the last loaded timestamp. However, you can change this value if needed. A typical scenario for changing this timestamp is when you need to reload data from a specific period.
 
 ### Handling Repeated Errors
 
-Each time the system tries and fails to process a message, it increases the **Processing attempts** counter for that message.
+Each time the system attempts to process a message but encounters a failure, the **Processing attempts** counter for that message increases.
 
 ![Processing attempts](ProcessingAttempts.png)
 
-When running the **Process incoming messages** batch job, you can set a filter on this field to limit how many times the system tries to process messages with errors.
+When running the **Process incoming messages** batch job, you can set a filter on this field to limit the number of times the system tries to process messages with errors.
 
 ![Process messages dialog](ProcessMessageDialog.png)
 
-This approach helps prevent the system from repeatedly trying to process messages that no one is addressing, which could slow down overall performance. A good practice is to set this filter to allow several processing attempts. This way, temporary issues—such as a missing customer record—can resolve automatically once the required data becomes available.
+This approach helps prevent the system from repeatedly trying to process error messages that no one is addressing, which could slow down overall performance. A good practice is to set this filter to allow several processing attempts. This way, temporary issues, such as a missing customer record, can be resolved automatically once the required data becomes available.
 
 ### Canceling Messages
 
@@ -281,7 +281,7 @@ The main goal of this feature is to ensure that messages don't remain in an **Er
 
 ### Full Traceability
 
-The system provides complete traceability, from the initial JSON message to the final sales order, and from the sales order back to the original web request.
+The system provides complete traceability, from the initial JSON message to the final Sales order, and from the Sales order back to the original Web request.
 
 Starting from the sales order:
 
@@ -291,7 +291,7 @@ You can view the staging data with parsed values:
 
 ![Sales staging](SOStep2.png)
 
-And also access the original message with the attached JSON payload:
+And also, access the original message with the attached JSON payload:
 
 ![Sales message step](SOStep3.png)
 
@@ -310,7 +310,7 @@ The main components are:
 3. Tables and forms to manage staging data.
 4. A mapping extension to implement mapping between Web application and Dynamics 365 Finance and Operations.
 
-Once you have these components set up, the External Integration framework will handle the rest of the integration process automatically.
+Once these components are set up, the External Integration framework will automatically handle the rest of the integration process.
 
 ### Sample Web App
 
