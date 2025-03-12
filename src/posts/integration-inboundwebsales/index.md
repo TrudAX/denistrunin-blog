@@ -77,7 +77,7 @@ In our example, I'll store the Customer account mappings in a separate table.
 
 Mapping documents is a key integration document that defines how fields from the Web application API will be mapped to D365FO fields.
 
-In our case, it will look like [this](https://denistrunin.com/integration-inboundwebsales/FieldMappingWebAPI.xlsx):
+In our case, it will look like [this](https://github.com/TrudAX/denistrunin-blog/tree/master/src/posts/integration-inboundwebsales/FieldMappingWebAPI.xlsx):
 
 ![Mapping SO Sample](MappingSOSample.png)
 

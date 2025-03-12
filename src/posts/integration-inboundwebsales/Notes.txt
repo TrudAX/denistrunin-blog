@@ -3,7 +3,9 @@ Activity - Color
 
 
 
-New Blog Post: D365FO Integration: Event-Based Exports to External Web Services
+New Blog Post: D365FO Integration: Import Sales Orders from an External Web Application
+A comprehensive guide on one of the most complex scenarios implemented using the External Integration Framework for Dynamics 365 Finance and Operations. Discover how to design and develop a complex document import to D365FO from external Web applications via REST APIs.
+
 I'm excited to share my latest blog post on implementing event-based exports from Dynamics 365 Finance and Operations to external Web Services!
 In this comprehensive guide, you'll learn:
 
