@@ -57,11 +57,12 @@ Before diving into the setup, perform a few essential pre-checks:
 
    ```xml
    <?xml version="1.0" encoding="utf-8"?>
-   <packages>
-   <package id="Microsoft.Dynamics.AX.Application.DevALM.BuildXpp" version="10.0.1084.80" targetFramework="net40" />
-   <package id="Microsoft.Dynamics.AX.ApplicationSuite.DevALM.BuildXpp" version="10.0.1084.80" targetFramework="net40" />
-   <package id="Microsoft.Dynamics.AX.Platform.CompilerPackage" version="7.0.6253.76" targetFramework="net40" />
-   <package id="Microsoft.Dynamics.AX.Platform.DevALM.BuildXpp" version="7.0.6253.76" targetFramework="net40" />
+   <packages>    
+       <package id="microsoft.dynamics.ax.application1.devalm.buildxpp" version="10.0.2177.37" targetFramework="net40" />
+       <package id="microsoft.dynamics.ax.application2.devalm.buildxpp" version="10.0.2177.37" targetFramework="net40" />
+       <package id="microsoft.dynamics.ax.applicationsuite.devalm.buildxpp" version="10.0.2177.37" targetFramework="net40" />
+       <package id="microsoft.dynamics.ax.platform.compilerpackage" version="7.0.7521.60" targetFramework="net40" />
+       <package id="microsoft.dynamics.ax.platform.devalm.buildxpp" version="7.0.7521.60" targetFramework="net40" />
    </packages>
    ```
 
@@ -72,10 +73,11 @@ Before diving into the setup, perform a few essential pre-checks:
 6. Open the command line and run the following command for each NuGet file:
 
    ```cmd
-   nuget.exe push -Source "AxBuild" -ApiKey az C:\AAA\Build\Microsoft.Dynamics.AX.Application.DevALM.BuildXpp.nupkg
-   nuget.exe push -Source "AxBuild" -ApiKey az C:\AAA\Build\Microsoft.Dynamics.AX.ApplicationSuite.DevALM.BuildXpp.nupkg
-   nuget.exe push -Source "AxBuild" -ApiKey az C:\AAA\Build\Microsoft.Dynamics.AX.Platform.CompilerPackage.nupkg
-   nuget.exe push -Source "AxBuild" -ApiKey az C:\AAA\Build\Microsoft.Dynamics.AX.Platform.DevALM.BuildXpp.nupkg
+   nuget.exe push -Source "Dynamics365FO" -ApiKey az C:\AAA\Build\Microsoft.Dynamics.AX.Application1.DevALM.BuildXpp.nupkg
+   nuget.exe push -Source "Dynamics365FO" -ApiKey az C:\AAA\Build\Microsoft.Dynamics.AX.Application2.DevALM.BuildXpp.nupkg
+   nuget.exe push -Source "Dynamics365FO" -ApiKey az C:\AAA\Build\Microsoft.Dynamics.AX.ApplicationSuite.DevALM.BuildXpp.nupkg
+   nuget.exe push -Source "Dynamics365FO" -ApiKey az C:\AAA\Build\Microsoft.Dynamics.AX.Platform.CompilerPackage.nupkg
+   nuget.exe push -Source "Dynamics365FO" -ApiKey az C:\AAA\Build\Microsoft.Dynamics.AX.Platform.DevALM.BuildXpp.nupkg
    ```
 
    When prompted, use: Username = az; Password = token value
@@ -94,7 +96,7 @@ Before diving into the setup, perform a few essential pre-checks:
 
    ```powershell
    cd C:\Users\Admin05ec84c604\Downloads\Dynamics365-Xpp-Samples-Tools-master\CI-CD\Pipeline-Samples
-
+   
    ./xpp-classic-ci-.ps1 
    ```
 
