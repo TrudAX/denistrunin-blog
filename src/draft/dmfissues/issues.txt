@@ -1,0 +1,58 @@
+
+2 hours ago
+
+I have a concerning issue with occasionally failing data management imports that are triggered from an integration.
+
+ 
+
+The integration uses OData actions available on the DataManagementDefinitionGroups entity. It first calls GetAzureWriteUrl to obtain a link to Azure storage. Using this link the file is uploaded to Azure storage. Finally ImportFromPackage is called to schedule a batch job to execute the import. This method has been in use successfully for around 3 years since go-live. 
+
+ 
+
+Recently we noticed rare occasions where the import does not succeed, and there is no record of the import in the job history section of the data management workspace. The missing history is caused by the DMFExecution table not having a record related to the import, all other tables such as DMFDefinitionGroupExecution and the related staging tables have records for the executions that are missing from DMFExecution.
+
+ 
+
+After enabling database logging we found that the DMFExecution record was deleted during the DMF import batch execution, but not by the integration service user account, or by any other user in the system. Corelating the time of deletion with the DMF staging execution history cleanup log we suspected this system job to be the cause.
+
+ 
+
+We have raised the issue with support and received the below information.
+
+"We can confirm that there is a system job (not the DMF cleanup batch job) that performs the clean up with (-1) values
+
+ 
+
+This script (system job) is to ensure that all staging tables stay at a manageable size. It's distinct from the DMF staging cleanup that runs in batch.
+
+ 
+
+This clean up runs several times a day and its recurrence is controlled by Microsoft. This is in your case is set up to run every 6 hours for example.
+
+ 
+
+This job cleans mainly the orphaned or stale staging records
+
+ 
+
+A stale record is normally the data that is outdated or no longer relevant. This can happen when a data import/export job was interrupted or failed. For example: A staging table still contains data from a previous import that was never finalized.
+
+An orphaned record is a record that no longer has a valid link to its parent or related data. This usually happens when a related record (like a header or parent entity) was deleted or a process removed a key reference, but didn’t clean up all dependent records. For example: A line item in a staging table exists, but its corresponding header record was deleted. The line item is now "orphaned" because it has no parent.
+
+This system job cannot be put on hold because those stale or orphaned records might cause some issues until the original DMF cleanup batch job is run again based on the recurrence customers set (7 days I believe in your case), so deleting them earlier is intended."
+
+ 
+
+The script mentioned is DmfOrphanCleanup_CleanupStaleStagingRecords.sql
+
+ 
+
+The explanation does not help us to solve our issue, since the records deleted are not stale in our opinion, they are active imports.
+
+ 
+
+We have been advised by support that they cannot provide any further assistance and that we should address our concerns to the product team using this forum.
+
+ 
+
+SR#2504221420000023
