@@ -2,7 +2,7 @@
 title: "Understanding Dynamics 365FO different Tiers performance"
 date: "2022-11-03T22:12:03.284Z"
 tags: ["Performance"]
-path: "/performanceD365-tierperf"
+path: "/performanced365-tierperf"
 featuredImage: "./logo.png"
 excerpt: "The blog post describes performance differences between various environments Tiers in D365FO."
 ---
