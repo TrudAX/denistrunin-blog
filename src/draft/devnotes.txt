@@ -1,0 +1,1 @@
+To create certificate, install Powershell module D365fo.tools and use function new-d365entraintegration. With this you will be able to import users from EntraID as well on CHE.
