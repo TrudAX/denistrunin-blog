@@ -15,7 +15,7 @@ Although the example provided here is simplified to illustrate core integration 
 
 Let's start by defining the integration scenario:
 
-**Goal: The customer receives complex invoice documents from external vendors as PDF files. We want to create Purchase orders in D365FO based on these documents. **
+**Goal: The customer receives complex invoice documents from external vendors as PDF files. We want to create Purchase orders in D365FO based on these documents.**
 
 ## Current solutions on the market
 
