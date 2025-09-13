@@ -1,3 +1,27 @@
+1.
+Purch line import. PurchPurchaseOrderLineV2Entity - more than 1000 lines
+This entity implements a differentiation between a field(as a column name) not specified in the template and a field that is specified, but the value is empty. E.g. if the price column is specified, price will by taken from this column. So, for example, if you want to support    Integration where the price may be taken from the D365FO price agreement or specified during the import, you need to pass 2 different data packages(in different formats). There is no description on this, the only way to find how this works - spend a time to debugging the entity logic. 
+
+How this is solved in external integration:
+Integration logic will be coded in X++ as a part of the initial design(e.g. what to do if the Price is empty), External system will use one data message format(template)  and don't need to know about processing rules on D365FO side
+
+2.
+PurchPurchaseOrderLineV2Entity - users reported integration error, as a test case - they populate fields used in the integration message on the PO form in specified sequence and it produces different results than using the entity during the integaraion. 
+Standard solution: a lot of debugging with many attempts, trying to match the form behaviour, where one fix breaking another scenario. finally some post update events 
+
+External integration solution: just change the purchase line creation code(with modifiedField methods call) match to the required sequence
+  
+
+3.
+There is a requirement to send updated lines during the PO confirmation process.
+External integration solution: There is an incremental template for this.  create an event for Purchase order, that is triggered on PO confirmation
+During the message processing(on X++ side, that may not be in sync with the current confirmation), analyse all confirmation rows and mark those that have already been sent with a flag. 
+
+Standard solution: PurchPurchaseOrderConfirmationLineEntity standard entity is a use of UNION purchase lines and history lines. There is no option to read only modified lines, you need to repeat all logic related to union query to create staging tables on the integration side, perform multiple reads from D365FO
+ 
+External teams wants to implement a incremental 
+
+
 
 2 hours ago
 
