@@ -323,6 +323,10 @@ Export class, however, maintains a unique Export log entry per document, updatin
 
 Business events are generally designed for one-way communication with limited built-in capabilities for processing responses from external systems. Our Export class easily incorporates logic to handle responses, allowing for updating local records based on the external system's response (e.g., linking local PO with external PO number).
 
+#### 4.No logs
+
+Business events do not support any logs, except for internal send errors. For example, if the event was sent successfully, you won't see this. You also can't find out for the original document - what types of events were sent to it. This is a common integration question, for example, if the external team tells you they don't receive an event, you have no options to validate it when using Business events. External integration has a complete log, and it contains the Original document and the Reference RecId to the original record, so troubleshooting is quite simple; you can always see what events were generated and sent. 
+
 ## Setting Up and Validating Integration
 
 Let's walk through the process of setting up and validating our integration solution.
