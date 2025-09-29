@@ -1,0 +1,32 @@
+[DataContractAttribute]
+public class MyDataContract
+{
+    str  parmA; str  parmB;
+    [DataMemberAttribute(identifierStr(ParmA))]
+    public str parmParmA(str _parmA = parmA)
+    {
+        parmA = _parmA;
+        return parmA;
+    }
+    [DataMemberAttribute(identifierStr(ParmB))]
+    public str parmParmB(str _parmB = parmB)
+    {
+        parmB = _parmB;
+        return parmB;
+    }
+}
+
+class MyService extends SysOperationServiceBase
+public void process(MyDataContract _dataContract)
+{  
+...          
+}
+
+Custom code to call 
+
+MyContract   dataContract    = new MyContract();
+            MyService    service         = new MyService();
+
+            dataContract.parmParameterA("Some value");
+            service.process(dataContract);
+

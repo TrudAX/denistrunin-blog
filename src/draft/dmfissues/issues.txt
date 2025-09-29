@@ -21,6 +21,27 @@ Standard solution: PurchPurchaseOrderConfirmationLineEntity standard entity is a
  
 External teams wants to implement a incremental 
 
+4.
+Sales orders import using ReturnOrderHeaderV2Entity
+
+ReturnOrderHeaderV2Entity returnOrderHeader;
+returnOrderHeader.initValue();
+
+returnOrderHeader.CustomerAccountNumber = "61182739";
+returnOrderHeader.CustomersOrderReference = "Test00814";
+returnOrderHeader.CustomerReturnReasonCode = "1";
+returnOrderHeader.METOriginalInvoice = "denissdfsdfsd3";
+
+returnOrderHeader.defaultRow();
+returnOrderHeader.insert();
+
+This entity uses SalesPurchModifiedTableExtension class to provide a defaulting logic(picture)
+Inside this class Microsoft uses record.isFieldSet(fieldId) to check that the field is provided by the integration
+The idea is correct, but it completely ignores the fact that some fields may be initialised on the initValue() method(usually with empty values). And for Sales order there are about 20 fields like this, including InventLocationId. Even if the field is empty record.isFieldSet(fieldId) return true if it was assigned in the initValue() method.
+This leads to the situation that InventLocationId(that is normally should be copied from the customer) is not automatically populated during the integration
+
+Standard solution: trying to extend the entity to make it work for the specific test cases 
+External integration solution: not even affected by this, you can match exactly the behaviour that happens during manual Purch order creation
 
 
 2 hours ago

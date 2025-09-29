@@ -1,0 +1,47 @@
+CustTable           custTable;
+CustInvoiceTrans    custInvoiceTrans;
+
+
+Dialog d = new Dialog("Generate AI test");
+DialogField dfPrompt = d.addFieldValue(extendedTypeStr(Notes), "Based on the last sold products to this customer, generate an e-mail text for a New year greeting message for this customer.", "Prompt");
+DialogField dfCustomer = d.addField(extendedTypeStr(CustAccount));
+
+if (d.run())
+{
+    CustAccount custAccount = dfCustomer.value();
+    custTable = CustTable::find(custAccount);
+    
+    str promptFull;
+    str items;
+    int num;
+    container usedItems;
+    
+    while select custInvoiceTrans
+       // order by TransDate desc
+       // group by custInvoiceTrans.ItemId
+        where custInvoiceTrans.CustAccount == custAccount
+    {
+        if (! confind(usedItems, custInvoiceTrans.ItemId))
+        {
+            items += custInvoiceTrans.itemName() + '; ';
+            num++;
+            
+            if (num > 5)
+            {
+                break;
+            }
+        }
+    }
+    
+    promptFull = strFmt("%1. Customer name: %2, Last sold items: %3", dfPrompt.value(), custTable.name(), items);
+    
+    DEVIntegAIProviderBase aiProvider = DEVIntegAIProviderBase::construct(DEVIntegAIProvider::find("Gemini"));
+    aiProvider.parmPromptText(promptFull);
+    aiProvider.parmResponseFormat(DEVIntegAIPromptResponseFormat::Text);
+    
+    str res = aiProvider.callAPIText();
+    
+    info(strFmt("RESULT: %1", res));
+    
+}
+
