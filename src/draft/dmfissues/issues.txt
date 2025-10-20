@@ -1,3 +1,5 @@
+SysMessageQueueMetadata
+
 1.
 Purch line import. PurchPurchaseOrderLineV2Entity - more than 1000 lines
 This entity implements a differentiation between a field(as a column name) not specified in the template and a field that is specified, but the value is empty. E.g. if the price column is specified, price will by taken from this column. So, for example, if you want to support    Integration where the price may be taken from the D365FO price agreement or specified during the import, you need to pass 2 different data packages(in different formats). There is no description on this, the only way to find how this works - spend a time to debugging the entity logic. 
