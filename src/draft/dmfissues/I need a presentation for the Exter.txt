@@ -1,0 +1,32 @@
+I need a presentation for the "External Integration" module. In should be in Microsoft style, the module itself is described in this series of blog posts: https://denistrunin.com/tags/integration/  
+The External Integration framework provides a standardized approach to developing X++ based integrations.  
+From my understanding, it should be something like that:
+The first slide should show the name and what steps the framework provides: Design - Template for requirements - Sample integrations for common scenarios(Sales line, Ledger Journals, Purch lines, Vendors ) - Performance testing
+
+Then slide with supported integration types :
+Inbound
+Outbound event-based
+Outbound periodic 
+Service based 
+
+And different formats:
+CSV
+EDI
+Excel
+XML
+JSON
+
+Different channels:
+Service bus
+SFTP
+Azure file share
+Web service REST API
+AI (LLM) 
+Manual
+
+Then slide with an advantage over the standard Microsoft 
+DMF, Business Events, Message processor 
+
+Then several slides regarding the last blog post: https://denistrunin.com/integration-importpurchpdf/
+
+and questions
