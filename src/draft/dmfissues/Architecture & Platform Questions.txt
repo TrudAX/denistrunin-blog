@@ -1,0 +1,416 @@
+Install GitHub CLI
+# Using winget (Windows 10/11)
+winget install GitHub.cli
+
+# Or using Chocolatey
+choco install gh
+
+# Or download installer from: https://cli.github.com/
+
+
+Authenticate
+gh auth login
+# Follow prompts: GitHub.com → HTTPS → Login with browser
+
+Create Release
+# Navigate to your project folder
+cd C:\Path\To\D365FO-DB-Copy
+
+# Build your project first (Release mode)
+dotnet build -c Release
+
+# Create release with the .exe attached
+gh release create v1.0.2025.334 `
+  "bin\Release\net9.0-windows\D365FO-DB-Copy.exe" `
+  --title "Release 1.0.2025.334" `
+  --notes "Initial release"
+
+Future Releases (one-liner)
+# Get version from built exe and create release
+$version = (Get-Item "bin\Release\net9.0-windows\D365FO-DB-Copy.exe").VersionInfo.FileVersion
+gh release create "v$version" "bin\Release\net9.0-windows\D365FO-DB-Copy.exe" --title "Release $version" --generate-notes
+
+1.
+Option C: Delete by ModifiedDateTime + Delete by WHERE condition + Delete by RecId (all three)
+
+2.
+can you propose something. also can format be modified to TableName:SourceStrategy [-truncate]
+
+3.
+Yes, if something outside the required format, error with line text
+
+
+1. No JOINS, JUST WHERE
+Yes, can be combined with RecID limit, should be possible get all or get Top x WHERE..
+
+2. this automatically imply TRUNCATE
+
+3. Yes, Example: Source has WHERE DataAreaId = '1000', so destination deletes WHERE DataAreaId = '1000' before insert
+
+4.
+Yes, 2.1 and 2.3 should be combined (Delete by RecId AND by custom condition) as RecId is unique value per table
+2.2 and 2.3 - no
+2.1 always applies in case the delete is not a truncate as RecId is unique value per table
+
+5.
+Case 1 (RecId) → defaults to 2.1
+Case 2 (ModifiedDateTime) → defaults to 2.1 + 2.2
+Case 3 (Custom SQL) → 2.3 + 2.1
+Case 4 (Full table) → 2.4
+
+6.
+TRUNCATE can be combined with any source strategy (1, 2, 3, 4)
+When TRUNCATE is used, the sequence still updated to max RecId after insert
+
+7.
+Single line per table with delimiters
+
+I want more extended rules for 3.3.2 Per-Table Strategy Overrides
+I describe to you the requirement, can you please propose the best format, how it will be more visually better. Ask questions if needed
+
+For the source table:
+1. Need to copy X records by RecId
+2. Need to copy X days by ModifiedDateTime
+3. Need to specify custom SQL to select. E.g. TableName and a Copy rule: WHERE DataAreaId = '1000' 
+4. Need to copy a full table
+
+For the destination table need to specify cleanup rules
+2.1. Delete all RecId with more than the minimum "source RecId". 
+This should be automatically work in case copy case
+2.2.  Delete all by ModifiedDateTime. This should be automatically used in case 2.
+2.3. The same condition(together with 2.1) should be used to delete
+2.4. TRUNCATE DESTINATION TABLE. There should be an option to specify this for any source copy logic. In this case any other cleanup rule is ignored
+
+
+
+
+On a Connection tab add a new multiline control, "System excluded tables"
+The functionality and rules should be exactly as "Tables to Exclude" control
+So in any place of the system where "Tables to Exclude" used, it should be union with "System excluded tables"
+"System excluded tables" should be a part of the config(save or load)
+Near "System excluded tables" should be a button with a icon. "Init"
+It should add the following tables:
+SQL*
+UserInfo
+Sys*
+Batch*
+RetailCDX*
+RETAILHARDWAREPROFILE
+
+Also this Init function should be called initially when the configuration does not exists
+
+
+ok, couple of issues
+
+1.
+Can you add Connection properties to a new tab "Connection". 
+also move 3.4 Execution Configuration there 
+
+1.1
+Combine Server\Database in one field    
+
+Example for Tier2 (default should be empty)
+spartan-srv-oce-d365opsprod-2c47723535e8.database.windows.net\db_d365opsprod_blundstonepp_ax_20251014_09440189_f2b3
+Example for local
+localhost\AxDB  (this a default value)
+
+1.2
+Add a field field Alias, text field 30 chars, example values DM10, UAT
+when the user change something there - Connection tab should be renamed to Connection-"Alias value" 
+the default value should be "default"
+also on save dialog - use this as a default save name
+
+2.
+
+for 3.2.1 Pattern Matching Rules - these rules applicable only during the Prepare Table List, in the Tables to Copy box we can specify tables in any case
+Probably move this paragraph "Pattern Matching Rules:" to Prepare Table List description
+
+3.
+for 3.3.2 Per-Table Strategy Overrides (Multiline Text)
+can you add a tooltip on a label that displays example
+
+
+Architecture & Platform Questions
+
+
+1. Winforms
+
+2.Always on the local VM
+
+3.Azure SQL Database, always SQL auth only
+
+4. always local, AxDB(but the name should be configured), SQL2019 or up
+
+5.FOr now: loading entire result sets into memory acceptable, size will be probably couple of GBs
+
+6. All columns type(including binary) should be copied. 
+
+7. Schema may be different. Field may exist in AxDB but not in Tier2, in this case it should be inserted with default value defined on a table. If the field not exists on a AxDB it should not be copied
+
+8.No, it is not redundand. Imagine we have an old record in AxDB(with a very old MODIFIEDDATETIME), that was modified recently in Tier2, so MODIFIEDDATETIME become new. 
+
+9.MAX RecId that exists in the table after insert
+
+10. It should be an error on a first step 
+
+11. Should be something configurable, e.g. 10. for writes - also 10
+
+12. every table in it's own transaction, but we should be able to retry failed tables
+
+13. yes
+
+14. no, just a list with a scroll bar, real time updates for each table
+
+15. no, only UI logs
+
+16. yes, it should be option to Re-Run. and yes, it shoudl be a button "run all stages" that can be stopped and during it it the progress should be visible for a user
+
+17. JSON, just a very simple encryption is ok(just not the plain text)
+
+18. Yes, via the different configuration files. the the config file should contains connection and all parameters.
+
+19. To get fields from the table use the following script 
+select SQLName from SQLDICTIONARY
+where tableid = 10878(tableId here) and FIELDID <> 0
+
+Please note that SYSROWVERSION field should be excluded from the copy(I provided a wrong answer before).
+Create this as a system settings, fields excluded from the copy, the settings should be global for all tables or only per table (e.g. CustGroup.SomeField - do not copy SomeField). 
+
+20. yes, always identical, no mapping required. But it should be fields exlude list defined above, either global or per table
+
+21.SQLDICTIONARY presents in both databases, SEQ_xxxxx - this a SQL Server sequence object
+
+22. Yes, If the MAX RecId after insert is lower than the current sequence value, we leave the sequence unchanged
+
+23. it should be manual only
+
+24. use the cached data from the previous fetch
+
+25. IF SELECT TableID FROM SQLDICTIONARY WHERE name = 'TableName' AND FIELDID = 0 returns no rows in either AxDB or Tier2 database - table should not be copied. but we need a log this to some text based log, this will be usefull during the debug stage
+
+26. Can include numbers
+
+27. we need a faster implementation, can we start with SqlBulkCopy, all triggers should be disabled during the insert
+
+28. can be Separate transaction
+
+29. we assume that no FK exists, so the order doesn't matter for now
+
+30. Can "Get Data" be run without "Get List" first? No, "Get Data" should be based on info from "Get List"
+Can "Insert Data" be run without "Get Data"? No, always in sequence, but user may decide to restart the process from GetData or repeat some step 
+
+31. No State Persistence, refetch is needed
+
+32. No
+
+33. Yes, defaults should be provided
+
+34. only when operations are attempted
+     
+
+35. Exact match only
+
+36. all compare case-insensitive
+
+37. per-table (disable → insert → re-enable), if error: re-enabled on that table
+
+38. All
+
+39. Part of the main log visible in UI(some multiline text field), with  timestamps and Clear button
+
+40. kept with a separator
+
+41. only RAM should be OK for initial stage
+
+42. yes, on GetList or restart
+
+43. can it be 
+      CustTable:5000
+      SalesLine:days:30
+44. no
+
+45. yes, if possible configurable. connection 3 seconds, get command - 600 seconds. local insert - no restrictions
+
+46. yes, pooling will be nice to have
+
+47. Single Page is better
+
+48. yes. all these columns. a standard dataset should be used with sorting allowed. Also I status line should presend that display the status of last operatoin (e.g. "Loaded 198 tables, 7 failed")
+
+49. Stop immediately
+
+50. the list should be updated in some interval with a status text updated, e.g. "Stage 2/3: Get Data - 150/2000 tables". no progress bar
+
+
+51
+The syntax CustTable:5000 implies RecId strategy by default (number only = RecId count)? YES
+And SalesLine:days:30 means ModifiedDate strategy with 30 days? YES
+What if someone wants to explicitly specify RecId? Would SalesLine:recid:5000 work, or is it always just the number? THIS IS A FORMAT ERROR, JUST STOP EXECUTION
+
+52.
+RecId with 10,000 records. this number should be a part of the config and visible on the screen and saved to parameters
+
+53. Yes, your example is correct. We replacing "recent" records, not just adding new ones.
+
+54. Yes, two separate DELETE statements
+
+55. It should be 
+"Prepare Table List" | "Get Data" | "Insert Data" | "Insert Failed" | "Run All" | "Stop"
+but I am open to different suggestions
+
+56. yes, good idea, "Stop" only be enabled during execution, buttons that only make sense should be enabled
+
+57. Do not allow file selection, only the config name. Save always in the run .exe path into some subfolders(e.g. Config)
+
+58."Save" and "Save As", allow only config name entry
+
+59. More detailed Pending, Fetching, Fetched, FetchError, Inserting, Inserted, InsertError?
+
+60. Both
+
+61. obfuscation is fine
+
+62. retry only tables with InsertError status
+
+63. Yes, always start from "Prepare Table List"
+
+64. yes,  safe filename characters. 100 char max
+
+65. Auto-create a "Default" config
+
+66. load last used config
+
+67. yes, that is  total table size on Tier2, it is for information only
+
+68.  yes, actual count of records retrieved 
+
+69.  if user ran "Prepare Table List" again (which clears cache) - "Insert Failed" be disabled
+
+70. all workers stop immediately
+
+71. all workers stop immediately
+
+Target Platform: What technology should this application be built with?
+
+Desktop app (WPF, WinForms, Avalonia)?
+Web application?
+Console application with configuration files?
+PowerShell-based tool?
+
+
+Deployment: Will this run on the Dev VM itself, or from a separate machine that has network access to both databases?
+
+Database Connectivity Questions
+
+Tier2 Azure SQL:
+
+Is this a standard Azure SQL Database, or Azure SQL Managed Instance?
+Are there any firewall/VPN considerations for connecting from the Dev VM?
+What authentication is available (SQL auth only, or also Azure AD)?
+
+
+Local AxDB:
+
+Is this always on localhost, or could it be on a different server?
+What SQL Server version(s) need to be supported?
+
+
+
+Data Handling Questions
+
+Data Volume & Memory:
+
+You mention ~2000 tables. For "Last by RecId" with 10,000 records, some D365 tables can have very wide rows (100+ columns, LOB data).
+Should we stream data in batches, or is loading entire result sets into memory acceptable?
+What's the maximum expected single-table data size to transfer in one operation?
+
+
+Data Type Handling:
+
+D365 tables can contain binary/varbinary columns, XML, and other complex types. Any special handling needed?
+Are there any columns that should always be excluded (e.g., DATAAREAID considerations)?
+
+
+Schema Differences:
+
+Should the tool assume schemas are identical between Tier2 and AxDB?
+What happens if a column exists in Tier2 but not in AxDB (or vice versa)?
+
+
+
+Copy Strategy Questions
+
+"Last by Modified Date" clarification:
+
+The spec says delete where MODIFIEDDATETIME >= minimum from set AND delete where RecId is present in set. Isn't the second delete redundant if we're already deleting by date? Or is this handling edge cases?
+
+
+RecId Sequence Update:
+
+Should the sequence be updated to the MAX RecId from the inserted dataset, or the MAX RecId that exists in the table after insert? (The latter would be safer if existing data has higher RecIds)
+
+
+Tables without MODIFIEDDATETIME:
+
+If a table is configured for "Last by Modified Date" but lacks this column, should it:
+
+Fall back to RecId strategy?
+Skip with warning?
+Error?
+
+
+
+
+
+Execution & Performance Questions
+
+Parallelism:
+
+For "Get data" step with ~2000 tables, how many parallel connections should be configurable?
+Should there be separate parallelism settings for Tier2 reads vs AxDB writes?
+
+
+Transaction Handling:
+
+Should each table's insert be in its own transaction?
+If one table fails, should we continue with others or stop?
+
+
+Resumability:
+
+If the process is interrupted, should there be a way to resume from where it left off?
+
+
+
+UI/UX Questions
+
+Progress Visibility:
+
+For the list view showing ~2000 tables, should this be a virtual/paginated list?
+Real-time updates as each table completes, or batch updates?
+
+
+Logging:
+
+Besides the UI display, should there be file-based logging?
+What log retention policy?
+
+
+"Stage" Execution:
+
+Can stages be re-run? (e.g., re-run "Get data" for failed tables only)
+Is there a "run all stages" option, or must they always be manual?
+
+
+
+Configuration Questions
+
+Configuration File Format:
+
+Preference for JSON, YAML, XML, or other?
+Should sensitive data (connection strings with passwords) be encrypted?
+
+
+Multiple Profiles:
+
+Should the tool support multiple saved configurations (e.g., different Tier2 environments)?
