@@ -1,19 +1,19 @@
 ---
 title: "Copy data from Dynamics 365 Finance & Operations Azure SQL Database (Tier2) to local SQL Server (AxDB)"
 date: "2026-01-01T12:00:00.000Z"
-tags: ["D365FO", "Tools", "SQL", "Data Management", "DevOps"]
-path: "/d365fo-db-copy"
+tags: ["SQL", "Data Management", "ALM"]
+path: "/d365tools-dbsync"
 featuredImage: "./logo.png"
 excerpt: "A new utility to synchronize data from D365FO cloud environments to local AxDB, featuring incremental sync and smart strategies."
 ---
 
-One of the frequent challenges in Dynamics 365 Finance & Operations development is keeping the local development database (`AxDB`) synchronized with fresh data from a Tier2 (UAT/Sandbox) environment. Standard approaches often involve restoring a full BACPAC, which is time-consuming and overwrites everything, or manually copying data, which is tedious and error-prone.
+One of the frequent challenges in Dynamics 365 Finance & Operations development is keeping the local development database (`AxDB`) synchronized with fresh data from a Tier2 (UAT/Sandbox) environment. Standard approaches often involve restoring a full BACPAC, which is time-consuming and overwrites everything, or manually copying data, which is tedious and error-prone. To address this, I created the **D365FO-DBSync** utility. This tool helps developers synchronize data from D365FO cloud environments to their local development databases, making it easier to test with production-like data. 
 
-To address this, I created the **D365FO-DB-Copy** utility. This tool helps developers synchronize data from D365FO cloud environments to their local development databases, making it easier to test with production-like data. The main idea is to make the last X records (ordered by `RecId`) the same between Tier2 and `AxDB`.
+The main idea is to make the last X records (ordered by `RecId`) the same between Tier2 and `AxDB`. E.g. A typical dynamics implementation has ~2000 tables with the data, around 200 tables are transactional tables that exceed 100k records, so if we sync last 100k records per table we can get a compact DB with the most of the base data and recent transactional data.
 
 ## Usage
 
-For detailed technical instructions and setup steps, please refer to the [GitHub repository](https://github.com/TrudAX/D365FO-DB-Copy).
+For detailed technical instructions and setup steps, please refer to the [GitHub repository](https://github.com/TrudAX/D365FO-DBSync).
 
 The main workflow is straightforward:
 
@@ -93,7 +93,7 @@ You are not limited to just "all or nothing". You can exclude specific tables (e
 
 This tool significantly reduces the friction of getting fresh data into your local VM.
 
-You can download the **D365FO-DB-Copy** from the GitHub repository:  
-[https://github.com/TrudAX/D365FO-DB-Copy](https://github.com/TrudAX/D365FO-DB-Copy)
+You can download the **D365FO-DBSync** from the GitHub repository:  
+[https://github.com/TrudAX/D365FO-DBSync](https://github.com/TrudAX/D365FO-DBSync)
 
 If you find it useful or have suggestions, feel free to open an issue or contribute!
