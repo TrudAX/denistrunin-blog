@@ -54,25 +54,25 @@ Some tables may contains images or some binary info and copying a standard 100k 
 
 In case you use a WHS solution, InventDim table may contains a lot of records with a LicensePlateId. During the copy you can't simply take the latest records, as you miss a lot of references to InventDimId that have a blank LicensePlateId. The solutoin for this is to take all dimensions without LicensePlateId PLUS all recent records with LicensePlateId. In this case you transfer the records that may be used in some setup and the latest transactional records. A setting for this looks the following:
 
-    ```text
+```sql
     InventDim|sql: SELECT * FROM InventDim WHERE RecId IN (SELECT RecId FROM (SELECT RecId FROM InventDim WHERE LICENSEPLATEID = '' AND PARTITION = 5637144576 AND DATAAREAID = 'USMF' AND WMSLOCATIONID = '' UNION SELECT RecId FROM (SELECT TOP 50000 RecId FROM InventDim ORDER BY RecId DESC) t) u) AND @sysRowVersionFilter ORDER BY RecId DESC
-    ```
+```
 
 #### Copy inventory onhand (InventSum)
 
 If InventSum is large, you may deside to copy only records that have some values. These records has the foolowing filter (`Closed = 0`), and it can reduce data volume. A settings for this will be the following:
 
-    ```text
+```sql
     InventSum|sql: SELECT * FROM InventSum WHERE Closed = 0 AND @sysRowVersionFilter ORDER BY RecId DESC
-    ```
+```
 
  #### Copy inventory reservations 
 
 To optimize a copy of inventory reservation (WHSINVENTRESERVE) we can use a filter that includes all reservation for a level 1 PLUS any records modified in the last 93 days. This ensures you have both current availability and recent history.
 
-    ```text
+```sql
     WHSINVENTRESERVE|sql: SELECT * FROM WHSINVENTRESERVE WHERE ((HIERARCHYLEVEL = 1 AND AVAILPHYSICAL <> 0) OR MODIFIEDDATETIME > DATEADD(DAY, -93, GETUTCDATE())) AND PARTITION = 5637144576 AND DATAAREAID = 'USMF' AND @sysRowVersionFilter ORDER BY RecId DESC
-    ```
+```
 
 ## Copy Performance Optimization
 
