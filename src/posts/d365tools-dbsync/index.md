@@ -1,6 +1,6 @@
 ---
-title: "Copy data from Dynamics 365 Finance & Operations Azure SQL Database (Tier2) to local SQL Server (AxDB)"
-date: "2026-01-01T12:00:00.000Z"
+title: "Sync data from Dynamics 365 Finance & Operations Azure SQL Database (Tier2) to local SQL Server (AxDB)"
+date: "2026-01-15T12:00:00.000Z"
 tags: ["SQL", "Data Management", "ALM"]
 path: "/d365tools-dbsync"
 featuredImage: "./logo.png"
@@ -19,8 +19,12 @@ The main workflow is straightforward:
 
 1.  **Prepare your environment**: Whitelist your IP and get database credentials from LCS.
 2.  **Configure the tool**: Enter the connection details for both the source (Tier2) and destination (Local AxDB).
+
+    ![Configuration Window](Configuration.png)
 3.  **Define strategies**: Choose which tables to copy and how (e.g., last 10k records).
 4.  **Sync**: Run the discovery and process steps to synchronize the data.
+
+    ![Execution Window](ExecutionWindow.png)
 
 ## Custom Copy Strategies
 
@@ -76,7 +80,7 @@ Copy speed is optimized using multiple approaches.
 
 ### SysRowVersion Optimization (Incremental Sync)
 
-The tool saves a `SysRowVersion` for every table during the first run. Then, if a saved value exists, it tries to estimate the changes first by querying only the system field before copying all data.
+The tool saves a `SysRowVersion` for every table during the first run. If a saved value exists, it tries to estimate the changes first by querying only system fields before copying all data.
 
 - If changes are below a certain percentage(e.g. 40%), it deletes only changed records and re-inserts them.
 - If changes are higher, it truncates the table (to save time on delete) and re-inserts the table.
@@ -84,7 +88,7 @@ The tool saves a `SysRowVersion` for every table during the first run. Then, if 
 This may give a reduction in data transfer for tables with minimal changes.
 
 ### Smart Strategies
-You are not limited to just "all or nothing". You can exclude specific tables (e.g., `Sys*`, `*Staging`) or write custom SQL to fetch only relevant data (e.g., specific `DataAreaId` or partition).
+You are not limited to just "all or nothing". You can exclude specific tables (e.g., `Sys*`, `*Staging`) or write custom SQL to fetch only relevant data (e.g., specific `DataAreaId`).
 
 ### Execution Efficiency
 - **Parallel Execution**: Uses multiple workers to process tables concurrently. Usually 10-20 workers are used.
