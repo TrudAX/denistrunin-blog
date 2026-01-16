@@ -13,7 +13,7 @@ The main idea is to make the last X records (ordered by `RecId`) the same betwee
 
 ## Usage
 
-For detailed technical instructions and setup steps, please refer to the [GitHub repository](https://github.com/TrudAX/D365FO-DBSync).
+For detailed technical instructions and setup steps, please refer to the [GitHub repository](https://github.com/TrudAX/D365FO-DB-Sync).
 
 The main workflow is straightforward:
 
@@ -125,6 +125,6 @@ The only downside is that the standard $20 Claude subscription is not enough; th
 This tool helps reduce the friction of getting fresh data into your local VM.
 
 You can download the **D365FO-DBSync** from the GitHub repository:  
-[https://github.com/TrudAX/D365FO-DBSync](https://github.com/TrudAX/D365FO-DBSync)
+[https://github.com/TrudAX/D365FO-DBSync](https://github.com/TrudAX/D365FO-DB-Sync)
 
-If you find it useful or have suggestions, feel free to open an issue or contribute!
+It is currently a working prototype, and it definitely requires input from different projects to become mature, so feel free to share your ideas on what can be improved.
