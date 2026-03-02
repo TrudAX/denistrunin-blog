@@ -44,7 +44,7 @@ To create a new service using the External Integration framework:
 
 A code sample looks like this:
 
-```c#
+```csharp
 public class DEVIntegTutorialServiceTest extends DEVIntegServiceExportBase
 {
 /// DEMO #1 (DataTables / DataSet):
