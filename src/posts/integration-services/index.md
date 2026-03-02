@@ -15,7 +15,7 @@ In this blog post, I will describe how to implement a service endpoint using the
 
 X++ services are created using a standard service class and the [Service and Service group objects](https://learn.microsoft.com/en-us/dynamics365/fin-ops-core/dev-itpro/data-entities/custom-services#json-based-custom-services).
 
-Please note that a service is a synchronous integration pattern that increases system coupling. It should only be used when an asynchronous approach is not an option.
+*Please note that a service is a synchronous integration pattern that increases system coupling. It should only be used when an asynchronous approach is not an option.*
 
 Before starting development, I analyzed several projects to see how different developers implemented their services. My key observations were:
 
