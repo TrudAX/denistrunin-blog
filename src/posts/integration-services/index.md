@@ -7,7 +7,7 @@ featuredImage: "./logo.png"
 excerpt: "This blog post describes how to implement a synchronous integration with D365FO by creating a service using the External Integration framework."
 ---
 
-The **External Integration** framework is an open-source [solution](https://github.com/TrudAX/XppTools?tab=readme-ov-file#devexternalintegration-submodel) designed for inbound and outbound integrations in D365FO. It supports several channels, including Azure File Share, SFTP, and Azure Service Bus, and provides comprehensive features for logging, error handling, and troubleshooting.
+The **External Integration** framework is an open-source [solution](https://github.com/TrudAX/XppTools?tab=readme-ov-file#devexternalintegration-submodel) designed for inbound and outbound integrations in D365FO. 
 
 In this blog post, I will describe how to implement a service endpoint using the External Integration framework.
 
