@@ -4,46 +4,45 @@ date: "2026-03-02T22:12:03.284Z"
 tags: ["Integration", "XppDEVTutorial"]
 path: "/integration-services"
 featuredImage: "./logo.png"
-excerpt: "This blog post describes how to implement a synchronous integration with D365FO by creating a Service inside D365FO using External integration framework"
+excerpt: "This blog post describes how to implement a synchronous integration with D365FO by creating a service using the External Integration framework."
 ---
 
-**External integration** is an open-source [framework](https://github.com/TrudAX/XppTools?tab=readme-ov-file#devexternalintegration-submodel) designed for inbound and outbound integrations in D365FO. It supports several channels: Azure file share, SFTP, Azure service bus, and provides comprehensive features for logging, error handling, and troubleshooting.
+The **External Integration** framework is an open-source [solution](https://github.com/TrudAX/XppTools?tab=readme-ov-file#devexternalintegration-submodel) designed for inbound and outbound integrations in D365FO. It supports several channels, including Azure File Share, SFTP, and Azure Service Bus, and provides comprehensive features for logging, error handling, and troubleshooting.
 
-In this blog post, I will describe how to implement a service endpoint using the External Integration framework.   
+In this blog post, I will describe how to implement a service endpoint using the External Integration framework.
 
-## Key Design Principles  
+## Key Design Principles
 
-X++ services are created using a standard service class in X++ and the [Service and Service group objects](https://learn.microsoft.com/en-us/dynamics365/fin-ops-core/dev-itpro/data-entities/custom-services#json-based-custom-services). 
+X++ services are created using a standard service class and the [Service and Service group objects](https://learn.microsoft.com/en-us/dynamics365/fin-ops-core/dev-itpro/data-entities/custom-services#json-based-custom-services).
 
-Please note that service is a synchronous integration pattern that increases system coupling; it should be used only when async is not an option.
+Please note that a service is a synchronous integration pattern that increases system coupling. It should only be used when an asynchronous approach is not an option.
 
-Before the development, I analysed several projects and how they were implemented by different developers. Key observations were:
+Before starting development, I analyzed several projects to see how different developers implemented their services. My key observations were:
 
-- The input parameters vary by integration; they can't be universal.
-- The output parameters look very similar; it is a data set containing one or more tables and some error flags. Also, most implementations contained some kind of logging table, usually different per implementation 
+- The input parameters vary by integration and cannot be universal.
+- The output parameters look very similar: typically a dataset containing one or more tables, along with some error flags. Additionally, most implementations included some kind of logging table, which usually varied per implementation.
 
- Based on these observations, the following concept was implemented: 
+Based on these observations, the following concept was implemented:
 
-1. The service input contract will be a new class for each integration, which gives maximum flexibility
-2. Output contract will be a unified class that contains the following data: A .NET dataset containing 0..n tables, Output string, Error flag, Error message
+1. The service input contract will be a new class for each integration, providing maximum flexibility.
+2. The output contract will be a unified class containing the following data: a .NET dataset (with 0 to n tables), an output string, an error flag, and an error message.
 3. A common logging option will be provided.
+4. It must be possible to test the class directly inside D365FO.
 
-4. It should be possible to test the class inside D365FO
 
+## Implementation details: X++ code
 
-## Implementation details: X++ code 
-
-I provide a sample code in the following [class](https://github.com/TrudAX/XppTools/blob/master/DEVTutorial/DEVExternalIntegrationSamples/AxClass/DEVIntegTutorialServiceTest.xml)   
+I have provided sample code in the following [class](https://github.com/TrudAX/XppTools/blob/master/DEVTutorial/DEVExternalIntegrationSamples/AxClass/DEVIntegTutorialServiceTest.xml).
 
 ![Solution overview](SolutionOverview.png)
 
-To create a new service in the External integration framework
+To create a new service using the External Integration framework:
 
-1. Create a new class that extends the **DEVIntegServiceExportBase**
-2. Create an entry point that is always 1 line, just a call with a reference to the main method 
-3. Implement a main method. It contains only the service business logic. 
+1. Create a new class that extends **DEVIntegServiceExportBase**.
+2. Create an entry point that is always a single line—just a call referencing the main method.
+3. Implement the main method to contain only the service's business logic.
 
-A sample code looks like this:
+A code sample looks like this:
 
 ```c#
 public class DEVIntegTutorialServiceTest extends DEVIntegServiceExportBase
@@ -128,57 +127,57 @@ public class DEVIntegTutorialServiceTest extends DEVIntegServiceExportBase
     }
 ```
 
-In case of errors, you just generate an exception, and the framework handles all this automatically. There are also a couple of helper methods that return either a temp table or a DataSet.
+In case of errors, simply throw an exception, and the framework will handle it automatically. There are also a few helper methods available that can return either a temporary table or a dataset.
 
-On the call side, if the calling system is .NET-based, they need to analyse the result: 
+On the caller side, if the calling system is .NET-based, it needs to analyze the result by following these steps:
 
-1. Check the status, **IsSuccess** flag, with error details in **ErrorMessage**  
-2. If successful, deserialise the **MessageDataSet** parameter as a class **System.Data.DataSet** and read the required data
+1. Check the **IsSuccess** flag, and review the error details in **ErrorMessage** if it failed.
+2. If successful, deserialize the **MessageDataSet** parameter into a **System.Data.DataSet** object and read the required data.
 
 ## Implementation details: User configuration
 
-After creating a service class, it should be added to the form **External Integration - Setup -Service message type**.
+After creating a service class, it must be added to the **External Integration > Setup > Service message type** form.
 
 ![Service main form](ServiceMainForm.png)
 
-From this form we can also test service class by using **Test** button
+From this form, we can also test the service class using the **Test** button.
 
 ![Test service initial run](TestServiceInitialRun.png)
 
-The system automatically create an empty contract, we just need to specify values and press the **Execute** button 
+The system will automatically create an empty contract. We just need to specify the parameter values and press the **Execute** button.
 
 ![Test results1](TestService1.png)
 
-In case the call was not successful error message will be generated 
+If the call is unsuccessful, an error message will be generated.
 
 ![Test service Exception](TestServiceBadResults.png)
 
 ## Logging
 
-Framework provides a different logging options that may be used in various business cases.
+The framework provides different logging options tailored to various business use cases.
 
 ![Service logging](ServiceLogging.png)
 
-The following log options are available:
+The following logging options are available:
 
-- **None** – no logging 
-- **Statistics & Errors** – there will be one record per day for successful calls, which will show the number of calls and number of lines, PLUS all calls that cause errors while executing
-- **Errors only** – only errors will be logged. 
-- **Request** – The system logs each request with parameters, its status and statistics(Start-End date, number of lines)
-- **Full** – the same as **Request**, but also the Response will be logged (may consume some space)
+- **None** – No logging.
+- **Statistics & Errors** – Creates one summary record per day for successful calls (showing the total number of calls and lines processed), PLUS detailed records for all calls that encounter errors during execution.
+- **Errors only** – Only failed calls are logged.
+- **Request** – Logs each request, including its parameters, status, and statistics (start/end date and number of lines).
+- **Full** – Same as **Request**, but also logs the response payload (note: this may consume significant storage space).
 
-Recommended values for the production usage: “**Request**” or “**Statistics & Errors**”.
+Recommended values for production environments are **"Request"** or **"Statistics & Errors"**.
 
-## Notes on consuming services 
+## Notes on consuming services
 
-Services may be consumed using AppId and connecting directly to the D365FO instance, but for the latest projects, we used the **Azure API management** service. Adrià wrote a [good article](https://ariste.info/2022/02/azure-api-management-dynamics-365-fo/) about this.
+Services can be consumed directly by connecting to the D365FO instance using an AppId. However, in recent projects, we have utilized the **Azure API Management** service. Adrià has written an [excellent article](https://ariste.info/2022/02/azure-api-management-dynamics-365-fo/) detailing this approach.
 
-In 2 words, you need to create an HTTP endpoint: 
+In short, you will need to create an HTTP endpoint:
 
 ```xml
 https://testsystemlink.sandbox.operations.dynamics.com/api/services/
 
-With a new operation: 
+With a new operation:
 Display name: getSOInfoDataTable
 Name: getsoinfodatatable
 URL:  /DEVIntegTutorialServiceTestGroup/DEVIntegTutorialServiceTest/getsoinfodatatable
@@ -216,13 +215,13 @@ and apply the following policy
 
 ```
 
-and then test the API with the following parameters
+Next, test the API using the following parameters:
 
 ```json
 {"_contract": {"CompanyId":"USMF","DelaySeconds":1,"SalesId":"001036"}}
 ```
 
-Or in case of Postman usage: 
+Alternatively, if you are using Postman:
 
 ```json
 https://d365apiserv.azure-api.net/mytest/DEVIntegTutorialServiceTest/getSOInfoDataTable
@@ -233,20 +232,19 @@ subscription-key
 
 Body raw
 {
-    _contract : {"CompanyId":"USMF","DelaySeconds":1,"SalesId":"001036"}
+    "_contract": {"CompanyId":"USMF","DelaySeconds":1,"SalesId":"001036"}
 }
 
 ```
 
 ## Summary
 
-External integration framework provides the following benefits for service development:
+The External Integration framework offers the following benefits for service development:
 
-- Standard output contact with workload and errors flag 
-- Automatic exceptions handling 
-- Several logging options
+- A standard output contract that includes workload statistics and error flags.
+- Automatic exception handling.
+- Flexible logging options.
 
-All used classes can be found on [GitHub](https://github.com/TrudAX/XppTools/tree/master/DEVTutorial/DEVExternalIntegrationSamples) and can be used as a starting point for your own integrations.
+All the classes discussed can be found on [GitHub](https://github.com/TrudAX/XppTools/tree/master/DEVTutorial/DEVExternalIntegrationSamples) and serve as a great starting point for your own integrations.
 
-I hope you find this information useful. As always, if you see any improvements, suggestions, or have questions about this work, don't hesitate to contact me.
-
+I hope you found this post helpful. As always, if you have any suggestions for improvements or questions regarding this implementation, please don't hesitate to reach out.
