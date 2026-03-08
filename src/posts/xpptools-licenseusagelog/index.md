@@ -232,6 +232,6 @@ I look forward to your feedback on it. Specifically:
 - Do the currently logged operations provide a clear enough view of license usage, or is more data needed?
 - Do you have any guidance or best practices you can share with the community on how to adjust security roles based on this tool's output?
 
-For general questions, please use the original post on [LinkedIn](https://www.linkedin.com/in/denistrunin/). For bug reports or feature requests, please use the [GitHub issue tracker](https://github.com/TrudAX/XppTools/issues).
+For general questions, please use the original post on [LinkedIn](https://www.linkedin.com/posts/denis-trunin-3b73a213_with-the-upcoming-microsoft-license-enforcement-activity-7436416828597465088-I-g-). For bug reports or feature requests, please use the [GitHub issue tracker](https://github.com/TrudAX/XppTools/issues).
 
 I hope you found this post helpful. As always, if you have any suggestions for improvements or questions regarding this implementation, please don't hesitate to reach out.
