@@ -222,13 +222,11 @@ The user is assigned an SCM license, but no logging activity is found. There may
 
 ### Quick overview
 
-Another option to get a quick overview: copy the header data to Excel and paste it to ChatGPT with the following prompt. It will provide a nice-looking Executive Summary.
-
-
+Another option to get a quick overview: copy the header data to Excel and paste it to ChatGPT with the following [prompt](https://github.com/TrudAX/denistrunin-blog/blob/master/src/posts/xpptools-licenseusagelog/notes.txt). It will provide a nice-looking Executive Summary.
 
 ## Summary
 
-License usage log utility can help you to understand how user using the system and adjust licenses based on this information. 
+A license usage log utility can help you understand how users are using the system, which may help you adjust licenses. 
 
 The tool can be downloaded from the  [GitHub](https://github.com/TrudAX/XppTools/tree/master/DEVTools/DEVLicenseUtils) .
 
