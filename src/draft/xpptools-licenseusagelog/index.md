@@ -7,25 +7,23 @@ featuredImage: "./logo.png"
 excerpt: "This blog post describes a tool that allows you to monitor license usage"
 ---
 
+In this blog post, I will describe how the current licensing works in D365FO and an open-source X++ utility that allows you to track the actual usage of elements and compare it with the elements assigned to the user.
 
-
-In this blog post, I will describe 
-
-## Technical details
+## Description of the current license model 
 
 At first, the new licensing model may look confusing, e.g., what all this "Entitled, not Entitled" means. I try to describe my path to understanding this.
 
-The legacy model relied on AOT properties for MenuItems. For example, here I open in Visual Studio a **WHSLoadTable** MenuItem that has 2 properties:  what license is required for read-only access, and what license is required if the access is write.
+The legacy model relied on AOT properties for MenuItems. For example, here I open a **WHSLoadTable** MenuItem in Visual Studio that has 2 properties: which license is required for read-only access, and which license is required for write access.
 
 ![Menu item properties](VSMenuItemProperties.png)
 
-This model obviously can't cover all the complexity of the current license model(e.g. you have Finance or SCM or both), so Microsoft released a new model, where they store all the license info in Licensing* tables and provide it to users. Data for these tables is calculated internally by Microsoft services and periodically (e.g., every 8h) synchronised with the Tier2/PROD environment. 
+This model obviously can't cover all the complexity of the current license model(e.g. you have Finance or SCM or both), so Microsoft released a new model, where they store all the license info on their servers and provide them to users in in Licensing* tables. Data for these tables is calculated internally by Microsoft services and periodically (e.g., every 8h) synchronised with the Tier2/PROD environment. All custom menu items are treated as Teams licenses in this model.
 
 Here is the same menu item license properties with the new model. 
 
 ![LicensingTablesView](LicensingTablesView.png)
 
-So now the logic is different, if the user has **Read** access to this WHSLoadTable menu, he should have one of the 7 licenses, and if he has **Write** access, he should have a SCM or SCM Premium license. That's what "Entitled" means.
+So now the logic is different, if the user has **Read** access to this **WHSLoadTable** menu, he should have one of the 7 licenses, and if he has **Write** access, he should have a SCM or SCM Premium license. That's what "Entitled" means.
 
 Microsoft provides a form "**Licenses usage summary**" where they actually display the result of the above query, but in a different granularity (Role - Duty - Privilege)
 
@@ -33,29 +31,42 @@ Microsoft provides a form "**Licenses usage summary**" where they actually displ
 
 ### Special roles
 
-There are also special roles with an exception from the license report:
+There are special roles with an exception from the license report:
 
 - **System administrator** - this role has access to everything and is currently excluded from the license report
-- **Device based licenses**: it is a common case in a warehouse; for example, you have a physical computer on the warehouse floor, and 5 warehouse workers who periodically use it to perform various activities. Instead of licensing these 5 people, you license just 1 device and assign the "Device-based" role for these users, which excludes them from the License report. As I understand, currently it is not something that is controlled by Microsoft, but they plan some control level in the future. 
+- **Device based licenses**: it is a common case in a warehouse; for example, you have a physical computer on the warehouse floor, and 5 warehouse workers who periodically use it to perform various activities. Instead of licensing these 5 people, you license just 1 device and assign the "Device-based" role for these users, which excludes them from the License report. As I understand, currently it is not something that is controlled by Microsoft, but they plan to have some control level in the future. 
 
-After you play with "**Licenses usage summary**" form I recommend reading the [series of articles](https://dynamicspedia.com/2025/11/dynamics-365-licensing-enforcement-advent-calendar/) by [André Arnaud de Calavon](https://www.linkedin.com/in/andreadc/) , he did a tremendous job of describing different security topics. T
+After you play with the "**Licenses usage summary**" form I recommend also reading the [series of articles](https://dynamicspedia.com/2025/11/dynamics-365-licensing-enforcement-advent-calendar/) by [André Arnaud de Calavon](https://www.linkedin.com/in/andreadc/) , who did a huge job of describing different security topics. After that, you will probably be more or less familiar with a new licensing model.
+
+### ISV solutions related to licensing 
+
+There are several companies working on D365FO security and licensing optimisation. When I originally asked a [question about user logging](https://www.linkedin.com/posts/denis-trunin-3b73a213_d365fo-licensing-question-does-anyone-in-activity-7421742261249576961-Wnkl), I received many comments, so I've saved them here as a reference: 
+
+- **André Arnaud de Calavon / Next365** — D365 expert and consultant, probably the top writer regarding security topics. Link: [André Arnaud de Calavon](https://dynamicspedia.com/2025/11/dynamics-365-licensing-enforcement-advent-calendar/)
+
+- **D365RoleSecure / NoirSoft** — D365FO security and licensing-focused tool. Link: [NoirSoft / D365RoleSecure](https://www.noirsoft.net/)
+
+- **Fastpath Assure / Alex Meyer** — Security, audit, compliance, and D365FO licensing governance. Link: [Fastpath Assure](https://marketplace.microsoft.com/en-us/product/fastpath.fastpath-assure-for-dynamics-365?tab=DetailsAndSupport)
+
+- **Marco Romano / IT\|Fandango** — D365 F&O consultant offering licensing/right-sizing assessment services. Link: [IT\|Fandango](https://itfandango.com/d365-fo-licence-cost-optimiser/)
+
+- **XPLUS Process Discovery / Anthonio Dixon** — User activity and process discovery for D365, with license optimisation angle. Link: [XPLUS Process Discovery](https://xplusglobal.com/products/security-and-compliance/)
 
 
+## License usage log tool
 
-### Independent consultants 
+The main issue with the standard Microsoft solution is that no license usage report is provided. 
 
-TODO: *describe who is working in this area with links to a web sites*
+*For example, a simple scenario: 10 users share a single role, and that role has 100 menu items at the Team level and one item that requires Activity. How can we determine which of these 10 users is actually using that specific Activity menu item.* 
 
-## License log usage
-
-The tool can be installed from [GitHub](https://github.com/TrudAX/XppTools/tree/master/DEVTools/DEVLicenseUtils) and then installed to the PROD version using your X++ pipeline.  
+The License usage log tool was built to fill this gap and provide you with the answer to this question. It can be installed from [GitHub](https://github.com/TrudAX/XppTools/tree/master/DEVTools/DEVLicenseUtils) and then deployed to the PROD version using your X++ pipeline.  
 
 ### Enable element usage logs
 
-After the installation, you need to Enable logging. There are 2 options:
+After the installation, you need to Enable element usage logging. There are 2 options:
 
 - Full(Debug only) mode, where every call is logged 
-- Or Summary, when a system creates an element usage log for a user only once per user session. 
+- or Summary, when a system creates an element usage log for a user only once per user session. 
 
 It should work for a couple of weeks on a PROD database to get some useful values.
 
@@ -67,13 +78,13 @@ The following events are [logged](https://github.com/TrudAX/XppTools/blob/master
 
 - Sysoperation execution(this includes reports and actions)
 
-- FormLetter executions (this includes sales and purch orders posting)
+- FormLetter executions (this includes sales and purchase orders posting)
 
 - RunBase classes execution 
 
 ![User element usage log](UserElementUsageLog.png)
 
-### Calculate modified tables
+### Calculate data modification
 
 One of the challenges of license monitoring is determining whether the user is viewing a form or actually modifying data. We can get a modification event from 2 sources:
 
@@ -86,9 +97,27 @@ The tool allows you to specify a period (e.g., the) last 90 days) and update the
 
 The next challenge is to link the Form the user is using to a list of tables. The License tool automatically calculates this data by linking all form DataSources with the used MenuItem, but this link can also be corrected manually.
 
+### Service functions
+
+The License log form have couple of service functions:
+
+**Cleanup function**: delete all log records older than 90 days and compact the rest (leave only one record per user-per element for the whole period)
+
+![Cleanup function](CleanupFunction.png)
+
+**Comments per user** - reporting table will be recalculated for every run, but you can provide a free text comment to save between the session, for example the user is already validated
+
+![Comments](Comments.png)
+
+A couple of custom recalculated tables, they are used mostly for debugging:
+
+**RunBase items** - links menu item names with a runbase class instance(during run base logging you can see only the class name, so this is required to link RunBase class with the MenuItem) 
+
+**Permissions** - A view containing Menu Items with Read and Write license requirements
+
 ## Running license usage report
 
-After you get the element usage a log and calculated tables modification, you can finally run a User license report
+After you get the element usage log and calculated data modification, you can finally run a User license report
 
 ![License usage report](LicenseUsageReport.png)
 
@@ -128,7 +157,7 @@ Example2
 
 ![Match status example 2](MatchStatusExample2.png)
 
-This example is more interesting. User is using only TMSPACKINGLIST report; for some reason, Microsoft has made it an Enterprise-level license in the current version(previously it was Activity). This information gives you options to reduce licensing costs, e.g., by developing your own report or providing it to the user in a different way. A typical question here: can we just duplicate a MenuItem 
+This example is more interesting. User is using only TMSPACKINGLIST report; for some reason, Microsoft has made it an Enterprise-level license in the current version(previously it was Activity). This information gives you some options to reduce licensing costs, e.g., by developing your own report or providing it to the user in a different way. A typical question here: Can we just duplicate a standard MenuItem and use a custom one? In the license guide, this is called Multiplexing and requires the original license to be applied.  
 
 ### 2. Match – Write Not Confirmed 
 
