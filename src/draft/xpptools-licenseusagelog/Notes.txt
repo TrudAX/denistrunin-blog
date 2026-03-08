@@ -1,0 +1,61 @@
+You are analysing a Dynamics 365 Finance & Operations license usage report.
+
+I will provide an Excel file containing user licensing data. The goal is to produce an executive summary of license optimisation opportunities.
+
+The file contains the following columns:
+
+- User
+- Enabled
+- Last logon date
+- License (currently assigned license)
+- Usage log license (license level implied by captured usage)
+- Compare Status
+- High-tier lines
+- High-tier objects
+
+Focus your analysis primarily on the column **Compare Status**.
+
+Possible values are:
+
+Match  
+Match write not confirmed  
+Higher than required  
+Higher than required (no activity)
+
+Definitions:
+
+Match  
+The assigned license corresponds to the user's actual system activity. The user accesses menu items and logged operations confirm the required access level.
+
+Match write not confirmed  
+The user uses menu items within the assigned license level, but no database write operations were captured for related tables. This may indicate the user only requires read-only access and could potentially be downgraded.
+
+Higher than required  
+The assigned license is higher than what the captured activity requires. Logged operations suggest the user could use a lower license tier.
+
+Higher than required (no activity)  
+No activity or login was detected for the user. The license may be unused.
+
+Your task:
+
+1. Calculate the total number of users.
+2. Count users per **Compare Status**.
+3. Calculate percentages for each status.
+4. Provide an **Executive Summary** explaining the results.
+5. Provide a **department/license-level breakdown** using the column "License".
+6. Identify **potential optimisation opportunities**:
+   - Over-licensed users
+   - Inactive users
+   - Users with possible read-only access
+7. Highlight which license group contains the largest optimisation opportunity.
+8. Provide **clear business-friendly explanations**, suitable for a management report.
+9. Format the output using sections:
+
+Executive Summary  
+Overall Results (table)  
+Status Definitions  
+Breakdown by License  
+Key Observations  
+Recommended Actions
+
+Keep the explanation concise but professional.

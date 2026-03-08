@@ -117,19 +117,36 @@ A couple of custom recalculated tables, they are used mostly for debugging:
 
 ## Running license usage report
 
-After you get the element usage log and calculated data modification, you can finally run a User license report
+After you collect the element usage log and calculate the data modification information, open the **User license report** tab and click **Refresh data**. The report compares the user’s assigned license with the highest license level from the captured usage data. 
 
 ![License usage report](LicenseUsageReport.png)
 
-It contains 2 sections - header and lines
+The report contains two sections: a **header** and **lines**
 
-The header section is one line per user and contains the following fields:
+### Header section
 
-TODO : describe fields
+The header contains one row per user and gives you a quick summary of the licensing situation:
 
-Lines section:
+- **User** – the user account being analysed.
+- **Enabled** – whether the user account is enabled.
+- **Last logon date** – the latest detected sign-in date for the user.
+- **License** – the license currently assigned to the user.
+- **Usage log license** – the highest license level from the Element Usage log.
+- **Compare Status** – comparison between the assigned license and the usage-based license. 
+- **High-tier lines** – the number of line records that contribute to the highest detected license requirement for that user.
+- **Comment** – an optional reviewer comment.
+- **High-tier objects** – the list of objects that drive the user to the highest detected license tier
 
-TODO : describe fields
+### Lines section
+
+The lines section shows the individual securable objects behind the selected user result and explains why that user falls into a specific license tier:
+
+- **AOT Name, Type** – the AOT name of the Menu Item.
+- **Read License** – the license needed for read access.
+- **Write Permission** – the license needed for write access.
+- **Access** – the access level being evaluated for the user, **Read** or **Write**.
+- **Current Permission** – the permission currently assigned through security.
+- **Writes** – indicates whether actual write activity was confirmed for this object from the collected modification data.
 
 ## Analysing the license report data
 
@@ -203,17 +220,21 @@ User has an assigned license but no recorded system activity.
 
 The user is assigned an SCM license, but no logging activity is found. There may be several options - user do not require access to the system and needs to be Disabled or the user is a high-level manager, they may periodically need access, in this case, the option is to add him to SysAdmin role.
 
+### Quick overview
+
+Another option to get a quick overview: copy the header data to Excel and paste it to ChatGPT with the following prompt. It will provide a nice-looking Executive Summary.
+
 
 
 ## Summary
 
-License usage log utility can help you to understand how user using the system and adjust licenses 
+License usage log utility can help you to understand how user using the system and adjust licenses based on this information. 
 
 The tool can be downloaded from the  [GitHub](https://github.com/TrudAX/XppTools/tree/master/DEVTools/DEVLicenseUtils) .
 
 It will be interesting to see the feedback, e.g. : 
 
-- Are currenly logged operations provides clear view on the license usage or something else required
-- Some guidencense that you can share with the community on how to adjust roles based on the tool output 
+- Are currently logged operations provides clear view on the license usage or something else required
+- Some guidance that you can share with the community on how to adjust roles based on the tool output 
 
 I hope you found this post helpful. As always, if you have any suggestions for improvements or questions regarding this implementation, please don't hesitate to reach out.
