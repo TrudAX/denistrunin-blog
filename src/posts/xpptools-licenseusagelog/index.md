@@ -13,7 +13,7 @@ In this blog post, I will describe how the current licensing works in D365FO and
 
 At first, the new licensing model may seem confusing. For example, what does "Entitled" or "not Entitled" mean? Here, I will describe my journey to understanding it.
 
-The legacy model relied on AOT properties for MenuItems. For example, opening the **WHSLoadTable** MenuItem in Visual Studio reveals two properties: one explicitly stating which license is required for read-only access, and another for write access.
+The legacy model relied on AOT properties for MenuItems. For example, opening the **WHSLoadTable** MenuItem in Visual Studio shows two properties: one for the read-only license, and another for the write license.
 
 ![Menu item properties](VSMenuItemProperties.png)
 
@@ -51,7 +51,6 @@ There are several companies that focus on D365FO security and licensing optimiza
 - **Marco Romano / IT\|Fandango** — D365 F&O consultant offering licensing/right-sizing assessment services. Link: [IT\|Fandango](https://itfandango.com/d365-fo-licence-cost-optimiser/)
 
 - **XPLUS Process Discovery / Anthonio Dixon** — User activity and process discovery for D365, with license optimisation angle. Link: [XPLUS Process Discovery](https://xplusglobal.com/products/security-and-compliance/)
-
 
 ## License usage log tool
 
@@ -92,7 +91,7 @@ One of the main challenges of license monitoring is distinguishing whether a use
 
 The tool allows you to specify a period (e.g., the last 90 days) and process the modification information from the two sources mentioned above.
 
-The next challenge is linking the form a user is opening to a list of tables. The License tool automatically calculates this by linking all form DataSources with the corresponding MenuItem, but you can also manually correct these links if needed.
+The next challenge is linking the form to a list of tables. The License tool automatically calculates this by linking all form DataSources with the corresponding MenuItem, but you can also manually correct these links if needed.
 
 ### Service functions
 
@@ -129,7 +128,7 @@ The header contains one row per user and provides their licensing status:
 - **License** – The license currently assigned to the user.
 - **Usage log license** – The highest license level required based on the Element Usage log.
 - **Compare Status** – A comparison between the assigned license and the usage-based license. 
-- **High-tier lines** – The number of discrete records that contribute to the highest detected license requirement for that user.
+- **High-tier lines** – The number of records that contribute to the highest detected license requirement for that user.
 - **Comment** – An optional, custom reviewer comment.
 - **High-tier objects** – The specific objects that drive the user into their highest detected license tier.
 
@@ -170,7 +169,7 @@ In this example, we can see that the user accesses the **Work** and **Waves** fo
 
 ![Match status example 2](MatchStatusExample2.png)
 
-This example is more nuanced. The user only runs the `TMSPACKINGLIST` report. Microsoft recently changed this report to require an Enterprise-level license (it previously only required an Activity license). Realizing this provides options for reducing licensing costs, for instance, by developing a custom report or providing the required data through a different channel. 
+This example is a bit different. The user only runs the `TMSPACKINGLIST` report. Microsoft recently changed this report to require an Enterprise-level license (it previously only required an Activity license). Since the high license requirement is caused by this single report, it presents an opportunity to reduce costs by developing a custom report or providing the required data through a different channel.
 
 A common question here is: *Can we just duplicate the standard MenuItem and use our custom copy instead?* According to the D365 licensing guide, this practice constitutes "Multiplexing," and still requires the original underlying license to be applied.
 
@@ -224,7 +223,7 @@ For a fast executive overview, you can copy the report's header data into Excel,
 
 ## Summary
 
-A license usage log utility provides deep insights into how users interact with the system, enabling you to intelligently optimize and adjust your license allocations. 
+A license usage log utility gives you insights into how users interact with the system by producing a usage report that compares the required license based on actual activity with their currently allocated license.
 
 The tool is open source and can be downloaded from [GitHub](https://github.com/TrudAX/XppTools/tree/master/DEVTools/DEVLicenseUtils).
 
@@ -232,5 +231,7 @@ I look forward to your feedback on it. Specifically:
 
 - Do the currently logged operations provide a clear enough view of license usage, or is more data needed?
 - Do you have any guidance or best practices you can share with the community on how to adjust security roles based on this tool's output?
+
+For general questions, please use the original post on [LinkedIn](https://www.linkedin.com/in/denistrunin/). For bug reports or feature requests, please use the [GitHub issue tracker](https://github.com/TrudAX/XppTools/issues).
 
 I hope you found this post helpful. As always, if you have any suggestions for improvements or questions regarding this implementation, please don't hesitate to reach out.
