@@ -4,43 +4,43 @@ date: "2026-03-08T22:12:03.284Z"
 tags: ["XppTools"]
 path: "/xpptools-licenseusagelog"
 featuredImage: "./logo.png"
-excerpt: "This blog post describes a tool that allows you to monitor license usage"
+excerpt: "Learn how the new D365FO licensing model works and discover an open-source X++ utility to monitor actual user activity and optimize your license costs."
 ---
 
-In this blog post, I will describe how the current licensing works in D365FO and an open-source X++ utility that allows you to track the actual usage of elements and compare it with the elements assigned to the user.
+In this blog post, I will describe how the current licensing works in D365FO and introduce an open-source X++ utility that allows you to track the actual usage of elements and compare it with the elements assigned to users.
 
-## Description of the current license model 
+## Understanding the current licensing model
 
-At first, the new licensing model may look confusing, e.g., what all this "Entitled, not Entitled" means. I try to describe my path to understanding this.
+At first, the new licensing model may seem confusing. For example, what does "Entitled" or "not Entitled" mean? Here, I will describe my journey to understanding it.
 
-The legacy model relied on AOT properties for MenuItems. For example, here I open a **WHSLoadTable** MenuItem in Visual Studio that has 2 properties: which license is required for read-only access, and which license is required for write access.
+The legacy model relied on AOT properties for MenuItems. For example, opening the **WHSLoadTable** MenuItem in Visual Studio reveals two properties: one explicitly stating which license is required for read-only access, and another for write access.
 
 ![Menu item properties](VSMenuItemProperties.png)
 
-This model obviously can't cover all the complexity of the current license model(e.g. you have Finance or SCM or both), so Microsoft released a new model, where they store all the license info on their servers and provide them to users in in Licensing* tables. Data for these tables is calculated internally by Microsoft services and periodically (e.g., every 8h) synchronised with the Tier2/PROD environment. All custom menu items are treated as Teams licenses in this model.
+This model obviously couldn't cover all the complexities of the current license model (e.g., whether you have Finance, SCM, or both). As a result, Microsoft released a new model where they store all the license information on their servers and provide it to users in `Licensing*` tables. The data for these tables is calculated internally by Microsoft services and periodically (e.g., every 8 hours) synchronized with the Tier 2 or PROD environments. In this model, all custom menu items are treated as Teams licenses.
 
-Here is the same menu item license properties with the new model. 
+Here are the license properties for the same menu item under the new model. 
 
 ![LicensingTablesView](LicensingTablesView.png)
 
-So now the logic is different, if the user has **Read** access to this **WHSLoadTable** menu, he should have one of the 7 licenses, and if he has **Write** access, he should have a SCM or SCM Premium license. That's what "Entitled" means.
+The logic is now different: if a user has **Read** access to this **WHSLoadTable** menu, they must have one of the 7 specified licenses. If they have **Write** access, they must have an SCM or SCM Premium license. This is exactly what "Entitled" means.
 
-Microsoft provides a form "**Licenses usage summary**" where they actually display the result of the above query, but in a different granularity (Role - Duty - Privilege)
+Microsoft provides a form "**Licenses usage summary**" which displays the results of the above query, but in a different level of  granularity (Role - Duty - Privilege)
 
 ![License usage summary](LicenseUsageSummary.png)
 
 ### Special roles
 
-There are special roles with an exception from the license report:
+There are special roles that are exempt from the license report:
 
-- **System administrator** - this role has access to everything and is currently excluded from the license report
-- **Device based licenses**: it is a common case in a warehouse; for example, you have a physical computer on the warehouse floor, and 5 warehouse workers who periodically use it to perform various activities. Instead of licensing these 5 people, you license just 1 device and assign the "Device-based" role for these users, which excludes them from the License report. As I understand, currently it is not something that is controlled by Microsoft, but they plan to have some control level in the future. 
+- **System administrator** - This role has access to everything and is currently excluded from the license report.
+- **Device based licenses** - This is a common scenario in warehouse environments. For example, if you have a physical computer on the warehouse floor and five warehouse workers who periodically use it to perform various activities, instead of licensing these five people individually, you license just one device. You then assign the "Device-based" role to these users, which excludes them from the license report. It's my understanding that this is not currently strictly controlled by Microsoft, but they plan to introduce some level of control in the future.
 
-After you play with the "**Licenses usage summary**" form I recommend also reading the [series of articles](https://dynamicspedia.com/2025/11/dynamics-365-licensing-enforcement-advent-calendar/) by [André Arnaud de Calavon](https://www.linkedin.com/in/andreadc/) , who did a huge job of describing different security topics. After that, you will probably be more or less familiar with a new licensing model.
+After familiarizing yourself with the "**Licenses usage summary**" form, I also recommend reading this [series of articles](https://dynamicspedia.com/2025/11/dynamics-365-licensing-enforcement-advent-calendar/) by [André Arnaud de Calavon](https://www.linkedin.com/in/andreadc/), who has done a fantastic job of explaining various security topics. This will give you a solid foundation in the new licensing model.
 
 ### ISV solutions related to licensing 
 
-There are several companies working on D365FO security and licensing optimisation. When I originally asked a [question about user logging](https://www.linkedin.com/posts/denis-trunin-3b73a213_d365fo-licensing-question-does-anyone-in-activity-7421742261249576961-Wnkl), I received many comments, so I've saved them here as a reference: 
+There are several companies that focus on D365FO security and licensing optimization. When I originally asked a [question about user logging on LinkedIn](https://www.linkedin.com/posts/denis-trunin-3b73a213_d365fo-licensing-question-does-anyone-in-activity-7421742261249576961-Wnkl), I received a lot of insightful comments. I've saved them here for reference: 
 
 - **André Arnaud de Calavon / Next365** — D365 expert and consultant, probably the top writer regarding security topics. Link: [André Arnaud de Calavon](https://dynamicspedia.com/2025/11/dynamics-365-licensing-enforcement-advent-calendar/)
 
@@ -55,184 +55,182 @@ There are several companies working on D365FO security and licensing optimisatio
 
 ## License usage log tool
 
-The main issue with the standard Microsoft solution is that no license usage report is provided. 
+The main limitation with Microsoft's standard solution is that it doesn't provide an actual activity-based license usage report.
 
-*For example, a simple scenario: 10 users share a single role, and that role has 100 menu items at the Team level and one item that requires Activity. How can we determine which of these 10 users is actually using that specific Activity menu item.* 
+*Consider a simple scenario: 10 users share a single role. This role contains 100 menu items that only require a Teams license, and one menu item that requires an Activity license. How can we determine which of these 10 users are actually using that specific Activity menu item?*
 
-The License usage log tool was built to fill this gap and provide you with the answer to this question. It can be installed from [GitHub](https://github.com/TrudAX/XppTools/tree/master/DEVTools/DEVLicenseUtils) and then deployed to the PROD version using your X++ pipeline.  
+The **License usage log tool** was built to fill this gap and answer exactly these types of questions. It can be downloaded from [GitHub](https://github.com/TrudAX/XppTools/tree/master/DEVTools/DEVLicenseUtils) and deployed to your PROD environment using your standard X++ pipeline.
 
-### Enable element usage logs
+### Enabling element usage logs
 
-After the installation, you need to Enable element usage logging. There are 2 options:
+After installation, you need to enable element usage logging. You have two options:
 
-- Full(Debug only) mode, where every call is logged 
-- or Summary, when a system creates an element usage log for a user only once per user session. 
+- **Full (Debug only) mode** - Every single access is logged.
+- **Summary mode** - The system creates an element usage log entry for a user only once per session.
 
-It should work for a couple of weeks on a PROD database to get some useful values.
+You should run this for a couple of weeks in your PROD environment to collect meaningful usage data.
 
-![Usage monitory](UsageLogSetup.png)
+![Element usage monitor](UsageLogSetup.png)
 
 The following events are [logged](https://github.com/TrudAX/XppTools/blob/master/DEVTools/DEVLicenseUtils/AxClass/DEVLicenseElementUsageLogMonitor.xml):
 
-- Form opening(the same extension point as standard Microsoft "Form runs (Page views)"  telemetry )
-
-- Sysoperation execution(this includes reports and actions)
-
-- FormLetter executions (this includes sales and purchase orders posting)
-
-- RunBase classes execution 
+- **Form openings** (using the same extension point as the standard Microsoft "Form runs (Page views)" telemetry)
+- **SysOperation executions** (including reports and actions)
+- **FormLetter executions** (such as sales and purchase order postings)
+- **RunBase class executions**
 
 ![User element usage log](UserElementUsageLog.png)
 
-### Calculate data modification
+### Calculating data modifications
 
-One of the challenges of license monitoring is determining whether the user is viewing a form or actually modifying data. We can get a modification event from 2 sources:
+One of the main challenges of license monitoring is distinguishing whether a user only viewed a form or if they actually modified data. We can gather modification events from two sources:
 
-- Table **ModifiedBy**, **CreatedBy** fields. This is not fully reliable info, as it contains only the last user who touched the record
-- **SysDatabaseLog** table - this produces more actual info, but it needs to be enabled in advance
+- **Table ModifiedBy and CreatedBy fields** - This is not always fully reliable, as it only records the last user who touched the record.
+- **SysDatabaseLog table** - This provides more accurate event information, but it must be enabled in advance.
 
-![Modified table calculate](ModifiedTablesCalc.png)
+![Modified tables calculation](ModifiedTablesCalc.png)
 
-The tool allows you to specify a period (e.g., the) last 90 days) and update the modification information from the 2 sources above.
+The tool allows you to specify a period (e.g., the last 90 days) and process the modification information from the two sources mentioned above.
 
-The next challenge is to link the Form the user is using to a list of tables. The License tool automatically calculates this data by linking all form DataSources with the used MenuItem, but this link can also be corrected manually.
+The next challenge is linking the form a user is opening to a list of tables. The License tool automatically calculates this by linking all form DataSources with the corresponding MenuItem, but you can also manually correct these links if needed.
 
 ### Service functions
 
-The License log form have couple of service functions:
+The License log form includes a couple of useful service functions:
 
-**Cleanup function**: delete all log records older than 90 days and compact the rest (leave only one record per user-per element for the whole period)
+- **Cleanup function**: Deletes all log records older than a specified period (e.g., 90 days) and compacts the remaining data, leaving only one record per user, per element, for the entire period.
 
 ![Cleanup function](CleanupFunction.png)
 
-**Comments per user** - reporting table will be recalculated for every run, but you can provide a free text comment to save between the session, for example the user is already validated
+- **Comments per user**: The reporting table is recalculated on every run, but you can add free-text comments that are preserved between sessions (for example, to note that a specific user has already been validated).
 
 ![Comments](Comments.png)
 
-A couple of custom recalculated tables, they are used mostly for debugging:
+It also includes a couple of custom recalculated tables, which are primarily used for tracking and debugging:
 
-**RunBase items** - links menu item names with a runbase class instance(during run base logging you can see only the class name, so this is required to link RunBase class with the MenuItem) 
+- **RunBase items**: Links MenuItem names with their corresponding RunBase class instances. Since RunBase logging only captures the class name, this table is required to link the class back to its originating MenuItem.
+- **Permissions**: A view containing MenuItems with their Read and Write license requirements.
 
-**Permissions** - A view containing Menu Items with Read and Write license requirements
+## Running the license usage report
 
-## Running license usage report
-
-After you collect the element usage log and calculate the data modification information, open the **User license report** tab and click **Refresh data**. The report compares the user’s assigned license with the highest license level from the captured usage data. 
+After collecting the element usage log and calculating the data modification information, open the **User license report** tab and click **Refresh data**. The report will compare each user’s currently assigned license with the highest license tier required based on their captured system usage.
 
 ![License usage report](LicenseUsageReport.png)
 
-The report contains two sections: a **header** and **lines**
+The report consists of two sections: a **header** and **lines**.
 
 ### Header section
 
-The header contains one row per user and gives you a quick summary of the licensing situation:
+The header contains one row per user and provides their licensing status:
 
-- **User** – the user account being analysed.
-- **Enabled** – whether the user account is enabled.
-- **Last logon date** – the latest detected sign-in date for the user.
-- **License** – the license currently assigned to the user.
-- **Usage log license** – the highest license level from the Element Usage log.
-- **Compare Status** – comparison between the assigned license and the usage-based license. 
-- **High-tier lines** – the number of line records that contribute to the highest detected license requirement for that user.
-- **Comment** – an optional reviewer comment.
-- **High-tier objects** – the list of objects that drive the user to the highest detected license tier
+- **User** – The user account being analyzed.
+- **Enabled** – Whether the user account is currently active.
+- **Last logon date** – The latest detected sign-in date for the user.
+- **License** – The license currently assigned to the user.
+- **Usage log license** – The highest license level required based on the Element Usage log.
+- **Compare Status** – A comparison between the assigned license and the usage-based license. 
+- **High-tier lines** – The number of discrete records that contribute to the highest detected license requirement for that user.
+- **Comment** – An optional, custom reviewer comment.
+- **High-tier objects** – The specific objects that drive the user into their highest detected license tier.
 
 ### Lines section
 
-The lines section shows the individual securable objects behind the selected user result and explains why that user falls into a specific license tier:
+The lines section details the individual securable objects behind a selected user's result, explaining exactly why they fall into a specific license tier:
 
-- **AOT Name, Type** – the AOT name of the Menu Item.
-- **Read License** – the license needed for read access.
-- **Write Permission** – the license needed for write access.
-- **Access** – the access level being evaluated for the user, **Read** or **Write**.
-- **Current Permission** – the permission currently assigned through security.
-- **Writes** – indicates whether actual write activity was confirmed for this object from the collected modification data.
+- **AOT Name, Type** – The AOT name and type of the MenuItem.
+- **Read License** – The license tier necessary for read access.
+- **Write Permission** – The license tier necessary for write access.
+- **Access** – The access level currently being evaluated for the user (**Read** or **Write**).
+- **Current Permission** – The permission currently assigned to the user via security roles.
+- **Writes** – Indicates whether actual write activity was verified for this object based on the collected data modification logic.
 
-## Analysing the license report data
+## Analyzing the license report data
 
-This report analyses **users** by comparing their **Assigned license level("License" column)** with their **actual system usage("Usage log license" column)**, based on captured activity logs and entitlement objects.
+This report evaluates users by comparing their **Assigned license level** (the "License" column) with their **Actual system usage** (the "Usage log license" column), based on captured daily activity and entitlement objects.
 
-Let's consider possible analysis scenarios based on the **Compare status** field:
+Let's review the possible analysis scenarios based on the **Compare status** field:
 
 ### 1. Match 
 
-The assigned license corresponds to the user’s actual system activity.
+The assigned license accurately corresponds to the user’s actual system activity.
 
 **Technical meaning:**
 
-- User accesses allocated menu items.
-- Logged operations confirm required access level (including write where applicable).
-- Assigned SKU aligns with required entitlement objects.
+- The user is accessing allocated menu items.
+- Logged operations confirm the required access level (including write access where applicable).
+- The assigned SKU properly aligns with the required entitlement objects.
 
-Example1
+*Example 1*
 
 ![Match status1](MatchStatusExample1.png)
 
-In this example, we can see that the user has access to **Work** and **Waves** forms and writes to the relevant tables, so it is a valid "**Supply Chain Management**" license; you can't optimise it.
+In this example, we can see that the user accesses the **Work** and **Waves** forms and actually writes to the relevant tables. This legitimately requires a **Supply Chain Management** license; it cannot be further optimized.
 
-Example2
+*Example 2*
 
 ![Match status example 2](MatchStatusExample2.png)
 
-This example is more interesting. User is using only TMSPACKINGLIST report; for some reason, Microsoft has made it an Enterprise-level license in the current version(previously it was Activity). This information gives you some options to reduce licensing costs, e.g., by developing your own report or providing it to the user in a different way. A typical question here: Can we just duplicate a standard MenuItem and use a custom one? In the license guide, this is called Multiplexing and requires the original license to be applied.  
+This example is more nuanced. The user only runs the `TMSPACKINGLIST` report. Microsoft recently changed this report to require an Enterprise-level license (it previously only required an Activity license). Realizing this provides options for reducing licensing costs, for instance, by developing a custom report or providing the required data through a different channel. 
+
+A common question here is: *Can we just duplicate the standard MenuItem and use our custom copy instead?* According to the D365 licensing guide, this practice constitutes "Multiplexing," and still requires the original underlying license to be applied.
 
 ### 2. Match – Write Not Confirmed 
 
-The user accesses functionality within their assigned license, but no write operations are captured for related tables.
+The user accesses functionality corresponding to their assigned license, but no write operations were captured for the related tables.
 
 **Technical meaning:**
 
-- User uses menu items.
-- Access level matches allocated license.
-- However, no logged database writes were 
+- The user accesses the menu items.
+- Their assigned access level matches their allocated license.
+- However, no actual database writes were logged for those sessions.
 
-Here the example 
+*Example*
 
 ![Match no writes](MatchNoWritesExample1.png)
 
-The user uses the Waves form, but there is no confirmed record of him writing to the relevant tables. This still requires some research, but gives you an option to lower the access to this form to read only(and that can lower the license level to Teams for this user)
+The user accesses the Waves form, but there is no confirmed record of them writing to its underlying tables. While this requires further investigation, it highlights an opportunity to lower their access to this form to read-only, which could potentially reduce their required license level down to a Teams license.
 
-### 3.Higher Than Required
+### 3. Higher Than Required
 
-The user’s assigned license is higher than what their logged system activity requires.
+The user’s assigned license is higher than what their actual logged system activity.
 
 **Technical meaning:**
 
-- Logged operations show lower access levels than the allocated SKU.
-- Required entitlement objects fall below the current license tier.
+- Logged operations demonstrate a lower utilization level than the allocated SKU.
+- The required entitlement objects actually fall into a lower license tier.
 
-Example 
+*Example*
 
 ![Higher than required](HigherExample1.png)
 
-In this case, the user is assigned an **SCM** license, but the usage log shows he only uses 2 forms that require an **Activity** license. So, a potential candidate for the permissions review. 
+In this case, the user is assigned a full **SCM** license. However, the usage log reveals they only use two forms that require an **Activity** license. This makes them a strong candidate for a permissions review to right-size their licensing.
 
 ### 4. Higher Than Required (No Activity)
 
-User has an assigned license but no recorded system activity.
+The user has an assigned license, but zero recorded system activity.
 
 **Technical meaning:**
 
-- No login or operational activity captured in logs.
-- No entitlement usage detected.
+- No logins or operational activities were captured in the system logs.
+- No entitlement usage was detected.
 
 ![No activity log](NoActivity.png)
 
-The user is assigned an SCM license, but no logging activity is found. There may be several options - user do not require access to the system and needs to be Disabled or the user is a high-level manager, they may periodically need access, in this case, the option is to add him to SysAdmin role.
+The user is assigned an SCM license, but no logging activity was recorded. There are a few possibilities here: the user may no longer require system access and should be disabled; or, the user might be a high-level manager who only needs periodic read access, or could perhaps be assigned a different appropriate role instead of holding an unused premium license.
 
-### Quick overview
+### Quick overview with AI
 
-Another option to get a quick overview: copy the header data to Excel and paste it to ChatGPT with the following [prompt](https://github.com/TrudAX/denistrunin-blog/blob/master/src/posts/xpptools-licenseusagelog/notes.txt). It will provide a nice-looking Executive Summary.
+For a fast executive overview, you can copy the report's header data into Excel, then pass it to ChatGPT alongside this [prompt](https://github.com/TrudAX/denistrunin-blog/blob/master/src/posts/xpptools-licenseusagelog/notes.txt) to generate a helpful written summary for stakeholders.
 
 ## Summary
 
-A license usage log utility can help you understand how users are using the system, which may help you adjust licenses. 
+A license usage log utility provides deep insights into how users interact with the system, enabling you to intelligently optimize and adjust your license allocations. 
 
-The tool can be downloaded from the  [GitHub](https://github.com/TrudAX/XppTools/tree/master/DEVTools/DEVLicenseUtils) .
+The tool is open source and can be downloaded from [GitHub](https://github.com/TrudAX/XppTools/tree/master/DEVTools/DEVLicenseUtils).
 
-It will be interesting to see the feedback, e.g. : 
+I look forward to your feedback on it. Specifically:
 
-- Are currently logged operations provides clear view on the license usage or something else required
-- Some guidance that you can share with the community on how to adjust roles based on the tool output 
+- Do the currently logged operations provide a clear enough view of license usage, or is more data needed?
+- Do you have any guidance or best practices you can share with the community on how to adjust security roles based on this tool's output?
 
 I hope you found this post helpful. As always, if you have any suggestions for improvements or questions regarding this implementation, please don't hesitate to reach out.
