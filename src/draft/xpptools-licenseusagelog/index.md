@@ -13,6 +13,33 @@ In this blog post, I will describe
 
 ## Technical details
 
+At first, the new licensing model may look confusing, e.g., what all this "Entitled, not Entitled" means. I try to describe my path to understanding this.
+
+The legacy model relied on AOT properties for MenuItems. For example, here I open in Visual Studio a **WHSLoadTable** MenuItem that has 2 properties:  what license is required for read-only access, and what license is required if the access is write.
+
+![Menu item properties](VSMenuItemProperties.png)
+
+This model obviously can't cover all the complexity of the current license model(e.g. you have Finance or SCM or both), so Microsoft released a new model, where they store all the license info in Licensing* tables and provide it to users. Data for these tables is calculated internally by Microsoft services and periodically (e.g., every 8h) synchronised with the Tier2/PROD environment. 
+
+Here is the same menu item license properties with the new model. 
+
+![LicensingTablesView](LicensingTablesView.png)
+
+So now the logic is different, if the user has **Read** access to this WHSLoadTable menu, he should have one of the 7 licenses, and if he has **Write** access, he should have a SCM or SCM Premium license. That's what "Entitled" means.
+
+Microsoft provides a form "**Licenses usage summary**" where they actually display the result of the above query, but in a different granularity (Role - Duty - Privilege)
+
+![License usage summary](LicenseUsageSummary.png)
+
+### Special roles
+
+There are also special roles with an exception from the license report:
+
+- **System administrator** - this role has access to everything and is currently excluded from the license report
+- **Device based licenses**: it is a common case in a warehouse; for example, you have a physical computer on the warehouse floor, and 5 warehouse workers who periodically use it to perform various activities. Instead of licensing these 5 people, you license just 1 device and assign the "Device-based" role for these users, which excludes them from the License report. As I understand, currently it is not something that is controlled by Microsoft, but they plan some control level in the future. 
+
+After you play with "**Licenses usage summary**" form I recommend reading the [series of articles](https://dynamicspedia.com/2025/11/dynamics-365-licensing-enforcement-advent-calendar/) by [André Arnaud de Calavon](https://www.linkedin.com/in/andreadc/) , he did a tremendous job of describing different security topics. T
+
 
 
 ### Independent consultants 
@@ -21,15 +48,20 @@ TODO: *describe who is working in this area with links to a web sites*
 
 ## License log usage
 
-The tool can be installed  from [GitHub](https://github.com/TrudAX/XppTools/tree/master/DEVTools/DEVLicenseUtils). It should work for couple of weeks on a PROD database to get some usefull values. 
+The tool can be installed from [GitHub](https://github.com/TrudAX/XppTools/tree/master/DEVTools/DEVLicenseUtils) and then installed to the PROD version using your X++ pipeline.  
 
 ### Enable element usage logs
 
-Enable logging, in case of Summary a system creates element usage log for a user only once per user session. 
+After the installation, you need to Enable logging. There are 2 options:
+
+- Full(Debug only) mode, where every call is logged 
+- Or Summary, when a system creates an element usage log for a user only once per user session. 
+
+It should work for a couple of weeks on a PROD database to get some useful values.
 
 ![Usage monitory](UsageLogSetup.png)
 
-The following elements are [logged](https://github.com/TrudAX/XppTools/blob/master/DEVTools/DEVLicenseUtils/AxClass/DEVLicenseElementUsageLogMonitor.xml):
+The following events are [logged](https://github.com/TrudAX/XppTools/blob/master/DEVTools/DEVLicenseUtils/AxClass/DEVLicenseElementUsageLogMonitor.xml):
 
 - Form opening(the same extension point as standard Microsoft "Form runs (Page views)"  telemetry )
 
@@ -50,7 +82,7 @@ One of the challenges of license monitoring is determining whether the user is v
 
 ![Modified table calculate](ModifiedTablesCalc.png)
 
-The tool allows you to specify a period(e.g. last 90 days) and update the modification information from the 2 sources above 
+The tool allows you to specify a period (e.g., the) last 90 days) and update the modification information from the 2 sources above.
 
 The next challenge is to link the Form the user is using to a list of tables. The License tool automatically calculates this data by linking all form DataSources with the used MenuItem, but this link can also be corrected manually.
 
@@ -60,7 +92,7 @@ After you get the element usage a log and calculated tables modification, you ca
 
 ![License usage report](LicenseUsageReport.png)
 
-It contains 2 section - header and lines
+It contains 2 sections - header and lines
 
 The header section is one line per user and contains the following fields:
 
@@ -74,9 +106,9 @@ TODO : describe fields
 
 This report analyses **users** by comparing their **Assigned license level("License" column)** with their **actual system usage("Usage log license" column)**, based on captured activity logs and entitlement objects.
 
-Let's consider possible analysis scenarios based on the **Compare status** field
+Let's consider possible analysis scenarios based on the **Compare status** field:
 
-### **Match** status
+### 1. Match 
 
 The assigned license corresponds to the user’s actual system activity.
 
@@ -96,17 +128,51 @@ Example2
 
 ![Match status example 2](MatchStatusExample2.png)
 
-This example is more interesting. User is using only TMSPACKINGLIST report; for some reason, Microsoft has made it an Enterprise-level license in the current version(previously it was Activity). This information gives you some options to reduce licensing, e.g. develop your own report or provide it to the user in a different way.
+This example is more interesting. User is using only TMSPACKINGLIST report; for some reason, Microsoft has made it an Enterprise-level license in the current version(previously it was Activity). This information gives you options to reduce licensing costs, e.g., by developing your own report or providing it to the user in a different way. A typical question here: can we just duplicate a MenuItem 
 
-### **Match – Write Not Confirmed Status** 
+### 2. Match – Write Not Confirmed 
 
-User accesses functionality within their assigned license, but no write operations were captured for related tables.
+The user accesses functionality within their assigned license, but no write operations are captured for related tables.
 
 **Technical meaning:**
 
 - User uses menu items.
 - Access level matches allocated license.
 - However, no logged database writes were 
+
+Here the example 
+
+![Match no writes](MatchNoWritesExample1.png)
+
+The user uses the Waves form, but there is no confirmed record of him writing to the relevant tables. This still requires some research, but gives you an option to lower the access to this form to read only(and that can lower the license level to Teams for this user)
+
+### 3.Higher Than Required
+
+The user’s assigned license is higher than what their logged system activity requires.
+
+**Technical meaning:**
+
+- Logged operations show lower access levels than the allocated SKU.
+- Required entitlement objects fall below the current license tier.
+
+Example 
+
+![Higher than required](HigherExample1.png)
+
+In this case, the user is assigned an **SCM** license, but the usage log shows he only uses 2 forms that require an **Activity** license. So, a potential candidate for the permissions review. 
+
+### 4. Higher Than Required (No Activity)
+
+User has an assigned license but no recorded system activity.
+
+**Technical meaning:**
+
+- No login or operational activity captured in logs.
+- No entitlement usage detected.
+
+![No activity log](NoActivity.png)
+
+The user is assigned an SCM license, but no logging activity is found. There may be several options - user do not require access to the system and needs to be Disabled or the user is a high-level manager, they may periodically need access, in this case, the option is to add him to SysAdmin role.
 
 
 
