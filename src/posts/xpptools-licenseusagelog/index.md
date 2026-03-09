@@ -7,7 +7,7 @@ featuredImage: "./logo.png"
 excerpt: "Learn how the new D365FO licensing model works and discover an open-source X++ utility to monitor actual user activity and optimize your license costs."
 ---
 
-In this blog post, I will describe how the current licensing works in D365FO and introduce an open-source X++ utility that allows you to track the actual usage of elements and compare it with the elements assigned to users.
+In this blog post, I will describe how the current licensing works in D365FO and introduce an open-source X++ utility that allows you to track the actual usage of elements and compare it with the elements assigned to users via user roles.
 
 ## Understanding the current licensing model
 
@@ -223,7 +223,7 @@ For a fast executive overview, you can copy the report's header data into Excel,
 
 ## Summary
 
-A license usage log utility gives you insights into how users interact with the system by producing a usage report that compares the required license based on actual activity with their currently allocated license.
+A license usage log utility provides insights into how users interact with the system by producing a usage report that compares the required license usage based on actual activity against the currently allocated licenses based on user roles.
 
 The tool is open source and can be downloaded from [GitHub](https://github.com/TrudAX/XppTools/tree/master/DEVTools/DEVLicenseUtils).
 
