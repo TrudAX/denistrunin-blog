@@ -1,3 +1,35 @@
 To create certificate, install Powershell module D365fo.tools and use function new-d365entraintegration. With this you will be able to import users from EntraID as well on CHE.
 
  E-Invoicing in Dynamics 365 F&O: End to End Setup to Automation   https://www.youtube.com/watch?v=nuxizIyUnqY 
+
+
+Чтобы переключить Claude Code на автономный режим:
+👉Если вы работаете в десктопном приложении:
+1. Зайти в настройки, включить разрешение на Allow bypass permissions mode.
+2. Потом в самом треде в самом низу включить эту опцию явно, и следить, чтобы она в таком виде оставалась.
+👉Если в VSC/CLI, то в файле setting.json добавить
+{
+  "permissions": {
+    "defaultMode": "bypassPermissions",
+    "allow": [
+      "Bash",
+      "Read",
+      "Edit",
+      "Write",
+      "WebFetch",
+      "Glob",
+      "Grep",
+      "MCP"
+    ]
+  }
+}
+👉Если для конкретного треда в Терминале, то сразу вызываете claude --dangerously-skip-permissions. Это пропускает все запросы на подтверждение — Claude выполняет любые команды (bash, запись файлов, git) без одобрения.
+😱Рекомендация CC: Использовать только в изолированных средах (контейнер, VM), где нет риска повреждения данных.
+Ключевая строка — "defaultMode": "bypassPermissions". Это эквивалент --dangerously-skip-permissions, но в конфиге — работает для всех сессий без флага в терминале.
+Можно включать режим глобально, тогда надо в глобальном .claude/setting.json
+На уровне проекта в его локальном .claude/setting.json
+Можно на уровне отдельного треда.
+Можно все в командной строке задавать в Терминале. Пример:
+claude -p "Настрой OAuth провайдеров по .claude/agents/15-oauth-configurator.md.  Используй Playwright для навигации по консолям. Google аккаунт: xxx Supabase callback: https://xxx.supabase.co/auth/v1/callback" \ --allowedTools "Edit,Write,Bash,mcp__playwright__navigate,mcp__playwright__click,mcp__playwright__fill,mcp__playwright__screenshot"
+Ну, и самое главное, для полноценной автономной работы дайте ИИ подготовить полноценное ТЗ и план создания/ тестирования/ деплоя.
+Если полноценного ТЗ и плана нет, ИИ не сможет работать автономно, все время будет останавливаться и переспрашивать.
