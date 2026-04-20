@@ -93,6 +93,21 @@ The tool allows you to specify a period (e.g., the last 90 days) and process the
 
 The next challenge is linking the form to a list of tables. The License tool automatically calculates this by linking all form DataSources with the corresponding MenuItem, but you can also manually correct these links if needed.
 
+**Update 20.04.2026:** There is also a v2 of this tool that supports update logging from the form (https://www.linkedin.com/pulse/d365fo-license-log-utility-v2-improved-data-logging-denis-trunin-um6fe/)
+
+You can enable write operations logging:
+
+![Data log setup](DataLogSetup.png)
+
+​      When enabled, the system dynamically tracks user modifications using **event handlers** on form data sources:         
+
+- Event handlers are attached to form **Insert, Update, and Delete** events 
+- A log entry is created whenever a modification occurs 
+- Only one record per *user session per table* is logged 
+- Logging can be enabled for specific users only 
+
+![](WriteLogView.png)
+
 ### Service functions
 
 The License log form includes a couple of useful service functions:
