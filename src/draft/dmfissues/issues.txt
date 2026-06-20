@@ -103,3 +103,13 @@ We have been advised by support that they cannot provide any further assistance 
  
 
 SR#2504221420000023
+
+5.
+Data events are generated per full table record. Someone updated 100k records with some field values, that not even mapped or included in the dataevents, and this initiated huge system overload
+with data events
+External integration solution: Framework ask you to provide a list of fields where the event should be initiated. Integration will be called only if values used in this integration modified
+
+6.
+DMF export performance for a large datasets 
+DMF for the export scenario use record by record export. If you need a calculated field, the only option use postLoad method on the DataEntity, but it will be calculated for every record
+In External integration you control by the code how the export works, so you can implement all possible performance techniques to make your export fast, for example calculate some data in a map or a temporary table and use these data to perform the export
