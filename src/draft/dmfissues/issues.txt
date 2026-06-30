@@ -113,3 +113,7 @@ External integration solution: Framework ask you to provide a list of fields whe
 DMF export performance for a large datasets 
 DMF for the export scenario use record by record export. If you need a calculated field, the only option use postLoad method on the DataEntity, but it will be calculated for every record
 In External integration you control by the code how the export works, so you can implement all possible performance techniques to make your export fast, for example calculate some data in a map or a temporary table and use these data to perform the export
+
+7.
+You see the error, pass it to developer, but they they return that that they "can't replicate the issue" even you restore the full database. DMF doesn't store the file reference in logs, so workload it not simple replicate, you see only staging tables, that can covers some issues, but not all. So you need to develop your own message logging system and then somehow link this logs with the actual documents.
+EI saves the file by default, you always can replicate the issue in dev evn. Each operation have a "manual test" mode, where you can specify the file or message(as text) in UI, so can repeat the operation without require the dev connected to the integration or database restore. There is always a simple link availialbe to user in UI that allow to trace from message document to D365FO document.
