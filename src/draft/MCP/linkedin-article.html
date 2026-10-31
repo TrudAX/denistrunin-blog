@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>D365FO MCP on a Dev VM</title>
+<style>
+  :root { --text: #1f2328; --muted: #59636e; --bg: #ffffff; --line: #d1d9e0; --code-bg: #f6f8fa; --link: #0a66c2; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 17px/1.6 -apple-system, "Segoe UI", Roboto, Arial, sans-serif; }
+  article { max-width: 760px; margin: 0 auto; padding: 32px 16px 64px; }
+  h1 { font-size: 32px; line-height: 1.25; margin: 0 0 8px; }
+  h2 { font-size: 23px; margin: 36px 0 8px; }
+  a { color: var(--link); }
+  blockquote { margin: 16px 0; padding: 8px 16px; border-left: 4px solid var(--link); background: var(--code-bg); }
+  code { background: var(--code-bg); padding: 1px 4px; border-radius: 4px; font-size: 0.92em; }
+  figure { margin: 20px 0; }
+  figure img { max-width: 100%; border: 1px solid var(--line); border-radius: 6px; }
+  figcaption { color: var(--muted); font-size: 14px; margin-top: 4px; }
+  .subtitle { color: var(--muted); font-size: 19px; margin: 0 0 24px; }
+</style>
+</head>
+<body>
+<article>
+
+<h1>Dynamics 365 Finance and Operations MCP on your local dev VM, plus trace analysis with Claude Code</h1>
+<p class="subtitle">Run the D365FO MCP server on a VHD or a cloud-hosted Tier1, create documents with it, and let Claude explain a trace back to the X++ code.</p>
+
+<h2>The problem: MCP was not available for developers</h2>
+
+<p>Microsoft has built a Model Context Protocol (MCP) server into Dynamics 365 Finance and Operations. It gives AI agents data tools, form tools and action tools, so an agent can read and write data, open forms, click buttons and run business logic as the signed-in user:</p>
+
+<ul>
+  <li><a href="https://learn.microsoft.com/en-us/dynamics365/fin-ops-core/dev-itpro/copilot/copilot-mcp">Use Model Context Protocol for finance and operations apps</a></li>
+  <li><a href="https://learn.microsoft.com/en-us/dynamics365/fin-ops-core/dev-itpro/copilot/mcp/mcp-vscode">Connect to the Dynamics 365 ERP MCP server with VS Code</a></li>
+  <li><a href="https://learn.microsoft.com/en-us/dynamics365/fin-ops-core/dev-itpro/copilot/build-agent-mcp">Build an agent with Dynamics 365 ERP MCP</a></li>
+</ul>
+
+<p>But it never worked on the classic development VMs: neither on a local VHD nor on a cloud-hosted Tier1 (CHE). Only the new UDEs and Tier2+ environments are supported. The documentation says it directly: cloud-hosted environments are not supported.</p>
+
+<p>From my point of view this is a very strange decision by the product team, and it slowed down MCP adoption. The consultants who work on Tier2+ are usually not technical enough to set up an Entra app and an MCP client, and the developers, who could do it, had no reason to, because MCP doesn't work on their own VMs.</p>
+
+<h2>The solution: a small bridge through your open browser</h2>
+
+<p>Working with Claude Code, I found what blocks the built-in MCP server on a VM where the AOS runs in IIS, and created a small fix for it. The MCP server code is already there; it just isn't wired up. The fix has two small parts:</p>
+
+<ul>
+  <li><strong>A small add-in for the AOS web app</strong> that maps the <code>/mcp</code> endpoint in IIS (one PowerShell script deploys it, and it can be removed the same way).</li>
+  <li><strong>A small browser script</strong> that sends the MCP calls from a D365 page that is open in your Chrome (through the Claude in Chrome extension).</li>
+</ul>
+
+<p>No setup is needed from the admin perspective: no Entra app registration, no client secret, no tenant admin consent and no tokens. Every call is an ordinary request from your signed-in D365 page, so MCP runs with your user and your security roles.</p>
+
+<p>To install it, ask Claude Code on your VM:</p>
+
+<blockquote>Set up the Dynamics 365 FinOps MCP using the following instruction: https://github.com/TrudAX/d365fo-xpp-skills/tree/main/notes/d365mcp-local-vhd</blockquote>
+
+<p>The full description is here: <a href="https://github.com/TrudAX/d365fo-xpp-skills/tree/main/notes/d365mcp-local-vhd">d365mcp-local-vhd</a>.</p>
+
+<h2>Test: create a purchase order through the form</h2>
+
+<p>After installing the MCP, we can use the following prompt:</p>
+
+<blockquote>using local dynamics 365 mcp and form entry can you create a PO for vendor 1001, item M0007 with quantity 11 and return deep link on this purchase order</blockquote>
+
+<figure>
+  <img src="images/picture1-prompt.png" alt="Claude Code creates purchase order 00000283 with the local D365 MCP and returns a deep link">
+  <figcaption>Picture 1. Claude Code creates the purchase order through the form tools and returns a deep link.</figcaption>
+</figure>
+
+<p>Claude opens the purchase order form, presses New, fills in the vendor, the item and the quantity, saves the order and returns a deep link to the new PO:</p>
+
+<figure>
+  <img src="images/picture2-purchase-order.png" alt="Purchase order 00000283 for vendor 1001 with item M0007, quantity 11, unit price 20">
+  <figcaption>Picture 2. The new purchase order opened from the deep link.</figcaption>
+</figure>
+
+<p>I have used this MCP for a while, and it is quite powerful. For example, combine it with the MCP of a Tier2 environment and ask Claude to create a sales order similar to an existing one in Tier2. This is probably the most common scenario for a developer: a consultant created something in their test environment, and you need to replicate the same on your local VM.</p>
+
+<p>Another example: ask Claude to post the invoice for this order. It thinks like a consultant would: "I need to post the invoice; which parameters should I use? Let me look at how the last orders were invoiced", and then posts the invoice the same way. It works to a certain extent, and it looks quite amazing: you don't need to give it detailed instructions.</p>
+
+<h2>Going further: let Claude read a trace</h2>
+
+<p>You can go even further. Enable a trace before you run the scenario (Settings &gt; Trace, with <em>Include SQL parameter values</em>):</p>
+
+<figure>
+  <img src="images/picture3-trace.png" alt="The Tracing pane in D365 with the trace name POCreate_1 and Include SQL parameter values enabled">
+  <figcaption>Picture 3. Start a trace before the scenario.</figcaption>
+</figure>
+
+<p>After the trace is finished and imported into Trace Parser, you can ask something like this:</p>
+
+<blockquote>I traced the PO 00000283 creation process, you can use trace parser data from AxTrace database (you may use a skill for this), Trace name is POCreate_1. Can you research how PO line Price = 20 was populated? What is the source of this info, what code is used?</blockquote>
+
+<p>Claude produces quite a detailed answer: what was in the trace, the call stack from the form control down to the line insert, and why the field (Price in our case) was populated in a certain way. Here it found that the price came from a trade agreement for all vendors, that the agreement was read from the price cache (so there was no SQL statement for it in the trace), and that the item's base purchase price, which is also 20, was not used.</p>
+
+<figure>
+  <img src="images/picture4-trace-analysis.png" alt="Claude's analysis of the trace: the call chain that set the purchase price from a trade agreement">
+  <figcaption>Picture 4. Part of the trace analysis.</figcaption>
+</figure>
+
+<h2>A full X++ development cycle on a local VM</h2>
+
+<p>So from now on you can use a more complete X++ development workflow on a local VM with Claude Code and the skills from this repository: <a href="https://github.com/TrudAX/d365fo-xpp-skills">TrudAX/d365fo-xpp-skills</a></p>
+
+<ul>
+  <li><strong>Compile</strong>: add the changed elements to the Visual Studio project, build it with xppc and fix the errors (<code>d365-xpp-compile</code>).</li>
+  <li><strong>Research</strong>: find where an element is used, and the existing extension classes, in the cross-reference database (<code>d365-xpp-xref</code>).</li>
+  <li><strong>Run operations</strong>: create and process documents with the local MCP.</li>
+  <li><strong>Analyse traces</strong>: link a Trace Parser trace to the X++ code (<code>d365-xpp-trace-parser</code>).</li>
+</ul>
+
+<p>To install the skills, ask Claude Code (I used Opus 5.5, High effort):</p>
+
+<blockquote>Install the plugin from this repository: https://github.com/TrudAX/d365fo-xpp-skills</blockquote>
+
+<p>So, welcome to the X++ AI era :)</p>
+
+<p>The next step will probably be more polished skills, such as converting <a href="https://github.com/TrudAX/TRUDUtilsD365">TRUDUtilsD365</a> into a skill. Stay tuned.</p>
+
+<p>Questions and comments are always welcome.</p>
+
+</article>
+</body>
+</html>
