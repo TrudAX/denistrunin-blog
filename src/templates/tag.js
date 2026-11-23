@@ -6,7 +6,7 @@ import { Helmet } from "react-helmet";
 import Layout from "../components/layout"
 import { graphql } from "gatsby";
 
-const Tag = ({ pageContext, data }) => {
+const Tag = ({ pageContext, data, location }) => {
   const { tag } = pageContext;
   const { edges, totalCount } = data.allMarkdownRemark;
   const siteTitle = data.site.siteMetadata.title;
@@ -25,7 +25,7 @@ const Tag = ({ pageContext, data }) => {
         <meta property="og:title" content={title} />
         <meta property="og:description" content={siteDescription} />
         <meta property="og:image" content={siteUrl + profilePic} />
-        <meta property="og:url" content={siteUrl + "/tags/" + tag} />
+        <meta property="og:url" content={siteUrl + location.pathname} />
         <meta property="og:site_name" content={siteTitle} />
         <meta property="og:type" content="website" />
 
