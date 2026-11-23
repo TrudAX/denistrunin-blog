@@ -69,7 +69,7 @@ class BlogIndex extends React.Component {
           <meta property="og:title" content={siteTitle} />
           <meta property="og:description" content={siteDescription} />
           <meta property="og:image" content={siteUrl + profilePic} />
-          <meta property="og:url" content={siteUrl} />
+          <meta property="og:url" content={siteUrl + this.props.location.pathname} />
           <meta property="og:site_name" content={siteTitle} />
           <meta property="og:type" content="website" />
           <meta property="fb:app_id" content="2072264049710958" />
