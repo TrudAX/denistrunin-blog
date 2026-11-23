@@ -20,7 +20,7 @@ class Template extends React.Component {
       <div className="content-root"
         style={{
           maxWidth: rhythm(32),
-          padding: `${rhythm(1.5)} ${rhythm(1.5)}`
+          "--layout-padding": rhythm(1.5)
         }}
       >
         <Helmet>
