@@ -140,7 +140,8 @@ module.exports = {
     {
       resolve: `gatsby-plugin-canonical-urls`,
       options: {
-        siteUrl: `https://denistrunin.com`
+        siteUrl: `https://denistrunin.com`,
+        stripQueryString: true
       }
     },
     `gatsby-plugin-sitemap`,
