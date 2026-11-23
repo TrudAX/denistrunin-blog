@@ -234,6 +234,13 @@ li {
     padding-inline: 1.125rem;
   }
 
+  .docSearch-content {
+    p > code, li > code {
+      white-space: normal;
+      overflow-wrap: anywhere;
+    }
+  }
+
   .front-post-image {
     display: block;
     width: fit-content;
